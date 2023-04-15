@@ -16,14 +16,14 @@ class ObjectManager:
     def __init__(self):
         self.objects = dict()
 
-    def create_cone(self, curve, point, t_bounce, v_bounce, **kwargs) -> Figure:
+    def create_cone(self, curve, point, t_bounce, v_bounce, **kwargs) -> str:
         uid = uuid.uuid4()
         cone = Cone(curve, point, t_bounce, v_bounce, uid, **kwargs)
         self.objects[uid] = cone
 
-        return cone
+        return uid
 
-    def update_cone(self, uid, **kwargs) -> Figure:
+    def update_cone(self, uid, **kwargs):
         if uid not in self.objects:
             raise Exception("Figure not found")
 
@@ -34,15 +34,15 @@ class ObjectManager:
 
         obj.update_settings(**kwargs)
 
-    def create_cylinder(self, curve, direction, t_bounce, v_bounce, **kwargs) -> Figure:
+    def create_cylinder(self, curve, direction, t_bounce, v_bounce, **kwargs) -> str:
         uid = uuid.uuid4()
 
         cylinder = Cylinder(curve, direction, t_bounce, v_bounce, uid, **kwargs)
         self.objects[uid] = cylinder
 
-        return cylinder
+        return uid
 
-    def update_cylinder(self, uid, **kwargs) -> Figure:
+    def update_cylinder(self, uid, **kwargs):
         if uid not in self.objects:
             raise Exception("Figure not found")
 
@@ -53,15 +53,15 @@ class ObjectManager:
 
         obj.update_settings(**kwargs)
 
-    def create_revolution_surface(self, curve, direction, t_bounce, **kwargs) -> Figure:
+    def create_revolution_surface(self, curve, direction, t_bounce, **kwargs) -> str:
         uid = uuid.uuid4()
 
         surf = RevolutionSurface(curve, direction, t_bounce, uid, **kwargs)
         self.objects[uid] = surf
 
-        return surf
+        return uid
 
-    def update_revolution_surface(self, uid, **kwargs) -> Figure:
+    def update_revolution_surface(self, uid, **kwargs):
         if uid not in self.objects:
             raise Exception("Figure not found")
 
@@ -72,15 +72,15 @@ class ObjectManager:
 
         obj.update_settings(**kwargs)
 
-    def create_curve(self, curve, t_bounce, **kwargs) -> Figure:
+    def create_curve(self, curve, t_bounce, **kwargs) -> str:
         uid = uuid.uuid4()
 
         curve = Curve(curve, t_bounce, uid, **kwargs)
         self.objects[uid] = curve
 
-        return curve
+        return uid
 
-    def update_curve(self, uid, **kwargs) -> Figure:
+    def update_curve(self, uid, **kwargs):
         if uid not in self.objects:
             raise Exception("Figure not found")
 
@@ -91,15 +91,15 @@ class ObjectManager:
 
         obj.update_settings(**kwargs)
 
-    def create_line(self, point1, point2, t_bounce, **kwargs) -> Figure:
+    def create_line(self, point1, point2, t_bounce, **kwargs) -> str:
         uid = uuid.uuid4()
 
         line = Line(point1, point2, t_bounce, uid, **kwargs)
         self.objects[uid] = line
 
-        return line
+        return uid
 
-    def update_line(self, uid, **kwargs) -> Figure:
+    def update_line(self, uid, **kwargs):
         if uid not in self.objects:
             raise Exception("Figure not found")
 
@@ -110,15 +110,15 @@ class ObjectManager:
 
         obj.update_settings(**kwargs)
 
-    def create_plane(self, normal, point, size, **kwargs) -> Figure:
+    def create_plane(self, normal, point, size, **kwargs) -> str:
         uid = uuid.uuid4()
 
         plane = Plane(normal, point, size, uid, **kwargs)
         self.objects[uid] = plane
 
-        return plane
+        return uid
 
-    def update_plane(self, uid, **kwargs) -> Figure:
+    def update_plane(self, uid, **kwargs):
         if uid not in self.objects:
             raise Exception("Figure not found")
 
@@ -176,15 +176,15 @@ if __name__ == "__main__":
     v_bounce = (0, 2)
     point = (5, 5, 5)
 
-    conus = manager.create_cone(curve, point, t_bounce, v_bounce)
+    uid = manager.create_cone(curve, point, t_bounce, v_bounce)
 
     p = pv.Plotter()
-    p.add_mesh(conus.get_mesh())
+    p.add_mesh(manager.get_figure_mesh(uid))
     p.show()
 
     curve1 = (lambda t: np.sin(t), lambda t: np.cos(t), lambda t: t * 0 + 5)
     vector = (0, 0, 1)
-    curve_fig = manager.create_curve(curve1, t_bounce)
+    uid = manager.create_curve(curve1, t_bounce)
     p = pv.Plotter()
-    p.add_mesh(curve_fig.get_mesh())
+    p.add_mesh(manager.get_figure_mesh(uid))
     p.show()
