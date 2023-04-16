@@ -8,6 +8,7 @@ class RevolutionSurface(Figure):
         self,
         curve,
         direction,
+        point,
         t_bounce: tuple[float, float],
         uid: str,
         resolution: int = 400,
@@ -19,13 +20,28 @@ class RevolutionSurface(Figure):
         self.__curve = curve
         self.__direction = direction
         self.__resolution = resolution
-
+        self.__point = point
+        
+    def __rotate_point_around_line(self,point, line_point, direction, angle):
+        direction = direction / np.linalg.norm(direction)
+        rotation_matrix = np.array([[np.cos(angle) + direction[0] ** 2 * (1 - np.cos(angle)),
+                                      direction[0] * direction[1] * (1 - np.cos(angle)) - direction[2] * np.sin(angle),
+                                      direction[0] * direction[2] * (1 - np.cos(angle)) + direction[1] * np.sin(angle)],
+                                     [direction[1] * direction[0] * (1 - np.cos(angle)) + direction[2] * np.sin(angle),
+                                      np.cos(angle) + direction[1] ** 2 * (1 - np.cos(angle)),
+                                      direction[1] * direction[2] * (1 - np.cos(angle)) - direction[0] * np.sin(angle)],
+                                     [direction[2] * direction[0] * (1 - np.cos(angle)) - direction[1] * np.sin(angle),
+                                      direction[2] * direction[1] * (1 - np.cos(angle)) + direction[0] * np.sin(angle),
+                                      np.cos(angle) + direction[2] ** 2 * (1 - np.cos(angle))]])
+        return line_point + (point - line_point).dot(rotation_matrix)
+        
     def get_mesh(self):
         t_bounce = self.__t_bounce
         curve = self.__curve
         direction = self.__direction
         resolution = self.__resolution
-
+        line_point = self.__point
+        
         t = np.linspace(t_bounce[0], t_bounce[1], resolution)
         theta = np.linspace(0, 2 * np.pi, 180)
 
@@ -41,32 +57,7 @@ class RevolutionSurface(Figure):
         for point in points_on_curve:
             plane_points = []
             for angle in theta:
-                rotation_matrix = np.array(
-                    [
-                        [
-                            np.cos(angle) + direction[0] ** 2 * (1 - np.cos(angle)),
-                            direction[0] * direction[1] * (1 - np.cos(angle))
-                            - direction[2] * np.sin(angle),
-                            direction[0] * direction[2] * (1 - np.cos(angle))
-                            + direction[1] * np.sin(angle),
-                        ],
-                        [
-                            direction[1] * direction[0] * (1 - np.cos(angle))
-                            + direction[2] * np.sin(angle),
-                            np.cos(angle) + direction[1] ** 2 * (1 - np.cos(angle)),
-                            direction[1] * direction[2] * (1 - np.cos(angle))
-                            - direction[0] * np.sin(angle),
-                        ],
-                        [
-                            direction[2] * direction[0] * (1 - np.cos(angle))
-                            - direction[1] * np.sin(angle),
-                            direction[2] * direction[1] * (1 - np.cos(angle))
-                            + direction[0] * np.sin(angle),
-                            np.cos(angle) + direction[2] ** 2 * (1 - np.cos(angle)),
-                        ],
-                    ]
-                )
-                rotated_point = point.dot(rotation_matrix)
+                rotated_point = self.__rotate_point_around_line(point, line_point, direction, angle)
                 plane_points.append(rotated_point)
             surface_points.append(plane_points)
 
