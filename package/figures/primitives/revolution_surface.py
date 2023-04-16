@@ -20,6 +20,7 @@ class RevolutionSurface(Figure):
         self.__curve = curve
         self.__direction = direction
         self.__resolution = resolution
+        self.__point = point
         
     def __rotate_point_around_line(self,point, line_point, direction, angle):
         direction = direction / np.linalg.norm(direction)
@@ -39,7 +40,8 @@ class RevolutionSurface(Figure):
         curve = self.__curve
         direction = self.__direction
         resolution = self.__resolution
-
+        line_point = self.__point
+        
         t = np.linspace(t_bounce[0], t_bounce[1], resolution)
         theta = np.linspace(0, 2 * np.pi, 180)
 
