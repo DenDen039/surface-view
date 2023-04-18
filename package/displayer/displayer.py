@@ -53,8 +53,7 @@ if __name__ == "__main__":
 
 
 class Displayer:
-    # TODO change surfaces to dict, add uids, add remove surface method
-    # TODO add plot parameter for each surface. We can create Surface class which will contain opacity, color, etc.
+
     def __init__(self, **kwargs) -> None:
         self.plotter = pv.Plotter(
             **kwargs,

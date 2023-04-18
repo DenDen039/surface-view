@@ -180,6 +180,7 @@ if __name__ == "__main__":
 
     p = pv.Plotter()
     p.add_mesh(manager.get_figure_mesh(uid))
+    p.show_grid()
     p.show()
 
     curve1 = (lambda t: np.sin(t), lambda t: np.cos(t), lambda t: t * 0 + 5)
@@ -187,4 +188,5 @@ if __name__ == "__main__":
     uid = manager.create_curve(curve1, t_bounce)
     p = pv.Plotter()
     p.add_mesh(manager.get_figure_mesh(uid))
+    p.show_grid()
     p.show()
