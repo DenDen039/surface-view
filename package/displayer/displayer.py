@@ -53,7 +53,6 @@ if __name__ == "__main__":
 
 
 class Displayer:
-
     def __init__(self, **kwargs) -> None:
         self.plotter = pv.Plotter(
             **kwargs,

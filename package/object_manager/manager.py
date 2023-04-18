@@ -53,10 +53,10 @@ class ObjectManager:
 
         obj.update_settings(**kwargs)
 
-    def create_revolution_surface(self, curve, direction, t_bounce, **kwargs) -> str:
+    def create_revolution_surface(self, curve, direction, point, t_bounce, **kwargs) -> str:
         uid = uuid.uuid4()
 
-        surf = RevolutionSurface(curve, direction, t_bounce, uid, **kwargs)
+        surf = RevolutionSurface(curve, direction, point, t_bounce, uid, **kwargs)
         self.objects[uid] = surf
 
         return uid
@@ -175,12 +175,12 @@ if __name__ == "__main__":
     t_bounce = (0, 2 * np.pi)
     v_bounce = (0, 2)
     point = (5, 5, 5)
-
-    uid = manager.create_cone(curve, point, t_bounce, v_bounce)
+    direction = (2,5,3)
+    
+    uid = manager.create_revolution_surface(curve, direction, point, t_bounce)
 
     p = pv.Plotter()
     p.add_mesh(manager.get_figure_mesh(uid))
-    p.show_grid()
     p.show()
 
     curve1 = (lambda t: np.sin(t), lambda t: np.cos(t), lambda t: t * 0 + 5)
@@ -188,5 +188,4 @@ if __name__ == "__main__":
     uid = manager.create_curve(curve1, t_bounce)
     p = pv.Plotter()
     p.add_mesh(manager.get_figure_mesh(uid))
-    p.show_grid()
     p.show()
