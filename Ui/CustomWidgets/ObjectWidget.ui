@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Form</class>
+ <widget class="QWidget" name="Form">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>154</width>
+    <height>38</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QHBoxLayout" name="horizontalLayout">
+   <item>
+    <widget class="QLabel" name="label_name">
+     <property name="text">
+      <string>ObjectName</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QComboBox" name="functionsBox">
+     <item>
+      <property name="text">
+       <string>Rename </string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Clone </string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Translate</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Delete</string>
+      </property>
+     </item>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
