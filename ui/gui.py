@@ -2,7 +2,8 @@ from PyQt5.QtWidgets import *
 import pyvista as pv
 from pyvistaqt import QtInteractor
 import sys
-from Ui.CustomWidgets.CustomWidgets import *
+from ui.Widgets._CustomWidgets import *
+import ui.userinterface_ as userinterface_
 
 #                                                    #
 # REPLACE THIS FUNCTION WITH THE ONE FROM @fenik_fam #
@@ -43,7 +44,11 @@ class UI(QMainWindow):
     def __init__(self):
         super(UI, self).__init__()
         # Load ui file
-        uic.loadUi("ui/userinterface.ui",self)
+        #uic.loadUi("ui/userinterface.ui",self)
+
+        _ui = userinterface_.Ui_MainWindow()
+        _ui.setupUi(self)
+        _ui.retranslateUi(self)
 
         # Define our widgets
         self.toolbox = self.findChild(QGroupBox, 'tools_box')
