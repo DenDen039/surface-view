@@ -2,62 +2,63 @@ import pyvista as pv
 from pyvistaqt import BackgroundPlotter
 from PyQt5 import QtWidgets
 
-
 class PlotterWidget(QtWidgets.QWidget):
-    def __init__(self, parent=None):
+    def __init__(self, objects: dict, parent=None, window_size=[1280, 720]):
         super().__init__(parent=parent)
 
-        # создаем plotter PyVista и сохраняем его как атрибут
         self.plotter = BackgroundPlotter(show=False)
+        self.plotter.enable_anti_aliasing()
+        self.plotter.window_size = window_size
+
         self.plotter.add_axes()
         self.plotter.show_grid()
 
-        # создаем размещение виджета
         self.layout = QtWidgets.QVBoxLayout(self)
         self.layout.addWidget(self.plotter.interactor)
 
-    def add_mesh(self, manager, uid):
-        self.plotter.add_mesh(manager.get_figure_mesh(uid))
+        self.objects = objects
+        self.actors = dict()
 
-    def add_axes(self, **kwargs):
-        self.plotter.add_axes(**kwargs)
 
-    def add_text(self, text, position=None, **kwargs):
-        self.plotter.add_text(text, position=position, **kwargs)
+    def add_mesh(self, uid: str, **kwargs):
+        self.actors[uid] = self.plotter.add_mesh(self.objects[uid].get_mesh(), **kwargs)
+        if uid not in self.objects:
+            raise Exception("Figure not found")
 
-    def add_scalar_bar(self, **kwargs):
-        self.plotter.add_scalar_bar(**kwargs)
+    def remove_mesh(self, uid: str):
+        self.plotter.remove_actor(self.actors[uid])
+        if uid not in self.objects:
+            raise Exception("Figure not exist")
 
-    def remove_scalar_bar(self):
-        self.plotter.remove_scalar_bar()
+    def clear_actors(self):
+        for actor in self.actors:
+            self.remove_mesh(actor)
+        self.actors = dict()
+        self.plotter.fly_to([0, 0, 0])
 
-    def clear(self):
-        self.plotter.clear()
+    def unlock_camera(self):
+        self.plotter.enable_fly_to_right_click()
+        
+    def view_xy(self):
+        self.plotter.view_xy()
+    
+    def view_xz(self):
+        self.plotter.view_xz()
 
-    def update(self):
-        self.plotter.update()
+    def view_yx(self):
+        self.plotter.view_yx()
 
-    def show_plot(self):
-        self.plotter.show()
+    def view_yz(self):
+        self.plotter.view_yz()
+    
+    def view_zx(self):
+        self.plotter.view_zx()
 
-    def create_mesh(self, uid):
-        self.plotter.add_mesh()
+    def view_zy(self):
+        self.plotter.view_zy()
 
-    def delete_mesh(self, uid):
-        self.plotter.remove_actor(uid)
-
-    def change_plotter_settings(self, **kwargs):
-        for key, value in kwargs.items():
-            if key == "t_bounce":
-                self.__t_bounce = value
-            elif key == "v_bounce":
-                self.__v_bounce = value
-            elif key == "curve":
-                self.__curve = value
-            elif key == "point":
-                self.__point = value
-            elif key == "resolution":
-                self.__resolution = value
-            else:
-                raise ValueError(f"Unknown parameter {key}")
-
+    def take_screenshot(self, file_name):
+        if file_name.split('.')[-1] not in ['.png', '.jpeg', '.jpg', '.bmp', '.tif', '.tiff']:
+            raise Exception("Unfortunately, this graphic format is not supported")
+        self.plotter.screenshot(f"photos\{file_name}")
+        

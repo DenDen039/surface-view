@@ -1,0 +1,115 @@
+import sys, numpy as np
+sys.path.append("C:\\surface-view\\package")
+from package.figures.figure import Figure, FigureTypes
+from package.figures.primitives.cone import Cone
+from package.figures.primitives.cylinder import Cylinder
+from package.figures.primitives.curve import Curve
+from package.figures.primitives.line import Line
+from package.figures.primitives.plane import Plane
+from package.figures.primitives.revolution_surface import RevolutionSurface
+from package.object_manager.manager import ObjectManager
+from package.qt_widgets.plotter_widget import PlotterWidget 
+
+import uuid
+import copy
+
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton
+
+
+class Example(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.initUI()
+
+    def initUI(self):
+        hbox = QHBoxLayout()
+
+        vbox_left = QVBoxLayout()
+        vbox_right = QVBoxLayout()
+
+        btn1 = QPushButton('add meshes')
+        btn2 = QPushButton('remove one')
+        btn3 = QPushButton('clear')
+        btn4 = QPushButton('screenshot')
+
+        btn5 = QPushButton('XY')
+        btn6 = QPushButton('YZ')
+        btn7 = QPushButton('add meshes')
+        btn8 = QPushButton('add meshes')
+
+
+        manager = ObjectManager()
+
+        curve = (lambda t: np.sin(t), lambda t: np.cos(t) * 0, lambda t: t)
+        t_bounce = (0, 2 * np.pi)
+        v_bounce = (0, 2)
+        point = (5, 5, 5)
+
+        curve2 = (lambda t: t, lambda t: np.cos(t), lambda t: np.sin(t) * 0)
+        t_bounce2 = (0, 2 * np.pi)
+        v_bounce2 = (0, 2)
+        point2 = (5, 5, 5)
+
+        uid = manager.create_cone(curve, point, t_bounce, v_bounce)
+        uid2 = manager.create_cone(curve2, point2, t_bounce2, v_bounce2)
+        
+
+        myWidget = PlotterWidget(manager.objects)
+
+
+        def add():
+            myWidget.add_mesh(uid, color='blue')
+            myWidget.add_mesh(uid2, color='red')
+
+        def remove():
+            myWidget.remove_mesh(uid)
+
+        def clear():
+            myWidget.clear_actors()
+
+        def viewXY():
+            myWidget.view_xy()
+
+        def viewYZ():
+            myWidget.view_yz()
+
+        def screenshot():
+            myWidget.take_screenshot('screen.png')
+
+        def blur():
+            myWidget.plotter.add_blurring()
+
+ 
+
+        btn1.clicked.connect(add)
+        btn2.clicked.connect(remove)
+        btn3.clicked.connect(clear)
+        btn4.clicked.connect(screenshot)
+        btn5.clicked.connect(viewXY)
+        btn6.clicked.connect(viewYZ)
+
+        # Добавляем кнопки в соответствующие вертикальные контейнеры
+        vbox_left.addWidget(btn1)
+        vbox_left.addWidget(btn2)
+        vbox_left.addWidget(btn3)
+        vbox_left.addWidget(btn4)
+        vbox_left.addWidget(btn5)
+        vbox_left.addWidget(btn6)
+        vbox_right.addWidget(myWidget)
+
+        # Добавляем вертикальные контейнеры с кнопками в горизонтальный контейнер
+        hbox.addLayout(vbox_left)
+        hbox.addLayout(vbox_right)
+
+        # Устанавливаем горизонтальный контейнер как основной контейнер для виджета
+        self.setLayout(hbox)
+
+        self.setGeometry(300, 300, 800, 600)
+        self.setWindowTitle('Example')
+        self.show()
+
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    ex = Example()
+    sys.exit(app.exec_())
