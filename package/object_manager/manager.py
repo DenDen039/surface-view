@@ -29,10 +29,21 @@ class ObjectManager:
 
         obj = self.objects[uid]
 
-        if obj.get_type() == FigureTypes.CONE:
+        if obj.get_type() != FigureTypes.CONE:
             raise Exception("Object is not a cone")
 
         obj.update_settings(**kwargs)
+
+    def update_cone_mesh(self, uid, **kwargs):
+        if uid not in self.objects:
+            raise Exception("Figure not found")
+
+        obj = self.objects[uid]
+
+        if obj.get_type() != FigureTypes.CONE:
+            raise Exception("Object is not a cone")
+
+        obj.update_parameters(**kwargs)
 
     def create_cylinder(self, curve, direction, t_bounce, v_bounce, **kwargs) -> str:
         uid = uuid.uuid4()
@@ -48,10 +59,21 @@ class ObjectManager:
 
         obj = self.objects[uid]
 
-        if obj.get_type() == FigureTypes.CYLINDER:
+        if obj.get_type() != FigureTypes.CYLINDER:
             raise Exception("Object is not a cylinder")
 
         obj.update_settings(**kwargs)
+
+    def update_cylinder_mesh(self, uid, **kwargs):
+        if uid not in self.objects:
+            raise Exception("Figure not found")
+
+        obj = self.objects[uid]
+
+        if obj.get_type() != FigureTypes.CYLINDER:
+            raise Exception("Object is not a cylinder")
+
+        obj.update_parameters(**kwargs)
 
     def create_revolution_surface(self, curve, direction, point, t_bounce, **kwargs) -> str:
         uid = uuid.uuid4()
@@ -67,10 +89,21 @@ class ObjectManager:
 
         obj = self.objects[uid]
 
-        if obj.get_type() == FigureTypes.REVOLUTION:
+        if obj.get_type() != FigureTypes.REVOLUTION:
             raise Exception("Object is not a revolution surface")
 
         obj.update_settings(**kwargs)
+
+    def update_revolution_surface_mesh(self, uid, **kwargs):
+        if uid not in self.objects:
+            raise Exception("Figure not found")
+
+        obj = self.objects[uid]
+
+        if obj.get_type() != FigureTypes.REVOLUTION:
+            raise Exception("Object is not a revolution surface")
+
+        obj.update_parameters(**kwargs)
 
     def create_curve(self, curve, t_bounce, **kwargs) -> str:
         uid = uuid.uuid4()
@@ -86,10 +119,21 @@ class ObjectManager:
 
         obj = self.objects[uid]
 
-        if obj.get_type() == FigureTypes.CYLINDER:
+        if obj.get_type() != FigureTypes.CYLINDER:
             raise Exception("Object is not a cylinder")
 
         obj.update_settings(**kwargs)
+
+    def update_curve_mesh(self, uid, **kwargs):
+        if uid not in self.objects:
+            raise Exception("Figure not found")
+
+        obj = self.objects[uid]
+
+        if obj.get_type() != FigureTypes.CYLINDER:
+            raise Exception("Object is not a cylinder")
+
+        obj.update_parameters(**kwargs)
 
     def create_line(self, point1, point2, t_bounce, **kwargs) -> str:
         uid = uuid.uuid4()
@@ -105,10 +149,21 @@ class ObjectManager:
 
         obj = self.objects[uid]
 
-        if obj.get_type() == FigureTypes.LINE:
+        if obj.get_type() != FigureTypes.LINE:
             raise Exception("Object is not a line")
 
         obj.update_settings(**kwargs)
+
+    def update_line_mesh(self, uid, **kwargs):
+        if uid not in self.objects:
+            raise Exception("Figure not found")
+
+        obj = self.objects[uid]
+
+        if obj.get_type() != FigureTypes.LINE:
+            raise Exception("Object is not a line")
+
+        obj.update_parameters(**kwargs)
 
     def create_plane(self, normal, point, size, **kwargs) -> str:
         uid = uuid.uuid4()
@@ -124,10 +179,21 @@ class ObjectManager:
 
         obj = self.objects[uid]
 
-        if obj.get_type() == FigureTypes.PLANE:
+        if obj.get_type() != FigureTypes.PLANE:
             raise Exception("Object is not a plane")
 
         obj.update_settings(**kwargs)
+
+    def update_plane_mesh(self, uid, **kwargs):
+        if uid not in self.objects:
+            raise Exception("Figure not found")
+
+        obj = self.objects[uid]
+
+        if obj.get_type() != FigureTypes.PLANE:
+            raise Exception("Object is not a plane")
+
+        obj.update_parameters(**kwargs)
 
     def get_figure(self, uid: str) -> Figure:
         if uid not in self.objects:
