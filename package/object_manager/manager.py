@@ -29,7 +29,7 @@ class ObjectManager:
 
         obj = self.objects[uid]
 
-        if obj.get_type() == FigureTypes.CONE:
+        if obj.get_type() != FigureTypes.CONE:
             raise Exception("Object is not a cone")
 
         obj.update_settings(**kwargs)
@@ -40,7 +40,7 @@ class ObjectManager:
 
         obj = self.objects[uid]
 
-        if obj.get_type() == FigureTypes.CONE:
+        if obj.get_type() != FigureTypes.CONE:
             raise Exception("Object is not a cone")
 
         obj.update_parameters(**kwargs)
@@ -59,7 +59,7 @@ class ObjectManager:
 
         obj = self.objects[uid]
 
-        if obj.get_type() == FigureTypes.CYLINDER:
+        if obj.get_type() != FigureTypes.CYLINDER:
             raise Exception("Object is not a cylinder")
 
         obj.update_settings(**kwargs)
@@ -70,7 +70,7 @@ class ObjectManager:
 
         obj = self.objects[uid]
 
-        if obj.get_type() == FigureTypes.CYLINDER:
+        if obj.get_type() != FigureTypes.CYLINDER:
             raise Exception("Object is not a cylinder")
 
         obj.update_parameters(**kwargs)
@@ -89,7 +89,7 @@ class ObjectManager:
 
         obj = self.objects[uid]
 
-        if obj.get_type() == FigureTypes.REVOLUTION:
+        if obj.get_type() != FigureTypes.REVOLUTION:
             raise Exception("Object is not a revolution surface")
 
         obj.update_settings(**kwargs)
@@ -100,7 +100,7 @@ class ObjectManager:
 
         obj = self.objects[uid]
 
-        if obj.get_type() == FigureTypes.REVOLUTION:
+        if obj.get_type() != FigureTypes.REVOLUTION:
             raise Exception("Object is not a revolution surface")
 
         obj.update_parameters(**kwargs)
@@ -119,7 +119,7 @@ class ObjectManager:
 
         obj = self.objects[uid]
 
-        if obj.get_type() == FigureTypes.CYLINDER:
+        if obj.get_type() != FigureTypes.CYLINDER:
             raise Exception("Object is not a cylinder")
 
         obj.update_settings(**kwargs)
@@ -130,7 +130,7 @@ class ObjectManager:
 
         obj = self.objects[uid]
 
-        if obj.get_type() == FigureTypes.CYLINDER:
+        if obj.get_type() != FigureTypes.CYLINDER:
             raise Exception("Object is not a cylinder")
 
         obj.update_parameters(**kwargs)
@@ -149,7 +149,7 @@ class ObjectManager:
 
         obj = self.objects[uid]
 
-        if obj.get_type() == FigureTypes.LINE:
+        if obj.get_type() != FigureTypes.LINE:
             raise Exception("Object is not a line")
 
         obj.update_settings(**kwargs)
@@ -160,7 +160,7 @@ class ObjectManager:
 
         obj = self.objects[uid]
 
-        if obj.get_type() == FigureTypes.LINE:
+        if obj.get_type() != FigureTypes.LINE:
             raise Exception("Object is not a line")
 
         obj.update_parameters(**kwargs)
@@ -179,7 +179,7 @@ class ObjectManager:
 
         obj = self.objects[uid]
 
-        if obj.get_type() == FigureTypes.PLANE:
+        if obj.get_type() != FigureTypes.PLANE:
             raise Exception("Object is not a plane")
 
         obj.update_settings(**kwargs)
@@ -190,7 +190,7 @@ class ObjectManager:
 
         obj = self.objects[uid]
 
-        if obj.get_type() == FigureTypes.PLANE:
+        if obj.get_type() != FigureTypes.PLANE:
             raise Exception("Object is not a plane")
 
         obj.update_parameters(**kwargs)
