@@ -20,6 +20,15 @@ class Line(Figure):
         self.__point2 = point2
         self.__resolution = resolution
 
+    def update_parameters(self, **kwargs):
+        for key, value in kwargs.items():
+            if key == "t_bounce":
+                self.__t_bounce = value
+            elif key == "point1":
+                self.__point1 = value
+            elif key == "point2":
+                self.__point2 = value
+
     def get_mesh(self):
         t_bounce = self.__t_bounce
         point1 = self.__point1

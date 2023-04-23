@@ -34,8 +34,6 @@ class Cylinder(Figure):
                 self.__direction = value
             elif key == "resolution":
                 self.__resolution = value
-            else:
-                raise ValueError(f"Unknown parameter {key}")
 
     def get_mesh(self) -> pv.StructuredGrid:
         t_bounce = self.__t_bounce

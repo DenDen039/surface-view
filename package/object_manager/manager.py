@@ -29,10 +29,10 @@ class ObjectManager:
 
         obj = self.objects[uid]
 
-        if obj.get_type() == FigureTypes.CONE:
+        if obj.get_type() != FigureTypes.CONE:
             raise Exception("Object is not a cone")
 
-        obj.update_settings(**kwargs)
+        obj.update_parameters(**kwargs)
 
     def create_cylinder(self, curve, direction, t_bounce, v_bounce, **kwargs) -> str:
         uid = uuid.uuid4()
@@ -48,10 +48,10 @@ class ObjectManager:
 
         obj = self.objects[uid]
 
-        if obj.get_type() == FigureTypes.CYLINDER:
+        if obj.get_type() != FigureTypes.CYLINDER:
             raise Exception("Object is not a cylinder")
 
-        obj.update_settings(**kwargs)
+        obj.update_parameters(**kwargs)
 
     def create_revolution_surface(self, curve, direction, point, t_bounce, **kwargs) -> str:
         uid = uuid.uuid4()
@@ -67,10 +67,10 @@ class ObjectManager:
 
         obj = self.objects[uid]
 
-        if obj.get_type() == FigureTypes.REVOLUTION:
+        if obj.get_type() != FigureTypes.REVOLUTION:
             raise Exception("Object is not a revolution surface")
 
-        obj.update_settings(**kwargs)
+        obj.update_parameters(**kwargs)
 
     def create_curve(self, curve, t_bounce, **kwargs) -> str:
         uid = uuid.uuid4()
@@ -86,10 +86,10 @@ class ObjectManager:
 
         obj = self.objects[uid]
 
-        if obj.get_type() == FigureTypes.CYLINDER:
+        if obj.get_type() != FigureTypes.CYLINDER:
             raise Exception("Object is not a cylinder")
 
-        obj.update_settings(**kwargs)
+        obj.update_parameters(**kwargs)
 
     def create_line(self, point1, point2, t_bounce, **kwargs) -> str:
         uid = uuid.uuid4()
@@ -105,10 +105,10 @@ class ObjectManager:
 
         obj = self.objects[uid]
 
-        if obj.get_type() == FigureTypes.LINE:
+        if obj.get_type() != FigureTypes.LINE:
             raise Exception("Object is not a line")
 
-        obj.update_settings(**kwargs)
+        obj.update_parameters(**kwargs)
 
     def create_plane(self, normal, point, size, **kwargs) -> str:
         uid = uuid.uuid4()
@@ -124,10 +124,10 @@ class ObjectManager:
 
         obj = self.objects[uid]
 
-        if obj.get_type() == FigureTypes.PLANE:
+        if obj.get_type() != FigureTypes.PLANE:
             raise Exception("Object is not a plane")
 
-        obj.update_settings(**kwargs)
+        obj.update_parameters(**kwargs)
 
     def get_figure(self, uid: str) -> Figure:
         if uid not in self.objects:
@@ -170,13 +170,14 @@ class ObjectManager:
 # Example
 if __name__ == "__main__":
     import numpy as np
+
     manager = ObjectManager()
     curve = (lambda t: np.sin(t), lambda t: np.cos(t) * 0, lambda t: t)
     t_bounce = (0, 2 * np.pi)
     v_bounce = (0, 2)
     point = (5, 5, 5)
-    direction = (2,5,3)
-    
+    direction = (2, 5, 3)
+
     uid = manager.create_revolution_surface(curve, direction, point, t_bounce)
 
     p = pv.Plotter()
