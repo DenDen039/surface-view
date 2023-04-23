@@ -1,0 +1,37 @@
+[33mcommit 3515e93915e851309a66c3a3ea53c5bdd54f8b7f[m[33m ([m[1;36mHEAD -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: Turist412 <alex.tepl03@gmail.com>
+Date:   Sun Apr 23 12:15:33 2023 +0300
+
+    msg
+
+[33mcommit 8f7bb9661493d61b0f671596878031f2fa650eac[m[33m ([m[1;31mupstream/main[m[33m)[m
+Author: Denys Denysyev <49571325+DenDen039@users.noreply.github.com>
+Date:   Sun Apr 16 20:37:54 2023 +0200
+
+    Fix surf of rev (#2)
+    
+    Add line instead of vector for rotation
+
+[33mcommit d5dba579cc7b0551f83973545af531efbef806e6[m
+Author: Denys Denysyev <49571325+DenDen039@users.noreply.github.com>
+Date:   Sat Apr 15 23:00:30 2023 +0200
+
+    Add Figures Manager and display prototype (#1)
+    
+    Add display prototype
+    
+    Figure is Base class contain uid and setting for plotting
+    
+    Add primitives for figures
+    1. Curve
+    2. Cone
+    3. Cylinder
+    4. Line
+    5. Plane
+    6. Surface of revolution
+
+[33mcommit 8552bd32573532719ef7c2577fce49bfcc22fdca[m
+Author: Denys Denysyev <49571325+DenDen039@users.noreply.github.com>
+Date:   Fri Mar 24 15:52:16 2023 +0100
+
+    Initial commit

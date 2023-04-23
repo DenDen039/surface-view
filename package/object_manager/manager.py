@@ -32,17 +32,6 @@ class ObjectManager:
         if obj.get_type() != FigureTypes.CONE:
             raise Exception("Object is not a cone")
 
-        obj.update_settings(**kwargs)
-
-    def update_cone_mesh(self, uid, **kwargs):
-        if uid not in self.objects:
-            raise Exception("Figure not found")
-
-        obj = self.objects[uid]
-
-        if obj.get_type() != FigureTypes.CONE:
-            raise Exception("Object is not a cone")
-
         obj.update_parameters(**kwargs)
 
     def create_cylinder(self, curve, direction, t_bounce, v_bounce, **kwargs) -> str:
@@ -54,17 +43,6 @@ class ObjectManager:
         return uid
 
     def update_cylinder(self, uid, **kwargs):
-        if uid not in self.objects:
-            raise Exception("Figure not found")
-
-        obj = self.objects[uid]
-
-        if obj.get_type() != FigureTypes.CYLINDER:
-            raise Exception("Object is not a cylinder")
-
-        obj.update_settings(**kwargs)
-
-    def update_cylinder_mesh(self, uid, **kwargs):
         if uid not in self.objects:
             raise Exception("Figure not found")
 
@@ -92,17 +70,6 @@ class ObjectManager:
         if obj.get_type() != FigureTypes.REVOLUTION:
             raise Exception("Object is not a revolution surface")
 
-        obj.update_settings(**kwargs)
-
-    def update_revolution_surface_mesh(self, uid, **kwargs):
-        if uid not in self.objects:
-            raise Exception("Figure not found")
-
-        obj = self.objects[uid]
-
-        if obj.get_type() != FigureTypes.REVOLUTION:
-            raise Exception("Object is not a revolution surface")
-
         obj.update_parameters(**kwargs)
 
     def create_curve(self, curve, t_bounce, **kwargs) -> str:
@@ -114,17 +81,6 @@ class ObjectManager:
         return uid
 
     def update_curve(self, uid, **kwargs):
-        if uid not in self.objects:
-            raise Exception("Figure not found")
-
-        obj = self.objects[uid]
-
-        if obj.get_type() != FigureTypes.CYLINDER:
-            raise Exception("Object is not a cylinder")
-
-        obj.update_settings(**kwargs)
-
-    def update_curve_mesh(self, uid, **kwargs):
         if uid not in self.objects:
             raise Exception("Figure not found")
 
@@ -152,17 +108,6 @@ class ObjectManager:
         if obj.get_type() != FigureTypes.LINE:
             raise Exception("Object is not a line")
 
-        obj.update_settings(**kwargs)
-
-    def update_line_mesh(self, uid, **kwargs):
-        if uid not in self.objects:
-            raise Exception("Figure not found")
-
-        obj = self.objects[uid]
-
-        if obj.get_type() != FigureTypes.LINE:
-            raise Exception("Object is not a line")
-
         obj.update_parameters(**kwargs)
 
     def create_plane(self, normal, point, size, **kwargs) -> str:
@@ -174,17 +119,6 @@ class ObjectManager:
         return uid
 
     def update_plane(self, uid, **kwargs):
-        if uid not in self.objects:
-            raise Exception("Figure not found")
-
-        obj = self.objects[uid]
-
-        if obj.get_type() != FigureTypes.PLANE:
-            raise Exception("Object is not a plane")
-
-        obj.update_settings(**kwargs)
-
-    def update_plane_mesh(self, uid, **kwargs):
         if uid not in self.objects:
             raise Exception("Figure not found")
 
@@ -236,13 +170,14 @@ class ObjectManager:
 # Example
 if __name__ == "__main__":
     import numpy as np
+
     manager = ObjectManager()
     curve = (lambda t: np.sin(t), lambda t: np.cos(t) * 0, lambda t: t)
     t_bounce = (0, 2 * np.pi)
     v_bounce = (0, 2)
     point = (5, 5, 5)
-    direction = (2,5,3)
-    
+    direction = (2, 5, 3)
+
     uid = manager.create_revolution_surface(curve, direction, point, t_bounce)
 
     p = pv.Plotter()

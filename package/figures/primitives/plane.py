@@ -30,8 +30,6 @@ class Plane(Figure):
                 self.__size = value
             elif key == "resolution":
                 self.__resolution = value
-            else:
-                raise ValueError(f"Unknown parameter {key}")
 
     def get_mesh(self) -> pv.StructuredGrid:
         normal = self.__normal

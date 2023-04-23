@@ -18,6 +18,13 @@ class Curve(Figure):
         self.__curve = curve
         self.__resolution = resolution
 
+    def update_parameters(self, **kwargs):
+        for key, value in kwargs.items():
+            if key == "t_bounce":
+                self.__t_bounce = value
+            elif key == "curve":
+                self.__curve = value
+
     def get_mesh(self):
         t = np.linspace(self.__t_bounce[0], self.__t_bounce[1], self.__resolution)
 
