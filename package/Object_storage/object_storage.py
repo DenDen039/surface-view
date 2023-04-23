@@ -41,7 +41,7 @@ class ObjectStorage:
             to_create["name"] = 'untitled_' + str(self.counter)
             self.counter += 1
 
-        if to_create["FigureTypes"] == FigureTypes.Cone:
+        if to_create["FigureTypes"] == FigureTypes.CONE:
             uid = self.objManager.create_cone(to_create["curve"],
                                               to_create["point"],
                                               to_create["t_bounce"],
