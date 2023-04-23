@@ -1,13 +1,15 @@
 from package.object_manager.manager import ObjectManager
 from package.figures.figure import FigureTypes
-
+from unittest.mock import MagicMock
+from numpy import *
 
 class ObjectStorage:
-    def __init__(self):
+    def __init__(self, PW):
+
         self.objManager = ObjectManager()
         self.storage = dict()
-        self.SWO = SWO()
-        self.PW = PW()
+        self.SWO = MagicMock()
+        self.PW = PW
         self.counter = 0
 
     def delete(self, uid):
@@ -80,6 +82,7 @@ class ObjectStorage:
         elif to_create["FigureTypes"] == FigureTypes.REVOLUTION:
             uid = self.objManager.create_revolution_surface(to_create["curve"],
                                                             to_create["direction"],
+                                                            to_create["point"],
                                                             to_create["t_bounce"])
             self.storage[uid] = to_create
             self.SWO.Display(uid, to_create["name"])

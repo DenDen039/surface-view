@@ -19,7 +19,7 @@ class Figure:
         self,
         uid: str,
         type: str = FigureTypes.FIGURE,
-        color: str = "black",
+        color: str = "#FFFFFF",
         opacity: float = 0.5,
         line_width: float = 5,
         enable_edges: bool = False,
@@ -57,10 +57,10 @@ class Figure:
 
     def get_settings(self):
         settings = {
-            "color": self.__color,
+            "color": str(self.__color),
             "opacity": self.__opacity,
             "line_width": self.__line_width,
-            "enable_edges": self.__enable_edges,
+            #"enable_edges": self.__enable_edges,
         }
         return settings
 
