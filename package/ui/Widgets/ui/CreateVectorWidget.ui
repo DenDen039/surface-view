@@ -6,62 +6,62 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>101</width>
-    <height>186</height>
+    <width>94</width>
+    <height>184</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,2,1,1,1">
+  <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QLabel" name="label_7">
+    <widget class="QLabel" name="label_8">
      <property name="text">
-      <string>Point:</string>
+      <string>Vector:</string>
      </property>
     </widget>
    </item>
    <item>
-    <layout class="QVBoxLayout" name="verticalLayout_point1" stretch="0,0,0">
+    <layout class="QVBoxLayout" name="verticalLayout_point1_2">
      <item>
-      <layout class="QHBoxLayout" name="horizontalLayout">
+      <layout class="QHBoxLayout" name="horizontalLayout_4">
        <item>
-        <widget class="QLabel" name="label">
+        <widget class="QLabel" name="label_4">
          <property name="text">
           <string>x:</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QLineEdit" name="input_x"/>
+        <widget class="QLineEdit" name="vector_input_x"/>
        </item>
       </layout>
      </item>
      <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <layout class="QHBoxLayout" name="horizontalLayout_5">
        <item>
-        <widget class="QLabel" name="label_2">
+        <widget class="QLabel" name="label_5">
          <property name="text">
           <string>y:</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QLineEdit" name="input_y"/>
+        <widget class="QLineEdit" name="vector_input_y"/>
        </item>
       </layout>
      </item>
      <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_3">
+      <layout class="QHBoxLayout" name="horizontalLayout_6">
        <item>
-        <widget class="QLabel" name="label_3">
+        <widget class="QLabel" name="label_6">
          <property name="text">
           <string>z:</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QLineEdit" name="input_z"/>
+        <widget class="QLineEdit" name="vector_input_z"/>
        </item>
       </layout>
      </item>
