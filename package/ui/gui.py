@@ -3,41 +3,23 @@ import pyvista as pv
 from pyvistaqt import QtInteractor
 from package.ui.Widgets.CustomWidgets import Creator
 import package.ui.Widgets.generated.userinterface_ as userinterface_
-from package.figures.figure import *
-
-
-from package.object_storage.object_storage import ObjectStorage
-
 
 import ast
-from numpy import *
-
-
-
-# TODO: add parser (maybe as class)
-#       add additional fields to user input (name of object, color, opacity, t_bounds)
-#       rename bounce -> bounds
-#       add update_widget
-#       add prototype of storage_object_widget
-#           1. List of objects in left
-#           2. Add update, delete methods
-#           3. Integrate with storage_object
-#       refactor gui
-#       add @fenik_fam `s PW
-
-
-
-
 
 def parse_expression(expr_str):
+    # Define a list of allowed names
+    allowed_names = {'t'}
 
-    if not ('t' in expr_str):
-        expr_str = expr_str + "+t*0"
+    # Parse the expression into an abstract syntax tree
+    expr_ast = ast.parse(expr_str, mode='eval')
 
-    func = lambda t: eval(expr_str)
+    # Check if the expression is a valid mathematical expression with only 't' variable
+    for node in ast.walk(expr_ast):
+        if isinstance(node, ast.Name) and node.id not in allowed_names:
+            raise ValueError(f"Expression contains an invalid variable '{node.id}'. Only 't' is allowed.")
 
-    # Return the lambda function
-    return func
+    # Return the parsed expression
+    return ast.Expression(expr_ast.body)
 
 #                                                    #
 # REPLACE THIS FUNCTION WITH THE ONE FROM @fenik_fam #
@@ -60,18 +42,18 @@ class PyvistaPyQtWidget(QWidget):
 
 
 
-    def add_mesh(self, uid, mesh, **kwargs):
+    def add_mesh(self, mesh, **kwargs):
         self.plotter.add_mesh(mesh, **kwargs)
         self.plotter.reset_camera()
         self.plotter.update()
 
     def test_scene(self):
         sphere = pv.Sphere()
-        self.add_mesh("1", sphere, opacity=0.50, color="red")
-        self.add_mesh("1", pv.Sphere(2, (1, 1, 1)), opacity=0.5, color="red")
+        self.add_mesh(sphere, opacity=0.50, color="red")
+        self.add_mesh(pv.Sphere(2, (1, 1, 1)), opacity=0.5, color="red")
 
-        self.add_mesh("1", pv.Sphere(2, (3, 1, 1)), opacity=0.50, color="red")
-        self.add_mesh("1", pv.Sphere(0.5, (3, -0.7, 1)), opacity=0.5, color="red")
+        self.add_mesh(pv.Sphere(2, (3, 1, 1)), opacity=0.50, color="red")
+        self.add_mesh(pv.Sphere(0.5, (3, -0.7, 1)), opacity=0.5, color="red")
 
 class UI(QMainWindow):
     def __init__(self):
@@ -118,7 +100,7 @@ class UI(QMainWindow):
         self.main_layout.removeWidget(self.toolbox)
 
         self.main_layout.addWidget(self.pyvista_widget, 1)
-        #self.pyvista_widget.test_scene()
+        self.pyvista_widget.test_scene()
 
         self.main_layout.addWidget(self.toolbox)
 
@@ -137,8 +119,6 @@ class UI(QMainWindow):
         self.hidden_tools = False
         self.hidden_console = False
 
-
-        self.object_storage = ObjectStorage(self.pyvista_widget)
 
 
     def add_object(self): # DEBUG VERSION, SUBJECT TO CHANGE
@@ -313,8 +293,6 @@ class UI(QMainWindow):
 
         def createObject(id):
 
-            input = {}
-
             match id:
                 case 0:  # Conical surface
 
@@ -331,22 +309,11 @@ class UI(QMainWindow):
 
                     self.console.append(
                         f"For this conical surface point x = {point_input_x}, y = {point_input_y}, z = {point_input_z}")
-                    print(
+                    self.console.append(
                         f"For this conical surface curve x = {str(curve_input_x)}, y = {str(curve_input_y)}, z = {str(curve_input_z)}")
 
 
-                    input = {
-
-                        "curve": (curve_input_x, curve_input_y, curve_input_z),
-                        "point": (point_input_x, point_input_y, point_input_z),
-                        "t_bounce": (-10,10),
-                        "v_bounce": (0,1),
-                        "name": "Cone",
-                        "FigureTypes": FigureTypes.CONE,
-                    }
-
-
-
+                    self.draw_object_on_screen("Conical")
 
                 case 1:  # Curve surface
 
@@ -357,14 +324,7 @@ class UI(QMainWindow):
                     self.console.append(
                         f"For this conical surface curve x = {curve_input_x}, y = {curve_input_y}, z = {curve_input_z}")
 
-                    input = {
-
-                        "curve": (curve_input_x, curve_input_y, curve_input_z),
-                        "t_bounce": (-10, 10),
-                        "v_bounce": (0, 1),
-                        "name": "Curve",
-                        "FigureTypes": FigureTypes.CURVE,
-                    }
+                    self.draw_object_on_screen("Curve")
 
                 case 2:  # Cylindrical surface
 
@@ -382,15 +342,6 @@ class UI(QMainWindow):
                     self.console.append(
                         f"For this Cylindrical surface curve x = {str(curve_input_x)}, y = {str(curve_input_y)}, z = {str(curve_input_z)}")
 
-                    input = {
-
-                        "curve": (curve_input_x, curve_input_y, curve_input_z),
-                        "direction": (vector_x, vector_y, vector_z),
-                        "t_bounce": (-10, 10),
-                        "v_bounce": (0, 1),
-                        "name": "Cylinder",
-                        "FigureTypes": FigureTypes.CYLINDER,
-                    }
 
                 case 3:  # Create line
 
@@ -401,16 +352,6 @@ class UI(QMainWindow):
                     self.console.append(
                         f"For this line x1 = {line_x1}, y1 = {line_y1}, z1 = {line_z1}"
                         f"              x2 = {line_x2}, y2 = {line_y2}, z2 = {line_z2}")
-
-                    input = {
-
-                        "point1": (line_x1, line_y1, line_z1),
-                        "point2": (line_x2, line_y2, line_z2),
-                        "t_bounce": (-10, 10),
-                        "v_bounce": (0, 1),
-                        "name": "Line",
-                        "FigureTypes": FigureTypes.LINE,
-                    }
 
                 case 4: # Create plane
 
@@ -426,18 +367,6 @@ class UI(QMainWindow):
                         f"For this Plane point x = {point_input_x}, y = {point_input_y}, z = {point_input_z}")
                     self.console.append(
                         f"For this Plane normal vector x = {vector_input_x}, y = {vector_input_y}, z = {vector_input_z}")
-
-                    input = {
-
-                        "normal": (vector_input_x, vector_input_y, vector_input_z),
-                        "point": (point_input_x, point_input_y, point_input_z),
-                        "size": 1,
-                        "t_bounce": (-10, 10),
-                        "v_bounce": (0, 1),
-                        "name": "Plane",
-                        "FigureTypes": FigureTypes.PLANE,
-                    }
-
 
                 case 5:  # Create point
                     if not input_point():
@@ -464,17 +393,6 @@ class UI(QMainWindow):
                     self.console.append(
                         f"For this Cylindrical surface curve x = {str(curve_input_x)}, y = {str(curve_input_y)}, z = {str(curve_input_z)}")
 
-                    input = {
-
-                        "curve": (curve_input_x, curve_input_y, curve_input_z),
-                        "direction": (line_x1, line_y1, line_z1),
-                        "point": (line_x2, line_y2, line_z2),
-                        "t_bounce": (-10, 10),
-                        "v_bounce": (0, 1),
-                        "name": "Rotation",
-                        "FigureTypes": FigureTypes.REVOLUTION,
-                    }
-
                 case 7: # Create vector
 
                     if not input_vector():
@@ -482,10 +400,11 @@ class UI(QMainWindow):
                     vector_input_x, vector_input_y, vector_input_z = input_vector()
                     self.console.append(
                         f"For this  vector x = {vector_input_x}, y = {vector_input_y}, z = {vector_input_z}")
-                case _:
-                    ...
 
-            self.object_storage.create(input)
+
+
+    def draw_object_on_screen(self, *args):
+        self.console.append(f"Drawing {args[0]}")
 
 
     def hide_unhide_tools(self):
