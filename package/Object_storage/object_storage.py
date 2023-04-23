@@ -13,28 +13,28 @@ class ObjectStorage:
     def delete(self, uid):
         del self.storage[uid]
         self.objManager.delete_figure(uid)
-        self.PW.delete_mesh(uid)
-        self.SWO.update()
+        self.PW.remove_mesh(uid)
+        self.SWO.delete(uid)
 
     def update(self, uid, new_data: dict):
         self.storage[uid] = new_data
         if new_data["FigureTypes"] == FigureTypes.CONE:
-            self.objManager.update_cone_mesh(uid, new_data)
+            self.objManager.update_cone(uid, **new_data)
         elif new_data["FigureTypes"] == FigureTypes.CYLINDER:
-            self.objManager.update_cylinder_mesh(uid, new_data)
+            self.objManager.update_cylinder(uid, **new_data)
         elif new_data["FigureTypes"] == FigureTypes.CURVE:
-            self.objManager.update_curve_mesh(uid, new_data)
+            self.objManager.update_curve(uid, **new_data)
         elif new_data["FigureTypes"] == FigureTypes.LINE:
-            self.objManager.update_line_mesh(uid, new_data)
+            self.objManager.update_line(uid, **new_data)
         elif new_data["FigureTypes"] == FigureTypes.PLANE:
-            self.objManager.update_plane_mesh(uid, new_data)
+            self.objManager.update_plane(uid, **new_data)
         elif new_data["FigureTypes"] == FigureTypes.REVOLUTION:
-            self.objManager.update_revolution_surface_mesh(uid, new_data)
+            self.objManager.update_revolution_surface(uid, **new_data)
         else:
             raise Exception(f"Invalid Figure type {new_data['FigureTypes']}")
-
-        self.PW.redraw_mesh(uid, self.objManager.get_figure_mesh(uid), **self.objManager.get_figure_settings(uid))
-        self.SWO.update()
+        self.PW.remove_mesh(uid)
+        self.PW.add_mesh(uid, self.objManager.get_figure_mesh(uid), **self.objManager.get_figure_settings(uid))
+        self.SWO.delete(uid)
 
     def create(self, to_create: dict):
         if to_create["name"] == '':

@@ -34,7 +34,20 @@ class RevolutionSurface(Figure):
                                       direction[2] * direction[1] * (1 - np.cos(angle)) + direction[0] * np.sin(angle),
                                       np.cos(angle) + direction[2] ** 2 * (1 - np.cos(angle))]])
         return line_point + (point - line_point).dot(rotation_matrix)
-        
+
+    def update_parameters(self, **kwargs):
+        for key, value in kwargs.items():
+            if key == "t_bounce":
+                self.__t_bounce = value
+            elif key == "point":
+                self.__point = value
+            elif key == "curve":
+                self.__curve = value
+            elif key == "direction":
+                self.__direction = value
+            elif key == "resolution":
+                self.__resolution = value
+
     def get_mesh(self):
         t_bounce = self.__t_bounce
         curve = self.__curve

@@ -45,8 +45,6 @@ class Figure:
                 self.__line_width = value
             elif key == "enable_edges":
                 self.__enable_edges = value
-            else:
-                raise Exception("invalid key")
 
     # Getters
     def get_uid(self):
