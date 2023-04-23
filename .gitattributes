@@ -1,4 +1,3 @@
-*.ui linguist-generated=true
 package/ui/Widgets/generated/* linguist-generated=true
 package/ui/Widgets/ui/* linguist-generated=true
-package/ui/assets/ linguist-generated=true
+package/ui/assets/* linguist-generated=true
