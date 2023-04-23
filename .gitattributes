@@ -1,0 +1,4 @@
+*.ui
+package/ui/Widgets/generated/*
+package/ui/Widgets/ui/*
+package/ui/assets/

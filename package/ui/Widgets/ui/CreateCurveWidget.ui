@@ -35,7 +35,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="input_x"/>
+          <widget class="QLineEdit" name="curve_input_x"/>
          </item>
         </layout>
        </item>
@@ -49,7 +49,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="input_y"/>
+          <widget class="QLineEdit" name="curve_input_y"/>
          </item>
         </layout>
        </item>
@@ -63,7 +63,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="input_z"/>
+          <widget class="QLineEdit" name="curve_input_z"/>
          </item>
         </layout>
        </item>
