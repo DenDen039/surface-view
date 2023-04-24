@@ -46,29 +46,29 @@ class ObjectStorage:
         if to_create["FigureTypes"] == FigureTypes.CONE:
             uid = self.objManager.create_cone(to_create["curve"],
                                               to_create["point"],
-                                              to_create["t_bounce"],
-                                              to_create["v_bounce"])
+                                              to_create["t_bounds"],
+                                              to_create["v_bounds"])
             self.storage[uid] = to_create
             self.SWO.Display(uid, to_create["name"])
             self.PW.add_mesh(uid, self.objManager.get_figure_mesh(uid), **self.objManager.get_figure_settings(uid))
         elif to_create["FigureTypes"] == FigureTypes.CYLINDER:
             uid = self.objManager.create_cylinder(to_create["curve"],
                                                   to_create["direction"],
-                                                  to_create["t_bounce"],
-                                                  to_create["v_bounce"])
+                                                  to_create["t_bounds"],
+                                                  to_create["v_bounds"])
             self.storage[uid] = to_create
             self.SWO.Display(uid, to_create["name"])
             self.PW.add_mesh(uid, self.objManager.get_figure_mesh(uid), **self.objManager.get_figure_settings(uid))
         elif to_create["FigureTypes"] == FigureTypes.CURVE:
             uid = self.objManager.create_curve(to_create["curve"],
-                                               to_create["t_bounce"])
+                                               to_create["t_bounds"])
             self.storage[uid] = to_create
             self.SWO.Display(uid, to_create["name"])
             self.PW.add_mesh(uid, self.objManager.get_figure_mesh(uid), **self.objManager.get_figure_settings(uid))
         elif to_create["FigureTypes"] == FigureTypes.LINE:
             uid = self.objManager.create_line(to_create["point1"],
                                               to_create["point2"],
-                                              to_create["t_bounce"])
+                                              to_create["t_bounds"])
             self.storage[uid] = to_create
             self.SWO.Display(uid, to_create["name"])
             self.PW.add_mesh(uid, self.objManager.get_figure_mesh(uid), **self.objManager.get_figure_settings(uid))
@@ -83,7 +83,7 @@ class ObjectStorage:
             uid = self.objManager.create_revolution_surface(to_create["curve"],
                                                             to_create["direction"],
                                                             to_create["point"],
-                                                            to_create["t_bounce"])
+                                                            to_create["t_bounds"])
             self.storage[uid] = to_create
             self.SWO.Display(uid, to_create["name"])
             self.PW.add_mesh(uid, self.objManager.get_figure_mesh(uid), **self.objManager.get_figure_settings(uid))

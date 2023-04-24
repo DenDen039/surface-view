@@ -16,7 +16,7 @@ from numpy import *
 
 # TODO: add parser (maybe as class)
 #       add additional fields to user input (name of object, color, opacity, t_bounds)
-#       rename bounce -> bounds
+#       rename bounds -> bounds
 #       add update_widget
 #       add prototype of storage_object_widget
 #           1. List of objects in left
@@ -359,8 +359,8 @@ class UI(QMainWindow):
 
                         "curve": (curve_input_x, curve_input_y, curve_input_z),
                         "point": (point_input_x, point_input_y, point_input_z),
-                        "t_bounce": t_bounds,
-                        "v_bounce": v_bounds,
+                        "t_bounds": t_bounds,
+                        "v_bounds": v_bounds,
                         "name": name,
                         "FigureTypes": FigureTypes.CONE,
                     }
@@ -380,8 +380,8 @@ class UI(QMainWindow):
                     input = {
 
                         "curve": (curve_input_x, curve_input_y, curve_input_z),
-                        "t_bounce": t_bounds,
-                        "v_bounce": v_bounds,
+                        "t_bounds": t_bounds,
+                        "v_bounds": v_bounds,
                         "name": name,
                         "FigureTypes": FigureTypes.CURVE,
                     }
@@ -406,8 +406,8 @@ class UI(QMainWindow):
 
                         "curve": (curve_input_x, curve_input_y, curve_input_z),
                         "direction": (vector_x, vector_y, vector_z),
-                        "t_bounce": t_bounds,
-                        "v_bounce": v_bounds,
+                        "t_bounds": t_bounds,
+                        "v_bounds": v_bounds,
                         "name": name,
                         "FigureTypes": FigureTypes.CYLINDER,
                     }
@@ -426,8 +426,8 @@ class UI(QMainWindow):
 
                         "point1": (line_x1, line_y1, line_z1),
                         "point2": (line_x2, line_y2, line_z2),
-                        "t_bounce": t_bounds,
-                        "v_bounce": v_bounds,
+                        "t_bounds": t_bounds,
+                        "v_bounds": v_bounds,
                         "name": name,
                         "FigureTypes": FigureTypes.LINE,
                     }
@@ -452,8 +452,8 @@ class UI(QMainWindow):
                         "normal": (vector_input_x, vector_input_y, vector_input_z),
                         "point": (point_input_x, point_input_y, point_input_z),
                         "size": 1,
-                        "t_bounce": t_bounds,
-                        "v_bounce": v_bounds,
+                        "t_bounds": t_bounds,
+                        "v_bounds": v_bounds,
                         "name": name,
                         "FigureTypes": FigureTypes.PLANE,
                     }
@@ -489,8 +489,8 @@ class UI(QMainWindow):
                         "curve": (curve_input_x, curve_input_y, curve_input_z),
                         "direction": (line_x1, line_y1, line_z1),
                         "point": (line_x2, line_y2, line_z2),
-                        "t_bounce": t_bounds,
-                        "v_bounce": v_bounds,
+                        "t_bounds": t_bounds,
+                        "v_bounds": v_bounds,
                         "name": name,
                         "FigureTypes": FigureTypes.REVOLUTION,
                     }
