@@ -16,9 +16,9 @@ class ObjectManager:
     def __init__(self):
         self.objects = dict()
 
-    def create_cone(self, curve, point, t_bounce, v_bounce, **kwargs) -> str:
+    def create_cone(self, curve, point, t_bounds, v_bounds, **kwargs) -> str:
         uid = uuid.uuid4()
-        cone = Cone(curve, point, t_bounce, v_bounce, uid, **kwargs)
+        cone = Cone(curve, point, t_bounds, v_bounds, uid, **kwargs)
         self.objects[uid] = cone
 
         return uid
@@ -34,10 +34,10 @@ class ObjectManager:
 
         obj.update_parameters(**kwargs)
 
-    def create_cylinder(self, curve, direction, t_bounce, v_bounce, **kwargs) -> str:
+    def create_cylinder(self, curve, direction, t_bounds, v_bounds, **kwargs) -> str:
         uid = uuid.uuid4()
 
-        cylinder = Cylinder(curve, direction, t_bounce, v_bounce, uid, **kwargs)
+        cylinder = Cylinder(curve, direction, t_bounds, v_bounds, uid, **kwargs)
         self.objects[uid] = cylinder
 
         return uid
@@ -53,10 +53,10 @@ class ObjectManager:
 
         obj.update_parameters(**kwargs)
 
-    def create_revolution_surface(self, curve, direction, point, t_bounce, **kwargs) -> str:
+    def create_revolution_surface(self, curve, direction, point, t_bounds, **kwargs) -> str:
         uid = uuid.uuid4()
 
-        surf = RevolutionSurface(curve, direction, point, t_bounce, uid, **kwargs)
+        surf = RevolutionSurface(curve, direction, point, t_bounds, uid, **kwargs)
         self.objects[uid] = surf
 
         return uid
@@ -72,10 +72,10 @@ class ObjectManager:
 
         obj.update_parameters(**kwargs)
 
-    def create_curve(self, curve, t_bounce, **kwargs) -> str:
+    def create_curve(self, curve, t_bounds, **kwargs) -> str:
         uid = uuid.uuid4()
 
-        curve = Curve(curve, t_bounce, uid, **kwargs)
+        curve = Curve(curve, t_bounds, uid, **kwargs)
         self.objects[uid] = curve
 
         return uid
@@ -91,10 +91,10 @@ class ObjectManager:
 
         obj.update_parameters(**kwargs)
 
-    def create_line(self, point1, point2, t_bounce, **kwargs) -> str:
+    def create_line(self, point1, point2, t_bounds, **kwargs) -> str:
         uid = uuid.uuid4()
 
-        line = Line(point1, point2, t_bounce, uid, **kwargs)
+        line = Line(point1, point2, t_bounds, uid, **kwargs)
         self.objects[uid] = line
 
         return uid
@@ -173,12 +173,12 @@ if __name__ == "__main__":
 
     manager = ObjectManager()
     curve = (lambda t: np.sin(t), lambda t: np.cos(t) * 0, lambda t: t)
-    t_bounce = (0, 2 * np.pi)
-    v_bounce = (0, 2)
+    t_bounds = (0, 2 * np.pi)
+    v_bounds = (0, 2)
     point = (5, 5, 5)
     direction = (2, 5, 3)
 
-    uid = manager.create_revolution_surface(curve, direction, point, t_bounce)
+    uid = manager.create_revolution_surface(curve, direction, point, t_bounds)
 
     p = pv.Plotter()
     p.add_mesh(manager.get_figure_mesh(uid))
@@ -186,7 +186,7 @@ if __name__ == "__main__":
 
     curve1 = (lambda t: np.sin(t), lambda t: np.cos(t), lambda t: t * 0 + 5)
     vector = (0, 0, 1)
-    uid = manager.create_curve(curve1, t_bounce)
+    uid = manager.create_curve(curve1, t_bounds)
     p = pv.Plotter()
     p.add_mesh(manager.get_figure_mesh(uid))
     p.show()
