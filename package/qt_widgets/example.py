@@ -34,9 +34,8 @@ class Example(QWidget):
 
         btn5 = QPushButton('XY')
         btn6 = QPushButton('YZ')
-        btn7 = QPushButton('add meshes')
-        btn8 = QPushButton('add meshes')
-
+        btn7 = QPushButton('zoom in')
+        btn8 = QPushButton('zoom out')
 
         manager = ObjectManager()
 
@@ -50,19 +49,25 @@ class Example(QWidget):
         v_bounce2 = (0, 2)
         point2 = (5, 5, 5)
 
-        uid = manager.create_cone(curve, point, t_bounce, v_bounce)
+        curve3 = (lambda t: 2 * t, lambda t: np.cos(2 * t), lambda t: np.sin(t))
+        t_bounce3 = (0, 2 * np.pi)
+        v_bounce3 = (2, 1.5)
+        point3 = (1, 40, 0)
+
+        uid1 = manager.create_cone(curve, point, t_bounce, v_bounce)
         uid2 = manager.create_cone(curve2, point2, t_bounce2, v_bounce2)
-        
+        uid3 = manager.create_cone(curve3, point3, t_bounce3, v_bounce3)
 
         myWidget = PlotterWidget(manager.objects)
 
-
         def add():
-            myWidget.add_mesh(uid, color='blue')
+            myWidget.add_mesh(uid3, color='grey', opacity=0.5)
             myWidget.add_mesh(uid2, color='red')
+            myWidget.add_mesh(uid1, color='blue')
 
         def remove():
-            myWidget.remove_mesh(uid)
+            myWidget.remove_mesh(uid1)
+            myWidget.remove_mesh(uid2)
 
         def clear():
             myWidget.clear_actors()
@@ -73,13 +78,17 @@ class Example(QWidget):
         def viewYZ():
             myWidget.view_yz()
 
+        def zoom_in():
+            myWidget.zoom_in()
+
+        def zoom_out():
+            myWidget.zoom_out()
+
         def screenshot():
-            myWidget.take_screenshot('screen.png')
+            myWidget.take_screenshot()
 
         def blur():
             myWidget.plotter.add_blurring()
-
- 
 
         btn1.clicked.connect(add)
         btn2.clicked.connect(remove)
@@ -87,21 +96,23 @@ class Example(QWidget):
         btn4.clicked.connect(screenshot)
         btn5.clicked.connect(viewXY)
         btn6.clicked.connect(viewYZ)
+        btn7.clicked.connect(zoom_in)
+        btn8.clicked.connect(zoom_out)
 
-        # Добавляем кнопки в соответствующие вертикальные контейнеры
         vbox_left.addWidget(btn1)
         vbox_left.addWidget(btn2)
         vbox_left.addWidget(btn3)
         vbox_left.addWidget(btn4)
         vbox_left.addWidget(btn5)
         vbox_left.addWidget(btn6)
+        #vbox_left.addWidget(btn7)
+        #vbox_left.addWidget(btn8)
+
         vbox_right.addWidget(myWidget)
 
-        # Добавляем вертикальные контейнеры с кнопками в горизонтальный контейнер
         hbox.addLayout(vbox_left)
         hbox.addLayout(vbox_right)
 
-        # Устанавливаем горизонтальный контейнер как основной контейнер для виджета
         self.setLayout(hbox)
 
         self.setGeometry(300, 300, 800, 600)
