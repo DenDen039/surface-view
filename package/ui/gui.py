@@ -24,6 +24,8 @@ from numpy import *
 #           3. Integrate with storage_object
 #       refactor gui
 #       add @fenik_fam `s PW
+#       better function parser
+#       parser for CommonObjectWidget
 
 
 
@@ -86,7 +88,9 @@ class UI(QMainWindow):
         # Define our widgets
         self.toolbox = self.findChild(QGroupBox, 'tools_box')
         self.toolbox_layout = QVBoxLayout()
+        self.commonWidget = QWidget()
         self.inside = QWidget()
+        self.toolbox_layout.addWidget(self.commonWidget)
         self.toolbox_layout.addWidget(self.inside)
         self.toolbox.setLayout(self.toolbox_layout)
 
@@ -176,6 +180,7 @@ class UI(QMainWindow):
         choice_point = QPushButton("Add point")
         choice_point.clicked.connect(lambda: self.openCreateWidget(5))
         choiceWidgetLayout.addWidget(choice_point)
+        choice_point.setEnabled(False)
 
         choice_rotation = QPushButton("Add rotation surface")
         choice_rotation.clicked.connect(lambda: self.openCreateWidget(6))
@@ -184,13 +189,16 @@ class UI(QMainWindow):
         choice_vector = QPushButton("Add vector")
         choice_vector.clicked.connect(lambda: self.openCreateWidget(7))
         choiceWidgetLayout.addWidget(choice_vector)
+        choice_vector.setEnabled(False)
 
         self.choiceWidget.setLayout(choiceWidgetLayout)
 
-        print("Showing win2")
 
+        self.toolbox_layout.removeWidget(self.commonWidget)
         self.toolbox_layout.removeWidget(self.inside)
+
         self.inside.deleteLater()
+        self.commonWidget.deleteLater()
 
         self.inside = self.choiceWidget
         self.toolbox_layout.addWidget(self.inside)
@@ -199,10 +207,14 @@ class UI(QMainWindow):
 
     def openCreateWidget(self, _id: int):
 
+        self.commonWidget = self.creator.CommonSettingsWidget()
+        self.commonWidget.Form.inputName.setText("Object")
+        self.commonWidget.Form.inputColor.setText("white")
+        self.commonWidget.Form.inputTBounds.setText("-10, 10")
+        self.commonWidget.Form.inputVBounds.setText("0, 1")
+
+
         applyButton = None
-
-
-
         match _id:
             case 0:
                 self.createWidget = self.creator.CreateConicalWidget()
@@ -226,7 +238,10 @@ class UI(QMainWindow):
         self.toolbox_layout.removeWidget(self.inside)
         self.inside.deleteLater()
 
+
+
         self.inside = self.createWidget
+        self.toolbox_layout.addWidget(self.commonWidget)
         self.toolbox_layout.addWidget(self.inside)
         self.toolbox_layout.update()
 
@@ -313,6 +328,11 @@ class UI(QMainWindow):
 
         def createObject(id):
 
+            name = self.commonWidget.Form.inputName.text()
+            color = self.commonWidget.Form.inputColor.text()
+            t_bounds = [float(x) for x in self.commonWidget.Form.inputTBounds.text().split(",")]
+            v_bounds = [float(x) for x in self.commonWidget.Form.inputTBounds.text().split(",")]
+
             input = {}
 
             match id:
@@ -339,9 +359,9 @@ class UI(QMainWindow):
 
                         "curve": (curve_input_x, curve_input_y, curve_input_z),
                         "point": (point_input_x, point_input_y, point_input_z),
-                        "t_bounce": (-10,10),
-                        "v_bounce": (0,1),
-                        "name": "Cone",
+                        "t_bounce": t_bounds,
+                        "v_bounce": v_bounds,
+                        "name": name,
                         "FigureTypes": FigureTypes.CONE,
                     }
 
@@ -360,9 +380,9 @@ class UI(QMainWindow):
                     input = {
 
                         "curve": (curve_input_x, curve_input_y, curve_input_z),
-                        "t_bounce": (-10, 10),
-                        "v_bounce": (0, 1),
-                        "name": "Curve",
+                        "t_bounce": t_bounds,
+                        "v_bounce": v_bounds,
+                        "name": name,
                         "FigureTypes": FigureTypes.CURVE,
                     }
 
@@ -386,9 +406,9 @@ class UI(QMainWindow):
 
                         "curve": (curve_input_x, curve_input_y, curve_input_z),
                         "direction": (vector_x, vector_y, vector_z),
-                        "t_bounce": (-10, 10),
-                        "v_bounce": (0, 1),
-                        "name": "Cylinder",
+                        "t_bounce": t_bounds,
+                        "v_bounce": v_bounds,
+                        "name": name,
                         "FigureTypes": FigureTypes.CYLINDER,
                     }
 
@@ -406,9 +426,9 @@ class UI(QMainWindow):
 
                         "point1": (line_x1, line_y1, line_z1),
                         "point2": (line_x2, line_y2, line_z2),
-                        "t_bounce": (-10, 10),
-                        "v_bounce": (0, 1),
-                        "name": "Line",
+                        "t_bounce": t_bounds,
+                        "v_bounce": v_bounds,
+                        "name": name,
                         "FigureTypes": FigureTypes.LINE,
                     }
 
@@ -432,9 +452,9 @@ class UI(QMainWindow):
                         "normal": (vector_input_x, vector_input_y, vector_input_z),
                         "point": (point_input_x, point_input_y, point_input_z),
                         "size": 1,
-                        "t_bounce": (-10, 10),
-                        "v_bounce": (0, 1),
-                        "name": "Plane",
+                        "t_bounce": t_bounds,
+                        "v_bounce": v_bounds,
+                        "name": name,
                         "FigureTypes": FigureTypes.PLANE,
                     }
 
@@ -469,9 +489,9 @@ class UI(QMainWindow):
                         "curve": (curve_input_x, curve_input_y, curve_input_z),
                         "direction": (line_x1, line_y1, line_z1),
                         "point": (line_x2, line_y2, line_z2),
-                        "t_bounce": (-10, 10),
-                        "v_bounce": (0, 1),
-                        "name": "Rotation",
+                        "t_bounce": t_bounds,
+                        "v_bounce": v_bounds,
+                        "name": name,
                         "FigureTypes": FigureTypes.REVOLUTION,
                     }
 
