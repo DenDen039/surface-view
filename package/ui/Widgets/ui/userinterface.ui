@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1131</width>
-    <height>848</height>
+    <width>1262</width>
+    <height>706</height>
    </rect>
   </property>
   <property name="cursor">
@@ -33,31 +33,28 @@
    <bool>false</bool>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,1,5">
-    <item>
-     <widget class="QSplitter" name="splitter_2">
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-      <widget class="QSplitter" name="splitter">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-      </widget>
-     </widget>
-    </item>
+   <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="1,5">
     <item>
      <widget class="QScrollArea" name="scrollArea">
+      <property name="verticalScrollBarPolicy">
+       <enum>Qt::ScrollBarAlwaysOn</enum>
+      </property>
+      <property name="sizeAdjustPolicy">
+       <enum>QAbstractScrollArea::AdjustIgnored</enum>
+      </property>
       <property name="widgetResizable">
        <bool>true</bool>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
       </property>
       <widget class="QWidget" name="scrollAreaWidgetContents">
        <property name="geometry">
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>181</width>
-         <height>737</height>
+         <width>187</width>
+         <height>613</height>
         </rect>
        </property>
       </widget>
@@ -66,7 +63,7 @@
     <item>
      <layout class="QVBoxLayout" name="verticalLayout" stretch="3,1">
       <property name="bottomMargin">
-       <number>11</number>
+       <number>0</number>
       </property>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout" stretch="5,1">
@@ -86,7 +83,13 @@
            <bool>true</bool>
           </property>
           <property name="title">
-           <string>GroupBox</string>
+           <string>Objects Editor</string>
+          </property>
+          <property name="flat">
+           <bool>false</bool>
+          </property>
+          <property name="checkable">
+           <bool>false</bool>
           </property>
          </widget>
         </item>
@@ -105,8 +108,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1131</width>
-     <height>24</height>
+     <width>1262</width>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu">

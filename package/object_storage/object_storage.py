@@ -89,3 +89,5 @@ class ObjectStorage:
             self.PW.add_mesh(uid, self.objManager.get_figure_mesh(uid), **self.objManager.get_figure_settings(uid))
         else:
             raise Exception(f"Invalid Figure type {to_create['FigureTypes']}")
+
+        return uid

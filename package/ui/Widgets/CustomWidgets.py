@@ -18,6 +18,7 @@ import package.ui.Widgets.generated.CreatePointWidget_ as CreatePointWidget_
 import package.ui.Widgets.generated.CreateCylindricalWidget_ as CreateCylindricalWidget_
 import package.ui.Widgets.generated.CreateVectorWidget_ as CreateVectorWidget_
 import package.ui.Widgets.generated.CommonSettingsWidget_ as CommonSettingsWidget_
+import package.ui.Widgets.generated.ObjectWidget_ as ObjectWidget_
 
 class Creator:
 
@@ -29,7 +30,6 @@ class Creator:
         Widget = QtWidgets.QWidget()
         Form = CreateConicalWidget_.Ui_Form()
         Form.setupUi(Widget)
-        Form.retranslateUi(Widget)
         Widget.Form = Form
 
         return Widget
@@ -38,7 +38,6 @@ class Creator:
         Widget = QtWidgets.QWidget()
         Form = CreateCurveWidget_.Ui_Form()
         Form.setupUi(Widget)
-        Form.retranslateUi(Widget)
         Widget.Form = Form
 
         return Widget
@@ -47,7 +46,6 @@ class Creator:
         Widget = QtWidgets.QWidget()
         Form = CreateCylindricalWidget_.Ui_Form()
         Form.setupUi(Widget)
-        Form.retranslateUi(Widget)
         Widget.Form = Form
 
         return Widget
@@ -56,7 +54,6 @@ class Creator:
         Widget = QtWidgets.QWidget()
         Form = CreateLineWidget_.Ui_Form()
         Form.setupUi(Widget)
-        Form.retranslateUi(Widget)
         Widget.Form = Form
 
         return Widget
@@ -66,7 +63,6 @@ class Creator:
         Widget = QtWidgets.QWidget()
         Form = CreatePlaneWidget_.Ui_Form()
         Form.setupUi(Widget)
-        Form.retranslateUi(Widget)
         Widget.Form = Form
 
         return Widget
@@ -76,7 +72,6 @@ class Creator:
         Widget = QtWidgets.QWidget()
         Form = CreatePointWidget_.Ui_Form()
         Form.setupUi(Widget)
-        Form.retranslateUi(Widget)
         Widget.Form = Form
 
         return Widget
@@ -86,7 +81,6 @@ class Creator:
         Widget = QtWidgets.QWidget()
         Form = CreateRotationFigureWidget_.Ui_Form()
         Form.setupUi(Widget)
-        Form.retranslateUi(Widget)
         Widget.Form = Form
 
         return Widget
@@ -96,14 +90,20 @@ class Creator:
         Widget = QtWidgets.QWidget()
         Form = CreateVectorWidget_.Ui_Form()
         Form.setupUi(Widget)
-        Form.retranslateUi(Widget)
         Widget.Form = Form
 
     def CommonSettingsWidget(self):
         Widget = QtWidgets.QWidget()
         Form = CommonSettingsWidget_.Ui_Form()
         Form.setupUi(Widget)
-        Form.retranslateUi(Widget)
+        Widget.Form = Form
+
+        return Widget
+
+    def ObjectWidget(self):
+        Widget = QtWidgets.QWidget()
+        Form = ObjectWidget_.Ui_Form()
+        Form.setupUi(Widget)
         Widget.Form = Form
 
         return Widget
