@@ -1,3 +1,5 @@
+import PyQt5
+import PyQt5.QtCore
 from PyQt5.QtWidgets import *
 import pyvista as pv
 from pyvistaqt import QtInteractor
@@ -27,20 +29,34 @@ from numpy import *
 #       better function parser
 #       parser for CommonObjectWidget
 
+import ast
+import numpy as np
+import re
 
 
 
 
-def parse_expression(expr_str):
+def parse_expression(expression):
+    # Check that the expression only contains the variable "t"
+    if "t" not in expression.replace(" ", ""):
+        raise ValueError("Expression must contain the variable 't'")
+    # Check that the expression only contains valid numpy functions and operators
+    allowed_functions = set(np.__dict__.keys())
+    allowed_operators = set("+-*/()")
+    expression_functions = set(re.findall(r"\b\w+\b", expression)) - set(["t"])
+    if not expression_functions.issubset(allowed_functions):
+        raise ValueError("Expression contains invalid function(s)")
+    for token in expression.split():
+        if token not in allowed_operators and token not in expression_functions and not re.match(r"^\d+\.?\d*$", token):
+            raise ValueError(f"Invalid character(s) in expression token: {token}")
+    # Define the lambda function using the expression
+    f = lambda t: eval(expression, {"__builtins__": None, "np": np, "t": t})
+    return f
 
-    if not ('t' in expr_str):
-        expr_str = expr_str + "+t*0"
+def parse_expression(expresion):
 
-    func = lambda t: eval(expr_str)
-
-    # Return the lambda function
-    return func
-
+    expr = lambda t: eval(expresion)
+    return expr
 #                                                    #
 # REPLACE THIS FUNCTION WITH THE ONE FROM @fenik_fam #
 #                       vvv                          #
@@ -85,6 +101,8 @@ class UI(QMainWindow):
         _ui.setupUi(self)
         _ui.retranslateUi(self)
 
+        self.creator = Creator()
+
         # Define our widgets
         self.toolbox = self.findChild(QGroupBox, 'tools_box')
         self.toolbox_layout = QVBoxLayout()
@@ -95,7 +113,15 @@ class UI(QMainWindow):
         self.toolbox.setLayout(self.toolbox_layout)
 
         self.widget = self.findChild(QWidget, 'widget')
+
         self.scrollArea = self.findChild(QScrollArea, 'scrollArea')
+        self.scrollAreaContents = self.findChild(QWidget, 'scrollAreaWidgetContents')
+        self.scrollAreaLayout = QVBoxLayout()
+        self.scrollAreaLayout.setAlignment(PyQt5.QtCore.Qt.AlignTop)
+        # for i in range(40):
+        #    self.scrollAreaLayout.addWidget(Creator.ObjectWidget(self))
+        self.scrollAreaContents.setLayout(self.scrollAreaLayout)
+
         self.console = self.findChild(QTextBrowser, 'textBrowser')
 
         self.save = self.findChild(QAction, 'save')
@@ -107,7 +133,7 @@ class UI(QMainWindow):
         self.show_console = self.findChild(QAction, 'console')
         self.setting = self.findChild(QAction, 'setting')
 
-        self.creator = Creator()
+       # self.creator = Creator()
 
 
 
@@ -119,9 +145,10 @@ class UI(QMainWindow):
 
 
         self.main_layout.removeWidget(self.widget)
+        self.widget.deleteLater()
         self.main_layout.removeWidget(self.toolbox)
 
-        self.main_layout.addWidget(self.pyvista_widget, 1)
+        self.main_layout.addWidget(self.pyvista_widget, 2)
         #self.pyvista_widget.test_scene()
 
         self.main_layout.addWidget(self.toolbox)
@@ -143,6 +170,10 @@ class UI(QMainWindow):
 
 
         self.object_storage = ObjectStorage(self.pyvista_widget)
+        #self.parser = Parser()
+
+        self.objects_list = {}
+
 
 
     def add_object(self): # DEBUG VERSION, SUBJECT TO CHANGE
@@ -158,32 +189,32 @@ class UI(QMainWindow):
         choiceWidgetLayout = QVBoxLayout()
 
         choice_conical = QPushButton("Add conical surface")
-        choice_conical.clicked.connect(lambda: self.openCreateWidget(0))
+        choice_conical.clicked.connect(lambda: self.openCreateWidget(FigureTypes.CONE))
         choiceWidgetLayout.addWidget(choice_conical)
 
         choice_curve = QPushButton("Add curve")
-        choice_curve.clicked.connect(lambda: self.openCreateWidget(1))
+        choice_curve.clicked.connect(lambda: self.openCreateWidget(FigureTypes.CURVE))
         choiceWidgetLayout.addWidget(choice_curve)
 
         choice_cylindrical = QPushButton("Add cylindrical surface")
-        choice_cylindrical.clicked.connect(lambda: self.openCreateWidget(2))
+        choice_cylindrical.clicked.connect(lambda: self.openCreateWidget(FigureTypes.CYLINDER))
         choiceWidgetLayout.addWidget(choice_cylindrical)
 
         choice_line = QPushButton("Add line")
-        choice_line.clicked.connect(lambda: self.openCreateWidget(3))
+        choice_line.clicked.connect(lambda: self.openCreateWidget(FigureTypes.LINE))
         choiceWidgetLayout.addWidget(choice_line)
 
         choice_plane = QPushButton("Add plane")
-        choice_plane.clicked.connect(lambda: self.openCreateWidget(4))
+        choice_plane.clicked.connect(lambda: self.openCreateWidget(FigureTypes.PLANE))
         choiceWidgetLayout.addWidget(choice_plane)
 
         choice_point = QPushButton("Add point")
-        choice_point.clicked.connect(lambda: self.openCreateWidget(5))
+        choice_point.clicked.connect(lambda: self.openCreateWidget(FigureTypes.POINT))
         choiceWidgetLayout.addWidget(choice_point)
         choice_point.setEnabled(False)
 
         choice_rotation = QPushButton("Add rotation surface")
-        choice_rotation.clicked.connect(lambda: self.openCreateWidget(6))
+        choice_rotation.clicked.connect(lambda: self.openCreateWidget(FigureTypes.REVOLUTION))
         choiceWidgetLayout.addWidget(choice_rotation)
 
         choice_vector = QPushButton("Add vector")
@@ -204,8 +235,7 @@ class UI(QMainWindow):
         self.toolbox_layout.addWidget(self.inside)
         self.toolbox_layout.update()
 
-
-    def openCreateWidget(self, _id: int):
+    def openCreateWidget(self, _type: FigureTypes):
 
         self.commonWidget = self.creator.CommonSettingsWidget()
         self.commonWidget.Form.inputName.setText("Object")
@@ -215,41 +245,37 @@ class UI(QMainWindow):
 
 
         applyButton = None
-        match _id:
-            case 0:
+        match _type:
+            case FigureTypes.CONE:
                 self.createWidget = self.creator.CreateConicalWidget()
-            case 1:
+            case FigureTypes.CURVE:
                 self.createWidget = self.creator.CreateCurveWidget()
-            case 2:
+            case FigureTypes.CYLINDER:
                 self.createWidget = self.creator.CreateCylindricalWidget()
-            case 3:
+            case FigureTypes.LINE:
                 self.createWidget = self.creator.CreateLineWidget()
-            case 4:
+            case FigureTypes.PLANE:
                 self.createWidget = self.creator.CreatePlaneWidget()
-            case 5:
+            case FigureTypes.POINT:
                 self.createWidget = self.creator.CreatePointWidget()
-            case 6:
+            case FigureTypes.REVOLUTION:
                 self.createWidget = self.creator.CreateRotationFigureWidget()
-            case 7:
-                self.createWidget = self.creator.CreateVectorWidget()
+           # case FigureTypes.VE:
+           #    self.createWidget = self.creator.CreateVectorWidget()
             case _:
                 self.createWidget = QWidget()
 
         self.toolbox_layout.removeWidget(self.inside)
         self.inside.deleteLater()
 
-
-
         self.inside = self.createWidget
         self.toolbox_layout.addWidget(self.commonWidget)
         self.toolbox_layout.addWidget(self.inside)
         self.toolbox_layout.update()
 
-        print(_id)
-        self.createWidget.Form.applyButton.clicked.connect(lambda: createObject(_id))
+        print(f"type: {_type}")
+        self.createWidget.Form.applyButton.clicked.connect(lambda: createObject(_type, False, 0))
         self.createWidget.Form.cancelButton.clicked.connect(self.add_object)
-
-
 
         def input_point():
 
@@ -326,7 +352,65 @@ class UI(QMainWindow):
 
             return point_input_x_1, point_input_y_1, point_input_z_1, point_input_x_2, point_input_y_2, point_input_z_2
 
-        def createObject(id):
+        def objectslist_append(uid):
+
+            storage = self.object_storage.storage
+            print(storage[uid])
+            object_name = storage[uid]["name"]
+            object_type = storage[uid]["FigureTypes"]
+
+            objectWidget = self.creator.ObjectWidget()
+            objectWidget.Form.label_name.setText(object_name)
+            objectWidget.Form.label_type.setText(object_type)
+            objectWidget.Form.label_color.setText(str(uid))
+
+            objectWidget.Form.button_edit.clicked.connect(lambda: edit_object(uid))
+
+            self.objects_list[uid] = objectWidget
+            self.scrollAreaLayout.addWidget(self.objects_list[uid])
+
+
+        def edit_object(uid):
+
+            storage = self.object_storage.storage
+            _type = storage[uid]["FigureTypes"]
+            self.openCreateWidget(_type)
+            button_delete = QPushButton("Delete")
+            self.createWidget.Form.verticalLayout.addWidget(button_delete)
+
+            self.commonWidget.Form.inputName.setText(storage[uid]["name"])
+            self.commonWidget.Form.inputColor.setText("white")
+            self.commonWidget.Form.inputTBounds.setText(str(storage[uid]["t_bounds"][0]) + ", " + str(storage[uid]["t_bounds"][1]))
+            self.commonWidget.Form.inputVBounds.setText(str(storage[uid]["v_bounds"][0]) + ", " + str(storage[uid]["v_bounds"][1]))
+
+            match  _type:
+                case FigureTypes.CONE:
+                    self.createWidget.Form.point_input_x.setText(str(storage[uid]["point"][0]))
+                    self.createWidget.Form.point_input_y.setText(str(storage[uid]["point"][1]))
+                    self.createWidget.Form.point_input_z.setText(str(storage[uid]["point"][2]))
+
+                    self.createWidget.Form.curve_input_x.setText(str(storage[uid]["curve"][0]))
+                    self.createWidget.Form.curve_input_y.setText(str(storage[uid]["curve"][1]))
+                    self.createWidget.Form.curve_input_z.setText(str(storage[uid]["curve"][2]))
+
+
+                case FigureTypes.CURVE:
+                    self.createWidget = self.creator.CreateCurveWidget()
+                case FigureTypes.CYLINDER:
+                    self.createWidget = self.creator.CreateCylindricalWidget()
+                case FigureTypes.LINE:
+                    self.createWidget = self.creator.CreateLineWidget()
+                case FigureTypes.PLANE:
+                    self.createWidget = self.creator.CreatePlaneWidget()
+                case FigureTypes.POINT:
+                    self.createWidget = self.creator.CreatePointWidget()
+                case FigureTypes.REVOLUTION:
+                    self.createWidget = self.creator.CreateRotationFigureWidget()
+
+            self.createWidget.Form.applyButton.clicked.connect(lambda: createObject(_type, True, uid))
+            self.createWidget.Form.verticalLayout.button_delete.clicked.connect(lambda: deleteObject(uid)) # TODO: FIX THIS
+
+        def createObject(_type, update_mode, uid):
 
             name = self.commonWidget.Form.inputName.text()
             color = self.commonWidget.Form.inputColor.text()
@@ -335,8 +419,8 @@ class UI(QMainWindow):
 
             input = {}
 
-            match id:
-                case 0:  # Conical surface
+            match _type:
+                case FigureTypes.CONE:  # Conical surface
 
                     if not input_point():
                         return
@@ -365,17 +449,14 @@ class UI(QMainWindow):
                         "FigureTypes": FigureTypes.CONE,
                     }
 
-
-
-
-                case 1:  # Curve surface
+                case FigureTypes.CURVE:  # Curve
 
                     if not input_curve():
                         return
                     curve_input_x, curve_input_y, curve_input_z = input_curve()
 
                     self.console.append(
-                        f"For this conical surface curve x = {curve_input_x}, y = {curve_input_y}, z = {curve_input_z}")
+                        f"For this curve x = {curve_input_x}, y = {curve_input_y}, z = {curve_input_z}")
 
                     input = {
 
@@ -386,7 +467,7 @@ class UI(QMainWindow):
                         "FigureTypes": FigureTypes.CURVE,
                     }
 
-                case 2:  # Cylindrical surface
+                case FigureTypes.CYLINDER:  # Cylindrical surface
 
                     if not input_vector():
                         return
@@ -412,7 +493,7 @@ class UI(QMainWindow):
                         "FigureTypes": FigureTypes.CYLINDER,
                     }
 
-                case 3:  # Create line
+                case FigureTypes.LINE:  # Create line
 
                     if not input_line():
                         return
@@ -432,7 +513,7 @@ class UI(QMainWindow):
                         "FigureTypes": FigureTypes.LINE,
                     }
 
-                case 4: # Create plane
+                case FigureTypes.PLANE: # Create plane
 
                     if not input_point():
                         return
@@ -459,7 +540,7 @@ class UI(QMainWindow):
                     }
 
 
-                case 5:  # Create point
+                case FigureTypes.POINT:  # Create point
                     if not input_point():
                         return
                     point_input_x, point_input_y, point_input_z = input_point()
@@ -467,7 +548,7 @@ class UI(QMainWindow):
                     self.console.append(
                         f"For this point x = {point_input_x}, y = {point_input_y}, z = {point_input_z}")
 
-                case 6:  # Create Rotation Surface
+                case FigureTypes.REVOLUTION:  # Create Rotation Surface
 
                     if not input_line():
                         return
@@ -487,8 +568,8 @@ class UI(QMainWindow):
                     input = {
 
                         "curve": (curve_input_x, curve_input_y, curve_input_z),
-                        "direction": (line_x1, line_y1, line_z1),
-                        "point": (line_x2, line_y2, line_z2),
+                        "direction": np.array((line_x1, line_y1, line_z1)),
+                        "point": np.array((line_x2, line_y2, line_z2)),
                         "t_bounds": t_bounds,
                         "v_bounds": v_bounds,
                         "name": name,
@@ -504,8 +585,22 @@ class UI(QMainWindow):
                         f"For this  vector x = {vector_input_x}, y = {vector_input_y}, z = {vector_input_z}")
                 case _:
                     ...
+            if update_mode == 0:
+                self.console.append(f"Created {input['FigureTypes']} object with name {input['name']}")
+                uid = self.object_storage.create(input)
 
-            self.object_storage.create(input)
+                objectslist_append(uid)
+            else:
+                self.console.append(f"Update {input['FigureTypes']} object with name {input['name']}")
+                self.object_storage.update(uid, input)
+
+        def deleteObject(uid):
+            self.object_storage.delete(uid)
+            del self.objects_list[uid]
+
+    def updateWidget(self):
+
+        self.add_object()
 
 
     def hide_unhide_tools(self):
