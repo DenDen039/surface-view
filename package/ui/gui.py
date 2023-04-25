@@ -7,6 +7,7 @@ from package.ui.Widgets.CustomWidgets import Creator
 import package.ui.Widgets.generated.userinterface_ as userinterface_
 from package.figures.figure import *
 
+from package.qt_widgets.plotter_widget import PlotterWidget
 
 from package.object_storage.object_storage import ObjectStorage
 
@@ -141,7 +142,7 @@ class UI(QMainWindow):
         self.main_layout = self.findChild(QHBoxLayout, 'horizontalLayout')
 
         # Initializing pyvista scene
-        self.pyvista_widget = PyvistaPyQtWidget(self)
+        self.pyvista_widget = PlotterWidget(self)
 
 
         self.main_layout.removeWidget(self.widget)
@@ -182,7 +183,6 @@ class UI(QMainWindow):
 
         #menu_choice_conical = contextMenu.addAction("Add conical surface")
         #menu_choice_conical.triggered.connect(lambda: self.openCreateWidget(0))
-
 
 
         self.choiceWidget = QWidget()

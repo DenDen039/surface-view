@@ -4,7 +4,9 @@ from pyvistaqt import BackgroundPlotter
 from PyQt5 import QtWidgets
 
 class PlotterWidget(QtWidgets.QWidget):
-    def __init__(self, objects: dict, parent=None, window_size=[1280, 720], zoom=-10):
+    def __init__(self,
+                 #objects: dict,
+                 parent=None, window_size=[1280, 720], zoom=-10):
         super().__init__(parent=parent)
 
         self.plotter = BackgroundPlotter(show=False)
@@ -20,13 +22,13 @@ class PlotterWidget(QtWidgets.QWidget):
         self.layout = QtWidgets.QVBoxLayout(self)
         self.layout.addWidget(self.plotter.interactor)
 
-        self.objects = objects
+        #self.objects = objects
         self.actors = dict()
 
-    def add_mesh(self, uid: str, **kwargs):
-        if uid not in self.objects:
-            raise Exception("Figure not found")
-        self.actors[uid] = self.plotter.add_mesh(self.objects[uid].get_mesh(), **kwargs)
+    def add_mesh(self, uid: str, mesh, **kwargs):
+        #if uid not in self.objects:
+        #    raise Exception("Figure not found")
+        self.actors[uid] = self.plotter.add_mesh(mesh, **kwargs)
         self.update_camera()
 
     def remove_mesh(self, uid: str):
