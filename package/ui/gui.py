@@ -1,8 +1,7 @@
 import PyQt5
 import PyQt5.QtCore
 from PyQt5.QtWidgets import *
-import pyvista as pv
-from pyvistaqt import QtInteractor
+
 from package.ui.Widgets.CustomWidgets import Creator
 import package.ui.Widgets.generated.userinterface_ as userinterface_
 from package.figures.figure import *
@@ -11,26 +10,17 @@ from package.qt_widgets.plotter_widget import PlotterWidget
 
 from package.object_storage.object_storage import ObjectStorage
 
-
-import ast
 from numpy import *
 
 
 
 # TODO: add parser (maybe as class)
-#       add additional fields to user input (name of object, color, opacity, t_bounds)
-#       rename bounds -> bounds
 #       add update_widget
-#       add prototype of storage_object_widget
-#           1. List of objects in left
-#           2. Add update, delete methods
-#           3. Integrate with storage_object
 #       refactor gui
-#       add @fenik_fam `s PW
 #       better function parser
 #       parser for CommonObjectWidget
+#       change object_storage to have strings at f(t) inputs
 
-import ast
 import numpy as np
 import re
 
@@ -58,39 +48,7 @@ def parse_expression(expresion):
 
     expr = lambda t: eval(expresion)
     return expr
-#                                                    #
-# REPLACE THIS FUNCTION WITH THE ONE FROM @fenik_fam #
-#                       vvv                          #
 
-class PyvistaPyQtWidget(QWidget):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-
-        # Create the QtInteractor object
-        self.interactor = QtInteractor(self)
-        self.layout = QVBoxLayout()
-        self.layout.addWidget(self.interactor)
-        self.setLayout(self.layout)
-
-        # Initialize the Pyvista plotter
-        self.plotter = self.interactor
-
-        self.plotter.enable_depth_peeling(10)
-
-
-
-    def add_mesh(self, uid, mesh, **kwargs):
-        self.plotter.add_mesh(mesh, **kwargs)
-        self.plotter.reset_camera()
-        self.plotter.update()
-
-    def test_scene(self):
-        sphere = pv.Sphere()
-        self.add_mesh("1", sphere, opacity=0.50, color="red")
-        self.add_mesh("1", pv.Sphere(2, (1, 1, 1)), opacity=0.5, color="red")
-
-        self.add_mesh("1", pv.Sphere(2, (3, 1, 1)), opacity=0.50, color="red")
-        self.add_mesh("1", pv.Sphere(0.5, (3, -0.7, 1)), opacity=0.5, color="red")
 
 class UI(QMainWindow):
     def __init__(self):
@@ -175,8 +133,6 @@ class UI(QMainWindow):
 
         self.objects_list = {}
 
-
-
     def add_object(self): # DEBUG VERSION, SUBJECT TO CHANGE
 
         #contextMenu = QMenu(self)
@@ -208,19 +164,11 @@ class UI(QMainWindow):
         choice_plane.clicked.connect(lambda: self.openCreateWidget(FigureTypes.PLANE))
         choiceWidgetLayout.addWidget(choice_plane)
 
-        choice_point = QPushButton("Add point")
-        choice_point.clicked.connect(lambda: self.openCreateWidget(FigureTypes.POINT))
-        choiceWidgetLayout.addWidget(choice_point)
-        choice_point.setEnabled(False)
-
         choice_rotation = QPushButton("Add rotation surface")
         choice_rotation.clicked.connect(lambda: self.openCreateWidget(FigureTypes.REVOLUTION))
         choiceWidgetLayout.addWidget(choice_rotation)
 
-        choice_vector = QPushButton("Add vector")
-        choice_vector.clicked.connect(lambda: self.openCreateWidget(7))
-        choiceWidgetLayout.addWidget(choice_vector)
-        choice_vector.setEnabled(False)
+
 
         self.choiceWidget.setLayout(choiceWidgetLayout)
 
@@ -236,6 +184,8 @@ class UI(QMainWindow):
         self.toolbox_layout.update()
 
     def openCreateWidget(self, _type: FigureTypes):
+
+
 
         self.commonWidget = self.creator.CommonSettingsWidget()
         self.commonWidget.Form.inputName.setText("Object")
@@ -267,6 +217,7 @@ class UI(QMainWindow):
 
         self.toolbox_layout.removeWidget(self.inside)
         self.inside.deleteLater()
+        #self.toolbox_layout.removeWidget(self.commonWidget)
 
         self.inside = self.createWidget
         self.toolbox_layout.addWidget(self.commonWidget)
@@ -372,9 +323,12 @@ class UI(QMainWindow):
 
         def edit_object(uid):
 
+            #self.add_object()
+
             storage = self.object_storage.storage
             _type = storage[uid]["FigureTypes"]
             self.openCreateWidget(_type)
+
             button_delete = QPushButton("Delete")
             self.createWidget.Form.verticalLayout.addWidget(button_delete)
 
@@ -393,22 +347,58 @@ class UI(QMainWindow):
                     self.createWidget.Form.curve_input_y.setText(str(storage[uid]["curve"][1]))
                     self.createWidget.Form.curve_input_z.setText(str(storage[uid]["curve"][2]))
 
-
                 case FigureTypes.CURVE:
-                    self.createWidget = self.creator.CreateCurveWidget()
+                    self.createWidget.Form.curve_input_x.setText(str(storage[uid]["curve"][0]))
+                    self.createWidget.Form.curve_input_y.setText(str(storage[uid]["curve"][1]))
+                    self.createWidget.Form.curve_input_z.setText(str(storage[uid]["curve"][2]))
+
                 case FigureTypes.CYLINDER:
-                    self.createWidget = self.creator.CreateCylindricalWidget()
+                    self.createWidget.Form.curve_input_x.setText(str(storage[uid]["curve"][0]))
+                    self.createWidget.Form.curve_input_y.setText(str(storage[uid]["curve"][1]))
+                    self.createWidget.Form.curve_input_z.setText(str(storage[uid]["curve"][2]))
+
+                    self.createWidget.Form.vector_input_x.setText(str(storage[uid]["direction"][0]))
+                    self.createWidget.Form.vector_input_y.setText(str(storage[uid]["direction"][1]))
+                    self.createWidget.Form.vector_input_z.setText(str(storage[uid]["direction"][2]))
+
                 case FigureTypes.LINE:
-                    self.createWidget = self.creator.CreateLineWidget()
+                    self.createWidget.Form.input_x_1.setText(str(storage[uid]["point1"][0]))
+                    self.createWidget.Form.input_y_1.setText(str(storage[uid]["point1"][1]))
+                    self.createWidget.Form.input_z_1.setText(str(storage[uid]["point1"][2]))
+
+                    self.createWidget.Form.input_x_2.setText(str(storage[uid]["point2"][0]))
+                    self.createWidget.Form.input_y_2.setText(str(storage[uid]["point2"][1]))
+                    self.createWidget.Form.input_z_2.setText(str(storage[uid]["point2"][2]))
+
                 case FigureTypes.PLANE:
-                    self.createWidget = self.creator.CreatePlaneWidget()
+                    self.createWidget.Form.point_input_x.setText(str(storage[uid]["point"][0]))
+                    self.createWidget.Form.point_input_y.setText(str(storage[uid]["point"][1]))
+                    self.createWidget.Form.point_input_z.setText(str(storage[uid]["point"][2]))
+
+                    self.createWidget.Form.vector_input_x.setText(str(storage[uid]["normal"][0]))
+                    self.createWidget.Form.vector_input_y.setText(str(storage[uid]["normal"][1]))
+                    self.createWidget.Form.vector_input_z.setText(str(storage[uid]["normal"][2]))
+
                 case FigureTypes.POINT:
-                    self.createWidget = self.creator.CreatePointWidget()
+                    self.createWidget.Form.point_input_x.setText(str(storage[uid]["point"][0]))
+                    self.createWidget.Form.point_input_y.setText(str(storage[uid]["point"][1]))
+                    self.createWidget.Form.point_input_z.setText(str(storage[uid]["point"][2]))
+
                 case FigureTypes.REVOLUTION:
-                    self.createWidget = self.creator.CreateRotationFigureWidget()
+                    self.createWidget.Form.curve_input_x.setText(str(storage[uid]["curve"][0]))
+                    self.createWidget.Form.curve_input_y.setText(str(storage[uid]["curve"][1]))
+                    self.createWidget.Form.curve_input_z.setText(str(storage[uid]["curve"][2]))
+
+                    self.createWidget.Form.input_x_1.setText(str(storage[uid]["point1"][0]))
+                    self.createWidget.Form.input_y_1.setText(str(storage[uid]["point1"][1]))
+                    self.createWidget.Form.input_z_1.setText(str(storage[uid]["point1"][2]))
+
+                    self.createWidget.Form.input_x_2.setText(str(storage[uid]["point2"][0]))
+                    self.createWidget.Form.input_y_2.setText(str(storage[uid]["point2"][1]))
+                    self.createWidget.Form.input_z_2.setText(str(storage[uid]["point2"][2]))
 
             self.createWidget.Form.applyButton.clicked.connect(lambda: createObject(_type, True, uid))
-            self.createWidget.Form.verticalLayout.button_delete.clicked.connect(lambda: deleteObject(uid)) # TODO: FIX THIS
+            button_delete.clicked.connect(lambda: deleteObject(uid))
 
         def createObject(_type, update_mode, uid):
 
@@ -594,14 +584,20 @@ class UI(QMainWindow):
                 self.console.append(f"Update {input['FigureTypes']} object with name {input['name']}")
                 self.object_storage.update(uid, input)
 
+            self.add_object()
+
         def deleteObject(uid):
+
             self.object_storage.delete(uid)
+            self.objects_list[uid].deleteLater()
+            self.console.append(f"Deleted object {uid}")
             del self.objects_list[uid]
+
+            self.add_object()
 
     def updateWidget(self):
 
         self.add_object()
-
 
     def hide_unhide_tools(self):
         if self.hidden_tools:

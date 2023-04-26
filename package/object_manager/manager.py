@@ -159,7 +159,7 @@ class ObjectManager:
             raise Exception("Figure not found")
         obj = self.objects[uid]
         del self.objects[uid]
-        return obj.copy()
+        #return obj.copy()
 
     def update_object_settings(self, uid: str, **kwargs) -> Figure:
         obj = self.objects[uid]
