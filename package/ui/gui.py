@@ -17,9 +17,12 @@ from numpy import *
 # TODO: add parser (maybe as class)
 #       add update_widget
 #       refactor gui
-#       better function parser
+#       better f(t) parser
 #       parser for CommonObjectWidget
 #       change object_storage to have strings at f(t) inputs
+#       fix opacity choice for object
+#       fix new object creation on update()
+#       add SWO to object_storage()
 
 import numpy as np
 import re
@@ -133,6 +136,12 @@ class UI(QMainWindow):
 
         self.objects_list = {}
 
+
+    def clear_right(self):
+        for i in reversed(range(self.toolbox_layout.count())):
+             self.toolbox_layout.itemAt(i).widget().setParent(None)
+
+
     def add_object(self): # DEBUG VERSION, SUBJECT TO CHANGE
 
         #contextMenu = QMenu(self)
@@ -140,6 +149,7 @@ class UI(QMainWindow):
         #menu_choice_conical = contextMenu.addAction("Add conical surface")
         #menu_choice_conical.triggered.connect(lambda: self.openCreateWidget(0))
 
+        self.clear_right()
 
         self.choiceWidget = QWidget()
         choiceWidgetLayout = QVBoxLayout()
@@ -185,11 +195,12 @@ class UI(QMainWindow):
 
     def openCreateWidget(self, _type: FigureTypes):
 
-
+        self.clear_right()
 
         self.commonWidget = self.creator.CommonSettingsWidget()
         self.commonWidget.Form.inputName.setText("Object")
         self.commonWidget.Form.inputColor.setText("white")
+        self.commonWidget.Form.inputOpacity.setText("0.5")
         self.commonWidget.Form.inputTBounds.setText("-10, 10")
         self.commonWidget.Form.inputVBounds.setText("0, 1")
 
@@ -333,7 +344,8 @@ class UI(QMainWindow):
             self.createWidget.Form.verticalLayout.addWidget(button_delete)
 
             self.commonWidget.Form.inputName.setText(storage[uid]["name"])
-            self.commonWidget.Form.inputColor.setText("white")
+            self.commonWidget.Form.inputColor.setText(storage[uid]["color"])
+            self.commonWidget.Form.inputOpacity.setText(storage[uid]["transparency"])
             self.commonWidget.Form.inputTBounds.setText(str(storage[uid]["t_bounds"][0]) + ", " + str(storage[uid]["t_bounds"][1]))
             self.commonWidget.Form.inputVBounds.setText(str(storage[uid]["v_bounds"][0]) + ", " + str(storage[uid]["v_bounds"][1]))
 
@@ -404,6 +416,7 @@ class UI(QMainWindow):
 
             name = self.commonWidget.Form.inputName.text()
             color = self.commonWidget.Form.inputColor.text()
+            opacity = self.commonWidget.Form.inputOpacity.text()
             t_bounds = [float(x) for x in self.commonWidget.Form.inputTBounds.text().split(",")]
             v_bounds = [float(x) for x in self.commonWidget.Form.inputTBounds.text().split(",")]
 
@@ -575,6 +588,10 @@ class UI(QMainWindow):
                         f"For this  vector x = {vector_input_x}, y = {vector_input_y}, z = {vector_input_z}")
                 case _:
                     ...
+
+            input["color"] = color
+            input["transparency"] = opacity
+
             if update_mode == 0:
                 self.console.append(f"Created {input['FigureTypes']} object with name {input['name']}")
                 uid = self.object_storage.create(input)

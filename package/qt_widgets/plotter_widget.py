@@ -9,6 +9,7 @@ class PlotterWidget(QtWidgets.QWidget):
                  parent=None, window_size=[1280, 720], zoom=-10):
         super().__init__(parent=parent)
 
+
         self.plotter = BackgroundPlotter(show=False)
         self.plotter.enable_anti_aliasing()
         self.zoom = zoom

@@ -23,6 +23,7 @@ class Figure:
         opacity: float = 0.5,
         line_width: float = 5,
         enable_edges: bool = False,
+        **kwargs
     ):
         self.__color = color
         self.__opacity = opacity
