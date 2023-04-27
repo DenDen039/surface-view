@@ -86,8 +86,8 @@ class ObjectManager:
 
         obj = self.objects[uid]
 
-        if obj.get_type() != FigureTypes.CYLINDER:
-            raise Exception("Object is not a cylinder")
+        if obj.get_type() != FigureTypes.CURVE:
+            raise Exception("Object is not a curve")
 
         obj.update_parameters(**kwargs)
 

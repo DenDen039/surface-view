@@ -270,6 +270,7 @@ class UI(QMainWindow):
         
         def input_curve():
 
+            #curve_input_x = self.inside.verticalLayout.curve_input_x.text()
             curve_input_x = self.findChild(QLineEdit, "curve_input_x").text()
             curve_input_y = self.findChild(QLineEdit, "curve_input_y").text()
             curve_input_z = self.findChild(QLineEdit, "curve_input_z").text()
@@ -334,7 +335,6 @@ class UI(QMainWindow):
 
         def edit_object(uid):
 
-            #self.add_object()
 
             storage = self.object_storage.storage
             _type = storage[uid]["FigureTypes"]
@@ -401,13 +401,13 @@ class UI(QMainWindow):
                     self.createWidget.Form.curve_input_y.setText(str(storage[uid]["curve"][1]))
                     self.createWidget.Form.curve_input_z.setText(str(storage[uid]["curve"][2]))
 
-                    self.createWidget.Form.input_x_1.setText(str(storage[uid]["point1"][0]))
-                    self.createWidget.Form.input_y_1.setText(str(storage[uid]["point1"][1]))
-                    self.createWidget.Form.input_z_1.setText(str(storage[uid]["point1"][2]))
+                    self.createWidget.Form.input_x_1.setText(str(storage[uid]["direction"][0]))
+                    self.createWidget.Form.input_y_1.setText(str(storage[uid]["direction"][1]))
+                    self.createWidget.Form.input_z_1.setText(str(storage[uid]["direction"][2]))
 
-                    self.createWidget.Form.input_x_2.setText(str(storage[uid]["point2"][0]))
-                    self.createWidget.Form.input_y_2.setText(str(storage[uid]["point2"][1]))
-                    self.createWidget.Form.input_z_2.setText(str(storage[uid]["point2"][2]))
+                    self.createWidget.Form.input_x_2.setText(str(storage[uid]["point"][0]))
+                    self.createWidget.Form.input_y_2.setText(str(storage[uid]["point"][1]))
+                    self.createWidget.Form.input_z_2.setText(str(storage[uid]["point"][2]))
 
             self.createWidget.Form.applyButton.clicked.connect(lambda: createObject(_type, True, uid))
             button_delete.clicked.connect(lambda: deleteObject(uid))
@@ -418,7 +418,7 @@ class UI(QMainWindow):
             color = self.commonWidget.Form.inputColor.text()
             opacity = self.commonWidget.Form.inputOpacity.text()
             t_bounds = [float(x) for x in self.commonWidget.Form.inputTBounds.text().split(",")]
-            v_bounds = [float(x) for x in self.commonWidget.Form.inputTBounds.text().split(",")]
+            v_bounds = [float(x) for x in self.commonWidget.Form.inputVBounds.text().split(",")]
 
             input = {}
 
@@ -601,7 +601,7 @@ class UI(QMainWindow):
                 self.console.append(f"Update {input['FigureTypes']} object with name {input['name']}")
                 self.object_storage.update(uid, input)
 
-            self.add_object()
+            #self.add_object()
 
         def deleteObject(uid):
 
