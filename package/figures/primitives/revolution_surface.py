@@ -11,7 +11,7 @@ class RevolutionSurface(Figure):
             point,
             t_bounds: tuple[float, float],
             uid: str,
-            resolution: int = 400,
+            resolution: int = 100,
             **kwargs
     ):
         super().__init__(uid, FigureTypes.REVOLUTION, **kwargs)

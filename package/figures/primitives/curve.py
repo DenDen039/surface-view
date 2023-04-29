@@ -9,7 +9,7 @@ class Curve(Figure):
         curve,
         t_bounds: tuple[float, float],
         uid: str,
-        resolution: int = 500,
+        resolution: int = 100,
         **kwargs
     ):
         super().__init__(uid, FigureTypes.CURVE, **kwargs)

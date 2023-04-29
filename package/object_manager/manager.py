@@ -90,6 +90,22 @@ class ObjectManager:
             raise Exception("Object is not a curve")
 
         obj.update_parameters(**kwargs)
+    
+
+    def compute_intersections(self):
+        planes = [pv.PolyData(self.objects[uid].get_mesh().extract_surface()).triangulate() for uid in self.objects if self.objects[uid].get_type() == FigureTypes.PLANE]
+        intersections = []
+        
+        for uid in self.objects:
+            if self.objects[uid].get_type() == FigureTypes.PLANE:
+                continue
+            mesh = pv.PolyData(self.objects[uid].get_mesh().extract_surface()).triangulate()
+            for plane in planes:
+                intersection,_,_ = mesh.intersection(plane)
+                if intersection.n_verts == 0:
+                    intersections.append(intersection)
+        return intersections
+            
 
     def create_line(self, point1, point2, t_bounds, **kwargs) -> str:
         uid = uuid.uuid4()
