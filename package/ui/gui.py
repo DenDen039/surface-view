@@ -21,8 +21,6 @@ from numpy import *
 #       parser for CommonObjectWidget
 #       change object_storage to have strings at f(t) inputs
 #       fix opacity choice for object
-#       fix new object creation on update()
-#       add SWO to object_storage()
 #       fix color don`t change on edit
 
 import numpy as np
@@ -84,22 +82,22 @@ class StorageObjectWidget(QScrollArea):
         self.setWidget(self.scroll_area_content)
 
         self.scroll_area_layout = QVBoxLayout()
+        self.scroll_area_layout.setAlignment(PyQt5.QtCore.Qt.AlignTop)
 
         self.scroll_area_content.setLayout(self.scroll_area_layout)
 
-        self.show()
+       # self.show()
 
         self.widgets = {}
-
+        self.color_widget = {}
 
         print("Storage object Widget initialized")
 
     def add(self, uid, name, type, color):
 
-        _color = ColoredWidget(color)
-        _color.setObjectName("_color")
+        self.color_widget[uid] = ColoredWidget(color)
         objectWidget = self.creator.ObjectWidget()
-        objectWidget.Form.horizontalLayout.replaceWidget(objectWidget.Form.color_view, _color)
+        objectWidget.Form.horizontalLayout.replaceWidget(objectWidget.Form.color_view, self.color_widget[uid])
         objectWidget.Form.color_view.deleteLater()
        # objectWidget.Form.horizontalLayout.addWidget(_color,2)
         objectWidget.Form.label_name.setText(name)
@@ -118,9 +116,9 @@ class StorageObjectWidget(QScrollArea):
 
         self.widgets[uid].Form.label_name.setText(name)
         self.widgets[uid].Form.label_type.setText(type)
-        self.widgets[uid].Form.label_color.setText(str(uid))
-        #self.widgets[uid]._color.change_color(color)
-
+        #self.widgets[uid].Form.label_color.setText(str(uid))
+        self.color_widget[uid].change_color(color)
+        print("updating widget")
 
 class UI(QMainWindow):
     def __init__(self):

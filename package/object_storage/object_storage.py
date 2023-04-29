@@ -34,6 +34,9 @@ class ObjectStorage:
             self.objManager.update_revolution_surface(uid, **new_data)
         else:
             raise Exception(f"Invalid Figure type {new_data['FigureTypes']}")
+
+        self.objManager.update_object_settings(uid, **new_data)
+
         self.PW.remove_mesh(uid)
         self.PW.add_mesh(uid, self.objManager.get_figure_mesh(uid), **self.objManager.get_figure_settings(uid))
         self.SWO.update(uid, new_data["name"], new_data["FigureTypes"], new_data["color"])
