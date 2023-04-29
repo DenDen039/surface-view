@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>534</width>
-    <height>427</height>
+    <width>153</width>
+    <height>183</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -36,7 +36,7 @@
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_2">
+    <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,1">
      <item>
       <widget class="QLabel" name="label_2">
        <property name="text">
@@ -45,7 +45,20 @@
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="inputColor"/>
+      <widget class="QPushButton" name="button_color">
+       <property name="styleSheet">
+        <string notr="true">backound-color : white</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="checkable">
+        <bool>false</bool>
+       </property>
+       <property name="default">
+        <bool>false</bool>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>

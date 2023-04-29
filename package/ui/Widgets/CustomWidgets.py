@@ -98,6 +98,9 @@ class Creator:
         Form.setupUi(Widget)
         Widget.Form = Form
 
+        Widget.color = "#FFFFFF"
+        Widget.palette = QtWidgets.QColorDialog()
+
         return Widget
 
     def ObjectWidget(self):
@@ -105,6 +108,8 @@ class Creator:
         Form = ObjectWidget_.Ui_Form()
         Form.setupUi(Widget)
         Widget.Form = Form
+
+
 
         return Widget
 

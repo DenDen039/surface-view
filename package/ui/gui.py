@@ -270,10 +270,15 @@ class UI(QMainWindow):
 
         self.commonWidget = self.creator.CommonSettingsWidget()
         self.commonWidget.Form.inputName.setText("Object")
-        self.commonWidget.Form.inputColor.setText("white")
+        self.commonWidget.Form.button_color.setText("")
+        self.commonWidget.Form.button_color.setStyleSheet("background-color : white")
         self.commonWidget.Form.inputOpacity.setText("0.5")
         self.commonWidget.Form.inputTBounds.setText("-10, 10")
         self.commonWidget.Form.inputVBounds.setText("0, 1")
+        self.commonWidget.Form.button_color.clicked.connect(self.change_color)
+
+
+
 
 
         applyButton = None
@@ -398,7 +403,8 @@ class UI(QMainWindow):
         self.createWidget.Form.verticalLayout.addWidget(button_delete)
 
         self.commonWidget.Form.inputName.setText(storage[uid]["name"])
-        self.commonWidget.Form.inputColor.setText(storage[uid]["color"])
+        self.commonWidget.Form.button_color.setStyleSheet(f"background-color : {storage[uid]['color']}")
+        self.commonWidget.color = storage[uid]['color']
         self.commonWidget.Form.inputOpacity.setText(storage[uid]["transparency"])
         self.commonWidget.Form.inputTBounds.setText(str(storage[uid]["t_bounds"][0]) + ", " + str(storage[uid]["t_bounds"][1]))
         self.commonWidget.Form.inputVBounds.setText(str(storage[uid]["v_bounds"][0]) + ", " + str(storage[uid]["v_bounds"][1]))
@@ -470,7 +476,7 @@ class UI(QMainWindow):
     def createObject(self, _type, update_mode, uid):
 
         name = self.commonWidget.Form.inputName.text()
-        color = self.commonWidget.Form.inputColor.text()
+        color = self.commonWidget.color
         opacity = self.commonWidget.Form.inputOpacity.text()
         t_bounds = [float(x) for x in self.commonWidget.Form.inputTBounds.text().split(",")]
         v_bounds = [float(x) for x in self.commonWidget.Form.inputVBounds.text().split(",")]
@@ -666,6 +672,13 @@ class UI(QMainWindow):
 
 
         self.add_object()
+
+    def change_color(self):
+        color = self.commonWidget.palette.getColor()
+
+        if color.isValid():
+            self.commonWidget.color = color.name()
+            self.commonWidget.Form.button_color.setStyleSheet(f"background-color : {color.name()}")
 
     def hide_unhide_tools(self):
         if self.hidden_tools:
