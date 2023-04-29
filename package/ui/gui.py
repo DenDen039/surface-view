@@ -23,6 +23,7 @@ from numpy import *
 #       fix opacity choice for object
 #       fix new object creation on update()
 #       add SWO to object_storage()
+#       fix color don`t change on edit
 
 import numpy as np
 import re
@@ -52,6 +53,74 @@ def parse_expression(expresion):
     expr = lambda t: eval(expresion)
     return expr
 
+class ColoredWidget(QWidget):
+    def __init__(self, color):
+        super(ColoredWidget,self).__init__()
+        self.setAutoFillBackground(True)
+
+        self.palette = self.palette()
+        self.palette.setColor(PyQt5.QtGui.QPalette.Window, PyQt5.QtGui.QColor(color))
+        self.setPalette(self.palette)
+
+    def change_color(self, color):
+        self.palette.setColor(PyQt5.QtGui.QPalette.Window, PyQt5.QtGui.QColor(color))
+        self.setPalette(self.palette)
+
+class StorageObjectWidget(QScrollArea):
+    def __init__(self, UI):
+        super(StorageObjectWidget, self).__init__()
+
+        self.creator = Creator()
+        self.UI = UI
+
+
+        self.setVerticalScrollBarPolicy(PyQt5.QtCore.Qt.ScrollBarAlwaysOn)
+        self.setSizeAdjustPolicy(PyQt5.QtWidgets.QAbstractScrollArea.AdjustIgnored)
+        self.setWidgetResizable(True)
+        self.setAlignment(PyQt5.QtCore.Qt.AlignLeading | PyQt5.QtCore.Qt.AlignLeft | PyQt5.QtCore.Qt.AlignTop)
+
+        self.scroll_area_content = QWidget(self)
+
+        self.setWidget(self.scroll_area_content)
+
+        self.scroll_area_layout = QVBoxLayout()
+
+        self.scroll_area_content.setLayout(self.scroll_area_layout)
+
+        self.show()
+
+        self.widgets = {}
+
+
+        print("Storage object Widget initialized")
+
+    def add(self, uid, name, type, color):
+
+        _color = ColoredWidget(color)
+        _color.setObjectName("_color")
+        objectWidget = self.creator.ObjectWidget()
+        objectWidget.Form.horizontalLayout.replaceWidget(objectWidget.Form.color_view, _color)
+        objectWidget.Form.color_view.deleteLater()
+       # objectWidget.Form.horizontalLayout.addWidget(_color,2)
+        objectWidget.Form.label_name.setText(name)
+        objectWidget.Form.label_type.setText(type)
+       # objectWidget.Form.label_color.setText(str(uid))
+        objectWidget.Form.button_edit.clicked.connect(lambda: self.UI.edit_object(uid))
+
+        self.widgets[uid] = objectWidget
+        self.scroll_area_layout.addWidget(self.widgets[uid])
+        print("added new widget")
+
+    def delete(self, uid):
+        self.widgets[uid].deleteLater()
+
+    def update(self, uid, name, type, color):
+
+        self.widgets[uid].Form.label_name.setText(name)
+        self.widgets[uid].Form.label_type.setText(type)
+        self.widgets[uid].Form.label_color.setText(str(uid))
+        #self.widgets[uid]._color.change_color(color)
+
 
 class UI(QMainWindow):
     def __init__(self):
@@ -78,11 +147,11 @@ class UI(QMainWindow):
 
         self.scrollArea = self.findChild(QScrollArea, 'scrollArea')
         self.scrollAreaContents = self.findChild(QWidget, 'scrollAreaWidgetContents')
-        self.scrollAreaLayout = QVBoxLayout()
-        self.scrollAreaLayout.setAlignment(PyQt5.QtCore.Qt.AlignTop)
+        #self.scrollAreaLayout = QVBoxLayout()
+        #self.scrollAreaLayout.setAlignment(PyQt5.QtCore.Qt.AlignTop)
         # for i in range(40):
         #    self.scrollAreaLayout.addWidget(Creator.ObjectWidget(self))
-        self.scrollAreaContents.setLayout(self.scrollAreaLayout)
+#       self.scrollAreaContents.setLayout(self.scrollAreaLayout)
 
         self.console = self.findChild(QTextBrowser, 'textBrowser')
 
@@ -94,6 +163,8 @@ class UI(QMainWindow):
         self.show_tools = self.findChild(QAction, 'tools')
         self.show_console = self.findChild(QAction, 'console')
         self.setting = self.findChild(QAction, 'setting')
+
+        self.horizontal_layout = self.findChild(QHBoxLayout, "horizontalLayout_2")
 
        # self.creator = Creator()
 
@@ -130,8 +201,13 @@ class UI(QMainWindow):
         self.hidden_tools = False
         self.hidden_console = False
 
+        self.SWO = StorageObjectWidget(self)
+        self.object_storage = ObjectStorage(self.pyvista_widget, self.SWO)
 
-        self.object_storage = ObjectStorage(self.pyvista_widget)
+        self.horizontal_layout.replaceWidget(self.scrollArea, self.SWO)
+      #  self.horizontal_layout.addWidget(self.SWO)
+        self.scrollArea.deleteLater()
+        self.scrollAreaContents.deleteLater()
         #self.parser = Parser()
 
         self.objects_list = {}
@@ -178,10 +254,7 @@ class UI(QMainWindow):
         choice_rotation.clicked.connect(lambda: self.openCreateWidget(FigureTypes.REVOLUTION))
         choiceWidgetLayout.addWidget(choice_rotation)
 
-
-
         self.choiceWidget.setLayout(choiceWidgetLayout)
-
 
         self.toolbox_layout.removeWidget(self.commonWidget)
         self.toolbox_layout.removeWidget(self.inside)
@@ -236,383 +309,363 @@ class UI(QMainWindow):
         self.toolbox_layout.update()
 
         print(f"type: {_type}")
-        self.createWidget.Form.applyButton.clicked.connect(lambda: createObject(_type, False, 0))
+        self.createWidget.Form.applyButton.disconnect()
+        self.createWidget.Form.applyButton.clicked.connect(lambda: self.createObject(_type, False, 0))
         self.createWidget.Form.cancelButton.clicked.connect(self.add_object)
 
-        def input_point():
-
-            point_input_x = self.findChild(QLineEdit, "point_input_x").text()
-            point_input_y = self.findChild(QLineEdit, "point_input_y").text()
-            point_input_z = self.findChild(QLineEdit, "point_input_z").text()
-            try:
-                point_input_x = float(point_input_x)
-                point_input_y = float(point_input_y)
-                point_input_z = float(point_input_z)
-            except:
-                self.console.append("Incorrect value in point input")
-                return False
-
-            return point_input_x, point_input_y, point_input_z
-
-        def input_vector():
-            vector_input_x = self.findChild(QLineEdit, "vector_input_x").text()
-            vector_input_y = self.findChild(QLineEdit, "vector_input_y").text()
-            vector_input_z = self.findChild(QLineEdit, "vector_input_z").text()
-            try:
-                vector_input_x = float(vector_input_x)
-                vector_input_y = float(vector_input_y)
-                vector_input_z = float(vector_input_z)
-            except:
-                self.console.append("Incorrect value in vector input")
-                return False
-    
-            return vector_input_x, vector_input_y, vector_input_z
-        
-        def input_curve():
-
-            #curve_input_x = self.inside.verticalLayout.curve_input_x.text()
-            curve_input_x = self.findChild(QLineEdit, "curve_input_x").text()
-            curve_input_y = self.findChild(QLineEdit, "curve_input_y").text()
-            curve_input_z = self.findChild(QLineEdit, "curve_input_z").text()
-
-            _curve_input_x_text = curve_input_x
-            _curve_input_y_text = curve_input_y
-            _curve_input_z_text = curve_input_z
-
-            try:
-                curve_input_x = parse_expression(curve_input_x)
-                curve_input_y = parse_expression(curve_input_y)
-                curve_input_z = parse_expression(curve_input_z)
-            except:
-                self.console.append("Incorrect value in curve input")
-                return False
-
-            return curve_input_x, curve_input_y, curve_input_z
-
-        def input_line():
-
-            point_input_x_1 = self.findChild(QLineEdit, "input_x_1").text()
-            point_input_y_1 = self.findChild(QLineEdit, "input_y_1").text()
-            point_input_z_1 = self.findChild(QLineEdit, "input_z_1").text()
-            try:
-                point_input_x_1 = float(point_input_x_1)
-                point_input_y_1 = float(point_input_y_1)
-                point_input_z_1 = float(point_input_z_1)
-            except:
-                self.console.append("Incorrect value in line`s point 1 input")
-                return False
-
-            point_input_x_2 = self.findChild(QLineEdit, "input_x_2").text()
-            point_input_y_2 = self.findChild(QLineEdit, "input_y_2").text()
-            point_input_z_2 = self.findChild(QLineEdit, "input_z_2").text()
-            try:
-                point_input_x_2 = float(point_input_x_2)
-                point_input_y_2 = float(point_input_y_2)
-                point_input_z_2 = float(point_input_z_2)
-            except:
-                self.console.append("Incorrect value in line`s point 2 input")
-                return False
-
-            return point_input_x_1, point_input_y_1, point_input_z_1, point_input_x_2, point_input_y_2, point_input_z_2
-
-        def objectslist_append(uid):
-
-            storage = self.object_storage.storage
-            print(storage[uid])
-            object_name = storage[uid]["name"]
-            object_type = storage[uid]["FigureTypes"]
-
-            objectWidget = self.creator.ObjectWidget()
-            objectWidget.Form.label_name.setText(object_name)
-            objectWidget.Form.label_type.setText(object_type)
-            objectWidget.Form.label_color.setText(str(uid))
-
-            objectWidget.Form.button_edit.clicked.connect(lambda: edit_object(uid))
-
-            self.objects_list[uid] = objectWidget
-            self.scrollAreaLayout.addWidget(self.objects_list[uid])
-
-
-        def edit_object(uid):
-
-
-            storage = self.object_storage.storage
-            _type = storage[uid]["FigureTypes"]
-            self.openCreateWidget(_type)
-
-            button_delete = QPushButton("Delete")
-            self.createWidget.Form.verticalLayout.addWidget(button_delete)
+    def input_point(self):
+
+        point_input_x = self.findChild(QLineEdit, "point_input_x").text()
+        point_input_y = self.findChild(QLineEdit, "point_input_y").text()
+        point_input_z = self.findChild(QLineEdit, "point_input_z").text()
+        try:
+            point_input_x = float(point_input_x)
+            point_input_y = float(point_input_y)
+            point_input_z = float(point_input_z)
+        except:
+            self.console.append("Incorrect value in point input")
+            return False
+
+        return point_input_x, point_input_y, point_input_z
+
+    def input_vector(self):
+        vector_input_x = self.findChild(QLineEdit, "vector_input_x").text()
+        vector_input_y = self.findChild(QLineEdit, "vector_input_y").text()
+        vector_input_z = self.findChild(QLineEdit, "vector_input_z").text()
+        try:
+            vector_input_x = float(vector_input_x)
+            vector_input_y = float(vector_input_y)
+            vector_input_z = float(vector_input_z)
+        except:
+            self.console.append("Incorrect value in vector input")
+            return False
+
+        return vector_input_x, vector_input_y, vector_input_z
+
+    def input_curve(self):
+
+        #curve_input_x = self.inside.verticalLayout.curve_input_x.text()
+        curve_input_x = self.findChild(QLineEdit, "curve_input_x").text()
+        curve_input_y = self.findChild(QLineEdit, "curve_input_y").text()
+        curve_input_z = self.findChild(QLineEdit, "curve_input_z").text()
+
+        _curve_input_x_text = curve_input_x
+        _curve_input_y_text = curve_input_y
+        _curve_input_z_text = curve_input_z
+
+        try:
+            curve_input_x = parse_expression(curve_input_x)
+            curve_input_y = parse_expression(curve_input_y)
+            curve_input_z = parse_expression(curve_input_z)
+        except:
+            self.console.append("Incorrect value in curve input")
+            return False
+
+        return curve_input_x, curve_input_y, curve_input_z
+
+    def input_line(self):
+
+        point_input_x_1 = self.findChild(QLineEdit, "input_x_1").text()
+        point_input_y_1 = self.findChild(QLineEdit, "input_y_1").text()
+        point_input_z_1 = self.findChild(QLineEdit, "input_z_1").text()
+        try:
+            point_input_x_1 = float(point_input_x_1)
+            point_input_y_1 = float(point_input_y_1)
+            point_input_z_1 = float(point_input_z_1)
+        except:
+            self.console.append("Incorrect value in line`s point 1 input")
+            return False
+
+        point_input_x_2 = self.findChild(QLineEdit, "input_x_2").text()
+        point_input_y_2 = self.findChild(QLineEdit, "input_y_2").text()
+        point_input_z_2 = self.findChild(QLineEdit, "input_z_2").text()
+        try:
+            point_input_x_2 = float(point_input_x_2)
+            point_input_y_2 = float(point_input_y_2)
+            point_input_z_2 = float(point_input_z_2)
+        except:
+            self.console.append("Incorrect value in line`s point 2 input")
+            return False
+
+        return point_input_x_1, point_input_y_1, point_input_z_1, point_input_x_2, point_input_y_2, point_input_z_2
+
+    def edit_object(self, uid):
+        print(uid)
+        storage = self.object_storage.storage
+        print(storage)
+        _type = storage[uid]["FigureTypes"]
+        self.openCreateWidget(_type)
+
+        button_delete = QPushButton("Delete")
+        self.createWidget.Form.verticalLayout.addWidget(button_delete)
+
+        self.commonWidget.Form.inputName.setText(storage[uid]["name"])
+        self.commonWidget.Form.inputColor.setText(storage[uid]["color"])
+        self.commonWidget.Form.inputOpacity.setText(storage[uid]["transparency"])
+        self.commonWidget.Form.inputTBounds.setText(str(storage[uid]["t_bounds"][0]) + ", " + str(storage[uid]["t_bounds"][1]))
+        self.commonWidget.Form.inputVBounds.setText(str(storage[uid]["v_bounds"][0]) + ", " + str(storage[uid]["v_bounds"][1]))
+
+        match  _type:
+            case FigureTypes.CONE:
+                self.createWidget.Form.point_input_x.setText(str(storage[uid]["point"][0]))
+                self.createWidget.Form.point_input_y.setText(str(storage[uid]["point"][1]))
+                self.createWidget.Form.point_input_z.setText(str(storage[uid]["point"][2]))
+
+                self.createWidget.Form.curve_input_x.setText(str(storage[uid]["curve"][0]))
+                self.createWidget.Form.curve_input_y.setText(str(storage[uid]["curve"][1]))
+                self.createWidget.Form.curve_input_z.setText(str(storage[uid]["curve"][2]))
 
-            self.commonWidget.Form.inputName.setText(storage[uid]["name"])
-            self.commonWidget.Form.inputColor.setText(storage[uid]["color"])
-            self.commonWidget.Form.inputOpacity.setText(storage[uid]["transparency"])
-            self.commonWidget.Form.inputTBounds.setText(str(storage[uid]["t_bounds"][0]) + ", " + str(storage[uid]["t_bounds"][1]))
-            self.commonWidget.Form.inputVBounds.setText(str(storage[uid]["v_bounds"][0]) + ", " + str(storage[uid]["v_bounds"][1]))
+            case FigureTypes.CURVE:
+                self.createWidget.Form.curve_input_x.setText(str(storage[uid]["curve"][0]))
+                self.createWidget.Form.curve_input_y.setText(str(storage[uid]["curve"][1]))
+                self.createWidget.Form.curve_input_z.setText(str(storage[uid]["curve"][2]))
 
-            match  _type:
-                case FigureTypes.CONE:
-                    self.createWidget.Form.point_input_x.setText(str(storage[uid]["point"][0]))
-                    self.createWidget.Form.point_input_y.setText(str(storage[uid]["point"][1]))
-                    self.createWidget.Form.point_input_z.setText(str(storage[uid]["point"][2]))
+            case FigureTypes.CYLINDER:
+                self.createWidget.Form.curve_input_x.setText(str(storage[uid]["curve"][0]))
+                self.createWidget.Form.curve_input_y.setText(str(storage[uid]["curve"][1]))
+                self.createWidget.Form.curve_input_z.setText(str(storage[uid]["curve"][2]))
 
-                    self.createWidget.Form.curve_input_x.setText(str(storage[uid]["curve"][0]))
-                    self.createWidget.Form.curve_input_y.setText(str(storage[uid]["curve"][1]))
-                    self.createWidget.Form.curve_input_z.setText(str(storage[uid]["curve"][2]))
+                self.createWidget.Form.vector_input_x.setText(str(storage[uid]["direction"][0]))
+                self.createWidget.Form.vector_input_y.setText(str(storage[uid]["direction"][1]))
+                self.createWidget.Form.vector_input_z.setText(str(storage[uid]["direction"][2]))
 
-                case FigureTypes.CURVE:
-                    self.createWidget.Form.curve_input_x.setText(str(storage[uid]["curve"][0]))
-                    self.createWidget.Form.curve_input_y.setText(str(storage[uid]["curve"][1]))
-                    self.createWidget.Form.curve_input_z.setText(str(storage[uid]["curve"][2]))
+            case FigureTypes.LINE:
+                self.createWidget.Form.input_x_1.setText(str(storage[uid]["point1"][0]))
+                self.createWidget.Form.input_y_1.setText(str(storage[uid]["point1"][1]))
+                self.createWidget.Form.input_z_1.setText(str(storage[uid]["point1"][2]))
 
-                case FigureTypes.CYLINDER:
-                    self.createWidget.Form.curve_input_x.setText(str(storage[uid]["curve"][0]))
-                    self.createWidget.Form.curve_input_y.setText(str(storage[uid]["curve"][1]))
-                    self.createWidget.Form.curve_input_z.setText(str(storage[uid]["curve"][2]))
+                self.createWidget.Form.input_x_2.setText(str(storage[uid]["point2"][0]))
+                self.createWidget.Form.input_y_2.setText(str(storage[uid]["point2"][1]))
+                self.createWidget.Form.input_z_2.setText(str(storage[uid]["point2"][2]))
 
-                    self.createWidget.Form.vector_input_x.setText(str(storage[uid]["direction"][0]))
-                    self.createWidget.Form.vector_input_y.setText(str(storage[uid]["direction"][1]))
-                    self.createWidget.Form.vector_input_z.setText(str(storage[uid]["direction"][2]))
+            case FigureTypes.PLANE:
+                self.createWidget.Form.point_input_x.setText(str(storage[uid]["point"][0]))
+                self.createWidget.Form.point_input_y.setText(str(storage[uid]["point"][1]))
+                self.createWidget.Form.point_input_z.setText(str(storage[uid]["point"][2]))
 
-                case FigureTypes.LINE:
-                    self.createWidget.Form.input_x_1.setText(str(storage[uid]["point1"][0]))
-                    self.createWidget.Form.input_y_1.setText(str(storage[uid]["point1"][1]))
-                    self.createWidget.Form.input_z_1.setText(str(storage[uid]["point1"][2]))
+                self.createWidget.Form.vector_input_x.setText(str(storage[uid]["normal"][0]))
+                self.createWidget.Form.vector_input_y.setText(str(storage[uid]["normal"][1]))
+                self.createWidget.Form.vector_input_z.setText(str(storage[uid]["normal"][2]))
 
-                    self.createWidget.Form.input_x_2.setText(str(storage[uid]["point2"][0]))
-                    self.createWidget.Form.input_y_2.setText(str(storage[uid]["point2"][1]))
-                    self.createWidget.Form.input_z_2.setText(str(storage[uid]["point2"][2]))
+            case FigureTypes.POINT:
+                self.createWidget.Form.point_input_x.setText(str(storage[uid]["point"][0]))
+                self.createWidget.Form.point_input_y.setText(str(storage[uid]["point"][1]))
+                self.createWidget.Form.point_input_z.setText(str(storage[uid]["point"][2]))
 
-                case FigureTypes.PLANE:
-                    self.createWidget.Form.point_input_x.setText(str(storage[uid]["point"][0]))
-                    self.createWidget.Form.point_input_y.setText(str(storage[uid]["point"][1]))
-                    self.createWidget.Form.point_input_z.setText(str(storage[uid]["point"][2]))
+            case FigureTypes.REVOLUTION:
+                self.createWidget.Form.curve_input_x.setText(str(storage[uid]["curve"][0]))
+                self.createWidget.Form.curve_input_y.setText(str(storage[uid]["curve"][1]))
+                self.createWidget.Form.curve_input_z.setText(str(storage[uid]["curve"][2]))
 
-                    self.createWidget.Form.vector_input_x.setText(str(storage[uid]["normal"][0]))
-                    self.createWidget.Form.vector_input_y.setText(str(storage[uid]["normal"][1]))
-                    self.createWidget.Form.vector_input_z.setText(str(storage[uid]["normal"][2]))
+                self.createWidget.Form.input_x_1.setText(str(storage[uid]["direction"][0]))
+                self.createWidget.Form.input_y_1.setText(str(storage[uid]["direction"][1]))
+                self.createWidget.Form.input_z_1.setText(str(storage[uid]["direction"][2]))
 
-                case FigureTypes.POINT:
-                    self.createWidget.Form.point_input_x.setText(str(storage[uid]["point"][0]))
-                    self.createWidget.Form.point_input_y.setText(str(storage[uid]["point"][1]))
-                    self.createWidget.Form.point_input_z.setText(str(storage[uid]["point"][2]))
+                self.createWidget.Form.input_x_2.setText(str(storage[uid]["point"][0]))
+                self.createWidget.Form.input_y_2.setText(str(storage[uid]["point"][1]))
+                self.createWidget.Form.input_z_2.setText(str(storage[uid]["point"][2]))
 
-                case FigureTypes.REVOLUTION:
-                    self.createWidget.Form.curve_input_x.setText(str(storage[uid]["curve"][0]))
-                    self.createWidget.Form.curve_input_y.setText(str(storage[uid]["curve"][1]))
-                    self.createWidget.Form.curve_input_z.setText(str(storage[uid]["curve"][2]))
+        self.createWidget.Form.applyButton.disconnect()
+        self.createWidget.Form.applyButton.clicked.connect(lambda: self.createObject(_type, True, uid))
+        button_delete.clicked.connect(lambda: self.deleteObject(uid))
 
-                    self.createWidget.Form.input_x_1.setText(str(storage[uid]["direction"][0]))
-                    self.createWidget.Form.input_y_1.setText(str(storage[uid]["direction"][1]))
-                    self.createWidget.Form.input_z_1.setText(str(storage[uid]["direction"][2]))
+    def createObject(self, _type, update_mode, uid):
 
-                    self.createWidget.Form.input_x_2.setText(str(storage[uid]["point"][0]))
-                    self.createWidget.Form.input_y_2.setText(str(storage[uid]["point"][1]))
-                    self.createWidget.Form.input_z_2.setText(str(storage[uid]["point"][2]))
+        name = self.commonWidget.Form.inputName.text()
+        color = self.commonWidget.Form.inputColor.text()
+        opacity = self.commonWidget.Form.inputOpacity.text()
+        t_bounds = [float(x) for x in self.commonWidget.Form.inputTBounds.text().split(",")]
+        v_bounds = [float(x) for x in self.commonWidget.Form.inputVBounds.text().split(",")]
 
-            self.createWidget.Form.applyButton.clicked.connect(lambda: createObject(_type, True, uid))
-            button_delete.clicked.connect(lambda: deleteObject(uid))
+        input = {}
 
-        def createObject(_type, update_mode, uid):
+        match _type:
+            case FigureTypes.CONE:  # Conical surface
 
-            name = self.commonWidget.Form.inputName.text()
-            color = self.commonWidget.Form.inputColor.text()
-            opacity = self.commonWidget.Form.inputOpacity.text()
-            t_bounds = [float(x) for x in self.commonWidget.Form.inputTBounds.text().split(",")]
-            v_bounds = [float(x) for x in self.commonWidget.Form.inputVBounds.text().split(",")]
+                if not self.input_point():
+                    return
+                point_input_x, point_input_y, point_input_z = self.input_point()
 
-            input = {}
+                if not self.input_curve():
+                    return
+                curve_input_x, curve_input_y, curve_input_z = self.input_curve()
 
-            match _type:
-                case FigureTypes.CONE:  # Conical surface
 
-                    if not input_point():
-                        return
-                    point_input_x, point_input_y, point_input_z = input_point()
+                print("test")
 
-                    if not input_curve():
-                        return
-                    curve_input_x, curve_input_y, curve_input_z = input_curve()
+                self.console.append(
+                    f"For this conical surface point x = {point_input_x}, y = {point_input_y}, z = {point_input_z}")
+                print(
+                    f"For this conical surface curve x = {str(curve_input_x)}, y = {str(curve_input_y)}, z = {str(curve_input_z)}")
 
 
-                    print("test")
+                input = {
 
-                    self.console.append(
-                        f"For this conical surface point x = {point_input_x}, y = {point_input_y}, z = {point_input_z}")
-                    print(
-                        f"For this conical surface curve x = {str(curve_input_x)}, y = {str(curve_input_y)}, z = {str(curve_input_z)}")
+                    "curve": (curve_input_x, curve_input_y, curve_input_z),
+                    "point": (point_input_x, point_input_y, point_input_z),
+                    "t_bounds": t_bounds,
+                    "v_bounds": v_bounds,
+                    "name": name,
+                    "FigureTypes": FigureTypes.CONE,
+                }
 
+            case FigureTypes.CURVE:  # Curve
 
-                    input = {
+                if not self.input_curve():
+                    return
+                curve_input_x, curve_input_y, curve_input_z = self.input_curve()
 
-                        "curve": (curve_input_x, curve_input_y, curve_input_z),
-                        "point": (point_input_x, point_input_y, point_input_z),
-                        "t_bounds": t_bounds,
-                        "v_bounds": v_bounds,
-                        "name": name,
-                        "FigureTypes": FigureTypes.CONE,
-                    }
+                self.console.append(
+                    f"For this curve x = {curve_input_x}, y = {curve_input_y}, z = {curve_input_z}")
 
-                case FigureTypes.CURVE:  # Curve
+                input = {
 
-                    if not input_curve():
-                        return
-                    curve_input_x, curve_input_y, curve_input_z = input_curve()
+                    "curve": (curve_input_x, curve_input_y, curve_input_z),
+                    "t_bounds": t_bounds,
+                    "v_bounds": v_bounds,
+                    "name": name,
+                    "FigureTypes": FigureTypes.CURVE,
+                }
 
-                    self.console.append(
-                        f"For this curve x = {curve_input_x}, y = {curve_input_y}, z = {curve_input_z}")
+            case FigureTypes.CYLINDER:  # Cylindrical surface
 
-                    input = {
+                if not self.input_vector():
+                    return
+                vector_x, vector_y, vector_z = self.input_vector()
 
-                        "curve": (curve_input_x, curve_input_y, curve_input_z),
-                        "t_bounds": t_bounds,
-                        "v_bounds": v_bounds,
-                        "name": name,
-                        "FigureTypes": FigureTypes.CURVE,
-                    }
+                if not self.input_curve():
+                    return
+                curve_input_x, curve_input_y, curve_input_z = self.input_curve()
 
-                case FigureTypes.CYLINDER:  # Cylindrical surface
+                self.console.append(
+                    f"For this Cylindrical surface vector x = {vector_x}, y = {vector_y}, z = {vector_z}")
 
-                    if not input_vector():
-                        return
-                    vector_x, vector_y, vector_z = input_vector()
+                self.console.append(
+                    f"For this Cylindrical surface curve x = {str(curve_input_x)}, y = {str(curve_input_y)}, z = {str(curve_input_z)}")
 
-                    if not input_curve():
-                        return
-                    curve_input_x, curve_input_y, curve_input_z = input_curve()
+                input = {
 
-                    self.console.append(
-                        f"For this Cylindrical surface vector x = {vector_x}, y = {vector_y}, z = {vector_z}")
+                    "curve": (curve_input_x, curve_input_y, curve_input_z),
+                    "direction": (vector_x, vector_y, vector_z),
+                    "t_bounds": t_bounds,
+                    "v_bounds": v_bounds,
+                    "name": name,
+                    "FigureTypes": FigureTypes.CYLINDER,
+                }
 
-                    self.console.append(
-                        f"For this Cylindrical surface curve x = {str(curve_input_x)}, y = {str(curve_input_y)}, z = {str(curve_input_z)}")
+            case FigureTypes.LINE:  # Create line
 
-                    input = {
+                if not self.input_line():
+                    return
+                line_x1, line_y1, line_z1, line_x2, line_y2, line_z2 = self.input_line()
+
+                self.console.append(
+                    f"For this line x1 = {line_x1}, y1 = {line_y1}, z1 = {line_z1}"
+                    f"              x2 = {line_x2}, y2 = {line_y2}, z2 = {line_z2}")
+
+                input = {
 
-                        "curve": (curve_input_x, curve_input_y, curve_input_z),
-                        "direction": (vector_x, vector_y, vector_z),
-                        "t_bounds": t_bounds,
-                        "v_bounds": v_bounds,
-                        "name": name,
-                        "FigureTypes": FigureTypes.CYLINDER,
-                    }
+                    "point1": (line_x1, line_y1, line_z1),
+                    "point2": (line_x2, line_y2, line_z2),
+                    "t_bounds": t_bounds,
+                    "v_bounds": v_bounds,
+                    "name": name,
+                    "FigureTypes": FigureTypes.LINE,
+                }
 
-                case FigureTypes.LINE:  # Create line
+            case FigureTypes.PLANE: # Create plane
 
-                    if not input_line():
-                        return
-                    line_x1, line_y1, line_z1, line_x2, line_y2, line_z2 = input_line()
+                if not self.input_point():
+                    return
+                point_input_x, point_input_y, point_input_z = self.input_point()
 
-                    self.console.append(
-                        f"For this line x1 = {line_x1}, y1 = {line_y1}, z1 = {line_z1}"
-                        f"              x2 = {line_x2}, y2 = {line_y2}, z2 = {line_z2}")
+                if not self.input_vector():
+                    return
+                vector_input_x, vector_input_y, vector_input_z = self.input_vector()
 
-                    input = {
+                self.console.append(
+                    f"For this Plane point x = {point_input_x}, y = {point_input_y}, z = {point_input_z}")
+                self.console.append(
+                    f"For this Plane normal vector x = {vector_input_x}, y = {vector_input_y}, z = {vector_input_z}")
 
-                        "point1": (line_x1, line_y1, line_z1),
-                        "point2": (line_x2, line_y2, line_z2),
-                        "t_bounds": t_bounds,
-                        "v_bounds": v_bounds,
-                        "name": name,
-                        "FigureTypes": FigureTypes.LINE,
-                    }
+                input = {
 
-                case FigureTypes.PLANE: # Create plane
+                    "normal": (vector_input_x, vector_input_y, vector_input_z),
+                    "point": (point_input_x, point_input_y, point_input_z),
+                    "size": 1,
+                    "t_bounds": t_bounds,
+                    "v_bounds": v_bounds,
+                    "name": name,
+                    "FigureTypes": FigureTypes.PLANE,
+                }
 
-                    if not input_point():
-                        return
-                    point_input_x, point_input_y, point_input_z = input_point()
 
-                    if not input_vector():
-                        return
-                    vector_input_x, vector_input_y, vector_input_z = input_vector()
+            case FigureTypes.POINT:  # Create point
+                if not self.input_point():
+                    return
+                point_input_x, point_input_y, point_input_z = self.input_point()
 
-                    self.console.append(
-                        f"For this Plane point x = {point_input_x}, y = {point_input_y}, z = {point_input_z}")
-                    self.console.append(
-                        f"For this Plane normal vector x = {vector_input_x}, y = {vector_input_y}, z = {vector_input_z}")
+                self.console.append(
+                    f"For this point x = {point_input_x}, y = {point_input_y}, z = {point_input_z}")
 
-                    input = {
+            case FigureTypes.REVOLUTION:  # Create Rotation Surface
 
-                        "normal": (vector_input_x, vector_input_y, vector_input_z),
-                        "point": (point_input_x, point_input_y, point_input_z),
-                        "size": 1,
-                        "t_bounds": t_bounds,
-                        "v_bounds": v_bounds,
-                        "name": name,
-                        "FigureTypes": FigureTypes.PLANE,
-                    }
+                if not self.input_line():
+                    return
+                line_x1, line_y1, line_z1, line_x2, line_y2, line_z2 = self.input_line()
 
+                if not self.input_curve():
+                    return
+                curve_input_x, curve_input_y, curve_input_z = self.input_curve()
 
-                case FigureTypes.POINT:  # Create point
-                    if not input_point():
-                        return
-                    point_input_x, point_input_y, point_input_z = input_point()
+                self.console.append(
+                    f"For this Rotation surface line x1 = {line_x1}, y1 = {line_y1}, z1 = {line_z1}"
+                    f"              x2 = {line_x2}, y2 = {line_y2}, z2 = {line_z2}")
 
-                    self.console.append(
-                        f"For this point x = {point_input_x}, y = {point_input_y}, z = {point_input_z}")
+                self.console.append(
+                    f"For this Cylindrical surface curve x = {str(curve_input_x)}, y = {str(curve_input_y)}, z = {str(curve_input_z)}")
 
-                case FigureTypes.REVOLUTION:  # Create Rotation Surface
+                input = {
 
-                    if not input_line():
-                        return
-                    line_x1, line_y1, line_z1, line_x2, line_y2, line_z2 = input_line()
+                    "curve": (curve_input_x, curve_input_y, curve_input_z),
+                    "direction": np.array((line_x1, line_y1, line_z1)),
+                    "point": np.array((line_x2, line_y2, line_z2)),
+                    "t_bounds": t_bounds,
+                    "v_bounds": v_bounds,
+                    "name": name,
+                    "FigureTypes": FigureTypes.REVOLUTION,
+                }
 
-                    if not input_curve():
-                        return
-                    curve_input_x, curve_input_y, curve_input_z = input_curve()
+            case 7: # Create vector
 
-                    self.console.append(
-                        f"For this Rotation surface line x1 = {line_x1}, y1 = {line_y1}, z1 = {line_z1}"
-                        f"              x2 = {line_x2}, y2 = {line_y2}, z2 = {line_z2}")
+                if not self.input_vector():
+                    return
+                vector_input_x, vector_input_y, vector_input_z = self.input_vector()
+                self.console.append(
+                    f"For this  vector x = {vector_input_x}, y = {vector_input_y}, z = {vector_input_z}")
+            case _:
+                ...
 
-                    self.console.append(
-                        f"For this Cylindrical surface curve x = {str(curve_input_x)}, y = {str(curve_input_y)}, z = {str(curve_input_z)}")
+        input["color"] = color
+        input["transparency"] = opacity
 
-                    input = {
+        if update_mode == 0:
+            self.console.append(f"Created {input['FigureTypes']} object with name {input['name']}")
+            uid = self.object_storage.create(input)
+            print(self.object_storage.storage[uid])
+            print("creating new object")
+            print(uid)
+            #self.objectslist_append(uid)
+        else:
+            self.console.append(f"Update {input['FigureTypes']} object with name {input['name']}")
+            print("updating object")
+            self.object_storage.update(uid, input)
 
-                        "curve": (curve_input_x, curve_input_y, curve_input_z),
-                        "direction": np.array((line_x1, line_y1, line_z1)),
-                        "point": np.array((line_x2, line_y2, line_z2)),
-                        "t_bounds": t_bounds,
-                        "v_bounds": v_bounds,
-                        "name": name,
-                        "FigureTypes": FigureTypes.REVOLUTION,
-                    }
+    def deleteObject(self, uid):
 
-                case 7: # Create vector
+        self.object_storage.delete(uid)
+        self.console.append(f"Deleted object {uid}")
 
-                    if not input_vector():
-                        return
-                    vector_input_x, vector_input_y, vector_input_z = input_vector()
-                    self.console.append(
-                        f"For this  vector x = {vector_input_x}, y = {vector_input_y}, z = {vector_input_z}")
-                case _:
-                    ...
-
-            input["color"] = color
-            input["transparency"] = opacity
-
-            if update_mode == 0:
-                self.console.append(f"Created {input['FigureTypes']} object with name {input['name']}")
-                uid = self.object_storage.create(input)
-
-                objectslist_append(uid)
-            else:
-                self.console.append(f"Update {input['FigureTypes']} object with name {input['name']}")
-                self.object_storage.update(uid, input)
-
-            #self.add_object()
-
-        def deleteObject(uid):
-
-            self.object_storage.delete(uid)
-            self.objects_list[uid].deleteLater()
-            self.console.append(f"Deleted object {uid}")
-            del self.objects_list[uid]
-
-            self.add_object()
-
-    def updateWidget(self):
 
         self.add_object()
 
