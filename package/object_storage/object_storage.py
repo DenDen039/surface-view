@@ -2,6 +2,8 @@ from package.object_manager.manager import ObjectManager
 from package.figures.figure import FigureTypes
 from unittest.mock import MagicMock
 from numpy import *
+import json
+
 
 class ObjectStorage:
     def __init__(self, PW, SWO):
@@ -11,11 +13,38 @@ class ObjectStorage:
         self.SWO = SWO
         self.PW = PW
         self.counter = 0
+        self.feature_flag = False
+
+    def save(self, path):
+        jsonString = json.dumps(self.storage)
+        jsonFile = open(path, "w")
+        jsonFile.write(jsonString) 
+        jsonFile.close()
+
+    def load(self, path):
+        with open(path, "r") as f:
+            objects = json.load(f)
+
+        self.feature_flag = False
+        for obj in objects:
+            self.create(obj)
+        self.feature_flag = True
+
+    def enable_intersections(self, intersections):
+        self.feature_flag = intersections
+        if self.feature_flag:
+            intersections = self.objManager.compute_intersections()
+            self.PW.drawIntersections(intersections)
+        else:
+            self.PW.drawIntersections([])
 
     def delete(self, uid):
         del self.storage[uid]
         self.objManager.delete_figure(uid)
         self.PW.remove_mesh(uid)
+        if self.feature_flag:
+            intersections = self.objManager.compute_intersections()
+            self.PW.drawIntersections(intersections)
         self.SWO.delete(uid)
 
     def update(self, uid, new_data: dict):
@@ -39,13 +68,18 @@ class ObjectStorage:
 
         self.PW.remove_mesh(uid)
         self.PW.add_mesh(uid, self.objManager.get_figure_mesh(uid), **self.objManager.get_figure_settings(uid))
+        if self.feature_flag:
+            intersections = self.objManager.compute_intersections()
+            self.PW.drawIntersections(intersections)
         self.SWO.update(uid, new_data["name"], new_data["FigureTypes"], new_data["color"])
 
     def create(self, to_create: dict):
         if to_create["name"] == '':
             to_create["name"] = 'untitled_' + str(self.counter)
             self.counter += 1
-
+        if self.feature_flag:
+            intersections = self.objManager.compute_intersections()
+            self.PW.drawIntersections(intersections)
         if to_create["FigureTypes"] == FigureTypes.CONE:
             uid = self.objManager.create_cone(**to_create)
         elif to_create["FigureTypes"] == FigureTypes.CYLINDER:
