@@ -11,7 +11,7 @@ class Cone(Figure):
         t_bounds: tuple[float, float],
         v_bounds: tuple[float, float],
         uid: str,
-        resolution: int = 100,
+        resolution: int = 250,
         **kwargs,
     ):
         super().__init__(uid, FigureTypes.CONE, **kwargs)

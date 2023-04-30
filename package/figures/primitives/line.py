@@ -10,7 +10,7 @@ class Line(Figure):
         point2: tuple[float, float, float],
         t_bounds: tuple[float, float],
         uid: str,
-        resolution: int = 100,
+        resolution: int = 250,
         **kwargs
     ):
         super().__init__(uid, FigureTypes.LINE, **kwargs)
