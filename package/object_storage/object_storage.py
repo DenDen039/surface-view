@@ -1,5 +1,6 @@
 from package.object_manager.manager import ObjectManager
 from package.figures.figure import FigureTypes
+from package.parser import Parser
 from unittest.mock import MagicMock
 from numpy import *
 
@@ -11,6 +12,7 @@ class ObjectStorage:
         self.SWO = SWO
         self.PW = PW
         self.counter = 0
+        self.parser = Parser()
 
     def delete(self, uid):
         del self.storage[uid]
@@ -21,16 +23,43 @@ class ObjectStorage:
     def update(self, uid, new_data: dict):
         self.storage[uid] = new_data
         if new_data["FigureTypes"] == FigureTypes.CONE:
+            new_data["curve_string"] = new_data["curve"]
+
+            new_data["curve"] = [self.parser.parse_expression_string_to_lambda(new_data["curve"][0]),
+                                 self.parser.parse_expression_string_to_lambda(new_data["curve"][1]),
+                                 self.parser.parse_expression_string_to_lambda(new_data["curve"][2])]
             self.objManager.update_cone(uid, **new_data)
+
         elif new_data["FigureTypes"] == FigureTypes.CYLINDER:
+
+            new_data["curve_string"] = new_data["curve"]
+
+            new_data["curve"] = [self.parser.parse_expression_string_to_lambda(new_data["curve"][0]),
+                                 self.parser.parse_expression_string_to_lambda(new_data["curve"][1]),
+                                 self.parser.parse_expression_string_to_lambda(new_data["curve"][2])]
+
             self.objManager.update_cylinder(uid, **new_data)
         elif new_data["FigureTypes"] == FigureTypes.CURVE:
+
+            new_data["curve_string"] = new_data["curve"]
+
+            new_data["curve"] = [self.parser.parse_expression_string_to_lambda(new_data["curve"][0]),
+                                 self.parser.parse_expression_string_to_lambda(new_data["curve"][1]),
+                                 self.parser.parse_expression_string_to_lambda(new_data["curve"][2])]
+
             self.objManager.update_curve(uid, **new_data)
         elif new_data["FigureTypes"] == FigureTypes.LINE:
             self.objManager.update_line(uid, **new_data)
         elif new_data["FigureTypes"] == FigureTypes.PLANE:
             self.objManager.update_plane(uid, **new_data)
         elif new_data["FigureTypes"] == FigureTypes.REVOLUTION:
+
+            new_data["curve_string"] = new_data["curve"]
+
+            new_data["curve"] = [self.parser.parse_expression_string_to_lambda(new_data["curve"][0]),
+                                 self.parser.parse_expression_string_to_lambda(new_data["curve"][1]),
+                                 self.parser.parse_expression_string_to_lambda(new_data["curve"][2])]
+
             self.objManager.update_revolution_surface(uid, **new_data)
         else:
             raise Exception(f"Invalid Figure type {new_data['FigureTypes']}")
@@ -47,19 +76,40 @@ class ObjectStorage:
             self.counter += 1
 
         if to_create["FigureTypes"] == FigureTypes.CONE:
+            to_create["curve_string"] = to_create["curve"]
+
+            to_create["curve"] = [self.parser.parse_expression_string_to_lambda(to_create["curve"][0]),
+                                  self.parser.parse_expression_string_to_lambda(to_create["curve"][1]),
+                                  self.parser.parse_expression_string_to_lambda(to_create["curve"][2])]
             uid = self.objManager.create_cone(**to_create)
         elif to_create["FigureTypes"] == FigureTypes.CYLINDER:
+            to_create["curve_string"] = to_create["curve"]
+
+            to_create["curve"] = [self.parser.parse_expression_string_to_lambda(to_create["curve"][0]),
+                                  self.parser.parse_expression_string_to_lambda(to_create["curve"][1]),
+                                  self.parser.parse_expression_string_to_lambda(to_create["curve"][2])]
             uid = self.objManager.create_cylinder(**to_create)
         elif to_create["FigureTypes"] == FigureTypes.CURVE:
+            to_create["curve_string"] = to_create["curve"]
+
+            to_create["curve"] = [self.parser.parse_expression_string_to_lambda(to_create["curve"][0]),
+                                  self.parser.parse_expression_string_to_lambda(to_create["curve"][1]),
+                                  self.parser.parse_expression_string_to_lambda(to_create["curve"][2])]
             uid = self.objManager.create_curve(**to_create)
         elif to_create["FigureTypes"] == FigureTypes.LINE:
             uid = self.objManager.create_line(**to_create)
         elif to_create["FigureTypes"] == FigureTypes.PLANE:
             uid = self.objManager.create_plane(**to_create)
         elif to_create["FigureTypes"] == FigureTypes.REVOLUTION:
+            to_create["curve_string"] = to_create["curve"]
+
+            to_create["curve"] = [self.parser.parse_expression_string_to_lambda(to_create["curve"][0]),
+                                  self.parser.parse_expression_string_to_lambda(to_create["curve"][1]),
+                                  self.parser.parse_expression_string_to_lambda(to_create["curve"][2])]
             uid = self.objManager.create_revolution_surface(**to_create)
         else:
             raise Exception(f"Invalid Figure type {to_create['FigureTypes']}")
+
 
         self.storage[uid] = to_create
         self.SWO.add(uid, to_create["name"], to_create["FigureTypes"], to_create["color"])

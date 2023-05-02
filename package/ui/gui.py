@@ -9,42 +9,22 @@ from package.figures.figure import *
 from package.qt_widgets.plotter_widget import PlotterWidget
 
 from package.object_storage.object_storage import ObjectStorage
+from package.parser import Parser
 
 from numpy import *
 
 
 
-# TODO: add parser (maybe as class)
+# TODO: finish parses class
 #       add update_widget
 #       refactor gui
 #       better f(t) parser
-#       parser for CommonObjectWidget
 #       change object_storage to have strings at f(t) inputs
 #       fix opacity choice for object
-#       fix color don`t change on edit
 
 import numpy as np
 import re
 
-
-
-
-def parse_expression(expression):
-    # Check that the expression only contains the variable "t"
-    if "t" not in expression.replace(" ", ""):
-        raise ValueError("Expression must contain the variable 't'")
-    # Check that the expression only contains valid numpy functions and operators
-    allowed_functions = set(np.__dict__.keys())
-    allowed_operators = set("+-*/()")
-    expression_functions = set(re.findall(r"\b\w+\b", expression)) - set(["t"])
-    if not expression_functions.issubset(allowed_functions):
-        raise ValueError("Expression contains invalid function(s)")
-    for token in expression.split():
-        if token not in allowed_operators and token not in expression_functions and not re.match(r"^\d+\.?\d*$", token):
-            raise ValueError(f"Invalid character(s) in expression token: {token}")
-    # Define the lambda function using the expression
-    f = lambda t: eval(expression, {"__builtins__": None, "np": np, "t": t})
-    return f
 
 def parse_expression(expresion):
 
@@ -203,10 +183,10 @@ class UI(QMainWindow):
         self.object_storage = ObjectStorage(self.pyvista_widget, self.SWO)
 
         self.horizontal_layout.replaceWidget(self.scrollArea, self.SWO)
-      #  self.horizontal_layout.addWidget(self.SWO)
+        # self.horizontal_layout.addWidget(self.SWO)
         self.scrollArea.deleteLater()
         self.scrollAreaContents.deleteLater()
-        #self.parser = Parser()
+        self.parser = Parser()
 
         self.objects_list = {}
 
@@ -356,15 +336,13 @@ class UI(QMainWindow):
         _curve_input_y_text = curve_input_y
         _curve_input_z_text = curve_input_z
 
-        try:
-            curve_input_x = parse_expression(curve_input_x)
-            curve_input_y = parse_expression(curve_input_y)
-            curve_input_z = parse_expression(curve_input_z)
-        except:
-            self.console.append("Incorrect value in curve input")
-            return False
+        if self.parser.check_expression_string(curve_input_x) and self.parser.check_expression_string(curve_input_y) and self.parser.check_expression_string(curve_input_z):
+            return curve_input_x, curve_input_y, curve_input_z
 
-        return curve_input_x, curve_input_y, curve_input_z
+        self.console.append("Incorrect value in curve input")
+        return False
+
+
 
     def input_line(self):
 
@@ -415,19 +393,19 @@ class UI(QMainWindow):
                 self.createWidget.Form.point_input_y.setText(str(storage[uid]["point"][1]))
                 self.createWidget.Form.point_input_z.setText(str(storage[uid]["point"][2]))
 
-                self.createWidget.Form.curve_input_x.setText(str(storage[uid]["curve"][0]))
-                self.createWidget.Form.curve_input_y.setText(str(storage[uid]["curve"][1]))
-                self.createWidget.Form.curve_input_z.setText(str(storage[uid]["curve"][2]))
+                self.createWidget.Form.curve_input_x.setText(str(storage[uid]["curve_string"][0]))
+                self.createWidget.Form.curve_input_y.setText(str(storage[uid]["curve_string"][1]))
+                self.createWidget.Form.curve_input_z.setText(str(storage[uid]["curve_string"][2]))
 
             case FigureTypes.CURVE:
-                self.createWidget.Form.curve_input_x.setText(str(storage[uid]["curve"][0]))
-                self.createWidget.Form.curve_input_y.setText(str(storage[uid]["curve"][1]))
-                self.createWidget.Form.curve_input_z.setText(str(storage[uid]["curve"][2]))
+                self.createWidget.Form.curve_input_x.setText(str(storage[uid]["curve_string"][0]))
+                self.createWidget.Form.curve_input_y.setText(str(storage[uid]["curve_string"][1]))
+                self.createWidget.Form.curve_input_z.setText(str(storage[uid]["curve_string"][2]))
 
             case FigureTypes.CYLINDER:
-                self.createWidget.Form.curve_input_x.setText(str(storage[uid]["curve"][0]))
-                self.createWidget.Form.curve_input_y.setText(str(storage[uid]["curve"][1]))
-                self.createWidget.Form.curve_input_z.setText(str(storage[uid]["curve"][2]))
+                self.createWidget.Form.curve_input_x.setText(str(storage[uid]["curve_string"][0]))
+                self.createWidget.Form.curve_input_y.setText(str(storage[uid]["curve_string"][1]))
+                self.createWidget.Form.curve_input_z.setText(str(storage[uid]["curve_string"][2]))
 
                 self.createWidget.Form.vector_input_x.setText(str(storage[uid]["direction"][0]))
                 self.createWidget.Form.vector_input_y.setText(str(storage[uid]["direction"][1]))
@@ -457,9 +435,9 @@ class UI(QMainWindow):
                 self.createWidget.Form.point_input_z.setText(str(storage[uid]["point"][2]))
 
             case FigureTypes.REVOLUTION:
-                self.createWidget.Form.curve_input_x.setText(str(storage[uid]["curve"][0]))
-                self.createWidget.Form.curve_input_y.setText(str(storage[uid]["curve"][1]))
-                self.createWidget.Form.curve_input_z.setText(str(storage[uid]["curve"][2]))
+                self.createWidget.Form.curve_input_x.setText(str(storage[uid]["curve_string"][0]))
+                self.createWidget.Form.curve_input_y.setText(str(storage[uid]["curve_string"][1]))
+                self.createWidget.Form.curve_input_z.setText(str(storage[uid]["curve_string"][2]))
 
                 self.createWidget.Form.input_x_1.setText(str(storage[uid]["direction"][0]))
                 self.createWidget.Form.input_y_1.setText(str(storage[uid]["direction"][1]))
@@ -478,8 +456,17 @@ class UI(QMainWindow):
         name = self.commonWidget.Form.inputName.text()
         color = self.commonWidget.color
         opacity = self.commonWidget.Form.inputOpacity.text()
-        t_bounds = [float(x) for x in self.commonWidget.Form.inputTBounds.text().split(",")]
-        v_bounds = [float(x) for x in self.commonWidget.Form.inputVBounds.text().split(",")]
+
+        if not self.parser.parse_two_floats(self.commonWidget.Form.inputTBounds.text()):
+            self.console.append("Incorrect input in t_bounds")
+            return
+        t_bounds = self.parser.parse_two_floats(self.commonWidget.Form.inputTBounds.text())
+
+        if not self.parser.parse_two_floats(self.commonWidget.Form.inputVBounds.text()):
+            self.console.append("Incorrect input in v_bounds")
+            return
+        v_bounds = self.parser.parse_two_floats(self.commonWidget.Form.inputVBounds.text())
+
 
         input = {}
 
