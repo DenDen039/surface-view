@@ -8,26 +8,26 @@ class Cone(Figure):
         self,
         curve,
         point: tuple[float, float, float],
-        t_bounce: tuple[float, float],
-        v_bounce: tuple[float, float],
+        t_bounds: tuple[float, float],
+        v_bounds: tuple[float, float],
         uid: str,
-        resolution: int = 500,
+        resolution: int = 250,
         **kwargs,
     ):
         super().__init__(uid, FigureTypes.CONE, **kwargs)
 
-        self.__t_bounce = t_bounce
-        self.__v_bounce = v_bounce
+        self.__t_bounds = t_bounds
+        self.__v_bounds = v_bounds
         self.__curve = curve
         self.__point = point
         self.__resolution = resolution
 
     def update_parameters(self, **kwargs):
         for key, value in kwargs.items():
-            if key == "t_bounce":
-                self.__t_bounce = value
-            elif key == "v_bounce":
-                self.__v_bounce = value
+            if key == "t_bounds":
+                self.__t_bounds = value
+            elif key == "v_bounds":
+                self.__v_bounds = value
             elif key == "curve":
                 self.__curve = value
             elif key == "point":
@@ -36,13 +36,13 @@ class Cone(Figure):
                 self.__resolution = value
 
     def get_mesh(self) -> pv.StructuredGrid:
-        t_bounce = self.__t_bounce
-        v_bounce = self.__v_bounce
+        t_bounds = self.__t_bounds
+        v_bounds = self.__v_bounds
         curve = self.__curve
         point = self.__point
         resolution = self.__resolution
-        t = np.linspace(t_bounce[0], t_bounce[1], resolution)
-        v = np.linspace(v_bounce[0], v_bounce[1], resolution)
+        t = np.linspace(t_bounds[0], t_bounds[1], resolution)
+        v = np.linspace(v_bounds[0], v_bounds[1], resolution)
 
         v, t = np.meshgrid(v, t)
 

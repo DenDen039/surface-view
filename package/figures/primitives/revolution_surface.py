@@ -9,14 +9,14 @@ class RevolutionSurface(Figure):
             curve,
             direction,
             point,
-            t_bounce: tuple[float, float],
+            t_bounds: tuple[float, float],
             uid: str,
-            resolution: int = 400,
+            resolution: int = 250,
             **kwargs
     ):
         super().__init__(uid, FigureTypes.REVOLUTION, **kwargs)
 
-        self.__t_bounce = t_bounce
+        self.__t_bounds = t_bounds
         self.__curve = curve
         self.__direction = direction
         self.__resolution = resolution
@@ -37,8 +37,8 @@ class RevolutionSurface(Figure):
 
     def update_parameters(self, **kwargs):
         for key, value in kwargs.items():
-            if key == "t_bounce":
-                self.__t_bounce = value
+            if key == "t_bounds":
+                self.__t_bounds = value
             elif key == "point":
                 self.__point = value
             elif key == "curve":
@@ -49,13 +49,13 @@ class RevolutionSurface(Figure):
                 self.__resolution = value
 
     def get_mesh(self):
-        t_bounce = self.__t_bounce
+        t_bounds = self.__t_bounds
         curve = self.__curve
         direction = self.__direction
         resolution = self.__resolution
         line_point = self.__point
 
-        t = np.linspace(t_bounce[0], t_bounce[1], resolution)
+        t = np.linspace(t_bounds[0], t_bounds[1], resolution)
         theta = np.linspace(0, 2 * np.pi, 180)
 
         direction = direction / np.linalg.norm(direction)

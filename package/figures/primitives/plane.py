@@ -10,7 +10,7 @@ class Plane(Figure):
         point: tuple[float, float, float],
         size: float,
         uid: str,
-        resolution: int = 50,
+        resolution: int = 2,
         **kwargs,
     ):
         super().__init__(uid, FigureTypes.PLANE, **kwargs)
@@ -32,36 +32,19 @@ class Plane(Figure):
                 self.__resolution = value
 
     def get_mesh(self) -> pv.StructuredGrid:
-        normal = self.__normal
-        point = self.__point
-        size = self.__size
-        resolution = self.__resolution
 
-        if not isinstance(normal, np.ndarray):
-            normal = np.array(normal)
+        plane = pv.Plane(center=np.asarray(self.__point), direction=np.asarray(self.__normal),
+                            i_size=self.__size, j_size=self.__size,
+                            i_resolution=self.__resolution ,
+                            j_resolution=self.__resolution,
+                            )
+        bounds = plane.bounds
+        x = np.linspace(bounds[0], bounds[1], 2)
+        y = np.linspace(bounds[2], bounds[3], 2)
+        z = np.linspace(bounds[4], bounds[5], 2)
 
-        if not isinstance(point, np.ndarray):
-            point = np.array(point)
+        xv, yv, zv = np.meshgrid(x, y, z, indexing='ij')
+        grid = pv.StructuredGrid(xv, yv, zv)
+        resampled_polydata = plane.sample(grid)
 
-        plane_source = pv.Plane(
-            center=point,
-            direction=normal,
-            i_size=size,
-            j_size=size,
-            i_resolution=resolution,
-            j_resolution=resolution,
-        )
-
-        spacing = 1.0
-        bounds = plane_source.bounds
-        dims = ((np.array(bounds[1::2]) - np.array(bounds[::2])) / spacing).astype(
-            int
-        ) + 1
-
-        x, y, z = np.mgrid[
-            bounds[0] : bounds[1] : dims[0] * 1j,
-            bounds[2] : bounds[3] : dims[1] * 1j,
-            bounds[4] : bounds[5] : dims[2] * 1j,
-        ]
-
-        return pv.StructuredGrid(x, y, z)
+        return pv.wrap(resampled_polydata)
