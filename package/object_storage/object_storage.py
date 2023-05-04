@@ -27,7 +27,7 @@ class ObjectStorage:
             objects = json.load(f)
 
         self.feature_flag = False
-        for obj in objects:
+        for obj in objects.values():
             self.create(obj)
         self.feature_flag = True
 
@@ -99,77 +99,8 @@ class ObjectStorage:
         self.storage[uid] = to_create
         self.SWO.add(uid, to_create["name"], to_create["FigureTypes"], to_create["color"])
         self.PW.add_mesh(uid, self.objManager.get_figure_mesh(uid), **self.objManager.get_figure_settings(uid))
-        self.PW.add_label(uid, to_create["FigureTypes"], self.get_labels(uid, to_create))
+        self.PW.add_label(uid, to_create["FigureTypes"], self.objManager.get_labels(to_create, self.label_counter))
+        self.label_counter += 1
 
         return uid
-
-    def get_labels(self, uid, figure_type):
-        labels = dict()
-        if figure_type["FigureTypes"] == FigureTypes.CONE:
-            labels["C" + str(self.label_counter)] = figure_type["point"]
-            curve = self.objManager.create_curve(figure_type["curve"], figure_type["t_bounds"])
-            labels["Y" + str(self.label_counter)] = self.objManager.get_figure_mesh(curve)
-            t = figure_type["t_bounce"]
-            labels["P" + str(self.label_counter)] = (figure_type["curve"][0](t * 0.5),
-                                                figure_type["curve"][1](t * 0.5),
-                                                figure_type["curve"][2](t * 0.5))
-            line = self.objManager.create_line(labels["C" + str(self.label_counter)],labels["P" + str(self.label_counter)])
-            labels["Y" + str(self.label_counter)] = self.objManager.get_figure_mesh(line)
-            self.label_counter += 1
-            return labels
-
-        elif figure_type["FigureTypes"] == FigureTypes.CYLINDER:
-            t = figure_type["t_bounds"]
-            labels["P" + str(self.label_counter)] = (figure_type["curve"][0](t * 0.5),
-                                                figure_type["curve"][1](t * 0.5),
-                                                figure_type["curve"][2](t * 0.5))
-            s = tuple(ai + bi for ai, bi in zip(labels["P" + str(self.label_counter)], figure_type["direction"]))
-            line = self.objManager.create_line(labels["P" + str(self.label_counter)],s)
-            labels["S" + str(self.label_counter)] = self.objManager.get_figure_mesh(line)
-
-            curve = self.objManager.create_curve(figure_type["curve"], figure_type["t_bounce"])
-            labels["Y" + str(self.label_counter)] = self.objManager.get_figure_mesh(curve)
-            self.label_counter += 1
-            return labels
-
-        elif figure_type["FigureTypes"] == FigureTypes.CURVE:
-            t = figure_type["t_bounce"]
-            labels["P" + str(self.label_counter)] = (figure_type["curve"][0](t * 0.5),
-                                                     figure_type["curve"][1](t * 0.5),
-                                                     figure_type["curve"][2](t * 0.5))
-
-            self.label_counter += 1
-            return labels
-
-        elif figure_type["FigureTypes"] == FigureTypes.LINE:
-            t = figure_type["t_bounce"]
-            labels["P" + str(self.label_counter)] = (figure_type["curve"][0](t * 0.5),
-                                                figure_type["curve"][1](t * 0.5),
-                                                figure_type["curve"][2](t * 0.5))
-
-            self.label_counter += 1
-            return labels
-
-        elif figure_type["FigureTypes"] == FigureTypes.PLANE:
-            t = figure_type["t_bounce"]
-            labels["M" + str(self.label_counter)] = figure_type["point"]
-            labels["n" + str(self.label_counter)] = tuple(ai + bi for ai, bi in zip(figure_type["point"], figure_type["normal"]))
-            self.label_counter += 1
-            return labels
-
-        elif figure_type["FigureTypes"] == FigureTypes.REVOLUTION:
-            t = figure_type["t_bounce"]
-            labels["P" + str(self.label_counter)] = (figure_type["curve"][0](t * 0.5),
-                                                     figure_type["curve"][1](t * 0.5),
-                                                     figure_type["curve"][2](t * 0.5))
-            s = tuple(ai + bi for ai, bi in zip(labels["P" + str(self.label_counter)], figure_type["direction"]))
-            line = self.objManager.create_line(labels["P" + str(self.label_counter)],s)
-            labels["S" + str(self.label_counter)] = self.objManager.get_figure_mesh(line)
-            line = self.objManager.create_line(labels["P" + str(self.label_counter)], s)
-            labels["S" + str(self.label_counter)] = self.objManager.get_figure_mesh(line)
-
-            curve = self.objManager.create_curve(figure_type["curve"], figure_type["t_bounce"])
-            labels["Y" + str(self.label_counter)] = self.objManager.get_figure_mesh(curve)
-            self.label_counter += 1
-            return labels
 

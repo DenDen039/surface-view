@@ -145,6 +145,62 @@ class ObjectManager:
 
         obj.update_parameters(**kwargs)
 
+    def get_labels(self, figure_type, counter):
+        labels = dict()
+        t = figure_type["t_bounds"]
+        if figure_type["FigureTypes"] == FigureTypes.CONE:
+            labels["C" + str(counter)] = figure_type["point"]
+            curve = self.create_curve(figure_type["curve"], t)
+            labels["Y" + str(counter)] = self.get_figure_mesh(curve)
+
+            labels["P" + str(counter)] = (figure_type["curve"][0](t * 0.5),
+                                          figure_type["curve"][1](t * 0.5),
+                                          figure_type["curve"][2](t * 0.5))
+            line = self.create_line(labels["C" + str(counter)],labels["P" + str(counter)], t)
+            labels["L" + str(counter)] = self.get_figure_mesh(line)
+            return labels
+
+        elif figure_type["FigureTypes"] == FigureTypes.CYLINDER:
+            labels["P" + str(counter)] = (figure_type["curve"][0](t * 0.5),
+                                          figure_type["curve"][1](t * 0.5),
+                                          figure_type["curve"][2](t * 0.5))
+            s = tuple(ai + bi for ai, bi in zip(labels["P" + str(counter)], figure_type["direction"]))
+            line = self.create_line(labels["P" + str(counter)], s, t)
+            labels["S" + str(counter)] = self.get_figure_mesh(line)
+
+            curve = self.create_curve(figure_type["curve"], t)
+            labels["Y" + str(counter)] = self.get_figure_mesh(curve)
+            return labels
+
+        elif figure_type["FigureTypes"] == FigureTypes.CURVE:
+            labels["P" + str(counter)] = (figure_type["curve"][0](t * 0.5),
+                                          figure_type["curve"][1](t * 0.5),
+                                          figure_type["curve"][2](t * 0.5))
+            return labels
+
+        elif figure_type["FigureTypes"] == FigureTypes.LINE:
+            labels["P" + str(counter)] = (figure_type["curve"][0](t * 0.5),
+                                          figure_type["curve"][1](t * 0.5),
+                                          figure_type["curve"][2](t * 0.5))
+            return labels
+
+        elif figure_type["FigureTypes"] == FigureTypes.PLANE:
+            labels["M" + str(counter)] = figure_type["point"]
+            labels["n" + str(counter)] = tuple(ai + bi for ai, bi in zip(figure_type["point"], figure_type["normal"]))
+            return labels
+
+        elif figure_type["FigureTypes"] == FigureTypes.REVOLUTION:
+            labels["P" + str(counter)] = (figure_type["curve"][0](t * 0.5),
+                                          figure_type["curve"][1](t * 0.5),
+                                          figure_type["curve"][2](t * 0.5))
+            s = tuple(ai + bi for ai, bi in zip(labels["P" + str(counter)], t))
+            line = self.create_line(labels["P" + str(counter)], s, t)
+            labels["S" + str(counter)] = self.get_figure_mesh(line)
+
+            curve = self.create_curve(figure_type["curve"], t)
+            labels["Y" + str(counter)] = self.get_figure_mesh(curve)
+            return labels
+
     def get_figure(self, uid: str) -> Figure:
         if uid not in self.objects:
             raise Exception("Figure not found")
