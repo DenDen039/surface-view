@@ -98,8 +98,9 @@ class ObjectStorage:
 
         self.storage[uid] = to_create
         self.SWO.add(uid, to_create["name"], to_create["FigureTypes"], to_create["color"])
-        self.PW.add_mesh(uid, self.objManager.get_figure_mesh(uid), **self.objManager.get_figure_settings(uid))
-        self.PW.add_label(uid, to_create["FigureTypes"], self.objManager.get_labels(to_create, self.label_counter))
+        self.PW.add_mesh(uid, self.objManager.get_figure_mesh(uid), to_create["FigureTypes"],
+                         [self.objManager.get_label_lines(to_create), self.objManager.get_labels(to_create, self.label_counter)],
+                         **self.objManager.get_figure_settings(uid))
         self.label_counter += 1
 
         return uid
