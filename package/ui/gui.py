@@ -19,8 +19,7 @@ from numpy import *
 #       add update_widget
 #       refactor gui
 #       better f(t) parser
-#       change object_storage to have strings at f(t) inputs
-#       fix opacity choice for object
+#
 
 import numpy as np
 import re
@@ -178,6 +177,8 @@ class UI(QMainWindow):
         # Keep track of hidden or not
         self.hidden_tools = False
         self.hidden_console = False
+        self.hide_unhide_console()
+        self.show_console.setChecked(0)
 
         self.SWO = StorageObjectWidget(self)
         self.object_storage = ObjectStorage(self.pyvista_widget, self.SWO)
@@ -191,12 +192,12 @@ class UI(QMainWindow):
         self.objects_list = {}
 
 
+
     def clear_right(self):
         for i in reversed(range(self.toolbox_layout.count())):
              self.toolbox_layout.itemAt(i).widget().setParent(None)
 
-
-    def add_object(self): # DEBUG VERSION, SUBJECT TO CHANGE
+    def add_object(self):
 
         #contextMenu = QMenu(self)
 
@@ -254,28 +255,34 @@ class UI(QMainWindow):
         self.commonWidget.Form.button_color.setStyleSheet("background-color : white")
         self.commonWidget.Form.inputOpacity.setText("0.5")
         self.commonWidget.Form.inputTBounds.setText("-10, 10")
+        self.commonWidget.Form.inputTBounds.setEnabled(False)
         self.commonWidget.Form.inputVBounds.setText("0, 1")
+        self.commonWidget.Form.inputVBounds.setEnabled(False)
         self.commonWidget.Form.button_color.clicked.connect(self.change_color)
-
-
-
 
 
         applyButton = None
         match _type:
             case FigureTypes.CONE:
                 self.createWidget = self.creator.CreateConicalWidget()
+                self.commonWidget.Form.inputTBounds.setEnabled(True)
+                self.commonWidget.Form.inputVBounds.setEnabled(True)
             case FigureTypes.CURVE:
                 self.createWidget = self.creator.CreateCurveWidget()
+                self.commonWidget.Form.inputTBounds.setEnabled(True)
             case FigureTypes.CYLINDER:
                 self.createWidget = self.creator.CreateCylindricalWidget()
+                self.commonWidget.Form.inputTBounds.setEnabled(True)
+                self.commonWidget.Form.inputVBounds.setEnabled(True)
             case FigureTypes.LINE:
                 self.createWidget = self.creator.CreateLineWidget()
+                self.commonWidget.Form.inputTBounds.setEnabled(True)
             case FigureTypes.PLANE:
                 self.createWidget = self.creator.CreatePlaneWidget()
             case FigureTypes.POINT:
                 self.createWidget = self.creator.CreatePointWidget()
             case FigureTypes.REVOLUTION:
+                self.commonWidget.Form.inputTBounds.setEnabled(True)
                 self.createWidget = self.creator.CreateRotationFigureWidget()
            # case FigureTypes.VE:
            #    self.createWidget = self.creator.CreateVectorWidget()
@@ -342,8 +349,6 @@ class UI(QMainWindow):
         self.console.append("Incorrect value in curve input")
         return False
 
-
-
     def input_line(self):
 
         point_input_x_1 = self.findChild(QLineEdit, "input_x_1").text()
@@ -383,12 +388,18 @@ class UI(QMainWindow):
         self.commonWidget.Form.inputName.setText(storage[uid]["name"])
         self.commonWidget.Form.button_color.setStyleSheet(f"background-color : {storage[uid]['color']}")
         self.commonWidget.color = storage[uid]['color']
-        self.commonWidget.Form.inputOpacity.setText(storage[uid]["transparency"])
+        self.commonWidget.Form.inputOpacity.setText(str(storage[uid]["opacity"]))
         self.commonWidget.Form.inputTBounds.setText(str(storage[uid]["t_bounds"][0]) + ", " + str(storage[uid]["t_bounds"][1]))
+        self.commonWidget.Form.inputTBounds.setEnabled(False)
         self.commonWidget.Form.inputVBounds.setText(str(storage[uid]["v_bounds"][0]) + ", " + str(storage[uid]["v_bounds"][1]))
+        self.commonWidget.Form.inputVBounds.setEnabled(False)
 
         match  _type:
             case FigureTypes.CONE:
+
+                self.commonWidget.Form.inputTBounds.setEnabled(True)
+                self.commonWidget.Form.inputVBounds.setEnabled(True)
+
                 self.createWidget.Form.point_input_x.setText(str(storage[uid]["point"][0]))
                 self.createWidget.Form.point_input_y.setText(str(storage[uid]["point"][1]))
                 self.createWidget.Form.point_input_z.setText(str(storage[uid]["point"][2]))
@@ -398,11 +409,18 @@ class UI(QMainWindow):
                 self.createWidget.Form.curve_input_z.setText(str(storage[uid]["curve_string"][2]))
 
             case FigureTypes.CURVE:
+
+                self.commonWidget.Form.inputTBounds.setEnabled(True)
+
                 self.createWidget.Form.curve_input_x.setText(str(storage[uid]["curve_string"][0]))
                 self.createWidget.Form.curve_input_y.setText(str(storage[uid]["curve_string"][1]))
                 self.createWidget.Form.curve_input_z.setText(str(storage[uid]["curve_string"][2]))
 
             case FigureTypes.CYLINDER:
+
+                self.commonWidget.Form.inputTBounds.setEnabled(True)
+                self.commonWidget.Form.inputVBounds.setEnabled(True)
+
                 self.createWidget.Form.curve_input_x.setText(str(storage[uid]["curve_string"][0]))
                 self.createWidget.Form.curve_input_y.setText(str(storage[uid]["curve_string"][1]))
                 self.createWidget.Form.curve_input_z.setText(str(storage[uid]["curve_string"][2]))
@@ -412,6 +430,9 @@ class UI(QMainWindow):
                 self.createWidget.Form.vector_input_z.setText(str(storage[uid]["direction"][2]))
 
             case FigureTypes.LINE:
+
+                self.commonWidget.Form.inputTBounds.setEnabled(True)
+
                 self.createWidget.Form.input_x_1.setText(str(storage[uid]["point1"][0]))
                 self.createWidget.Form.input_y_1.setText(str(storage[uid]["point1"][1]))
                 self.createWidget.Form.input_z_1.setText(str(storage[uid]["point1"][2]))
@@ -435,6 +456,9 @@ class UI(QMainWindow):
                 self.createWidget.Form.point_input_z.setText(str(storage[uid]["point"][2]))
 
             case FigureTypes.REVOLUTION:
+
+                self.commonWidget.Form.inputTBounds.setEnabled(True)
+
                 self.createWidget.Form.curve_input_x.setText(str(storage[uid]["curve_string"][0]))
                 self.createWidget.Form.curve_input_y.setText(str(storage[uid]["curve_string"][1]))
                 self.createWidget.Form.curve_input_z.setText(str(storage[uid]["curve_string"][2]))
@@ -638,7 +662,7 @@ class UI(QMainWindow):
                 ...
 
         input["color"] = color
-        input["transparency"] = opacity
+        input["opacity"] = float(opacity)
 
         if update_mode == 0:
             self.console.append(f"Created {input['FigureTypes']} object with name {input['name']}")

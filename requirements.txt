@@ -23,4 +23,4 @@ scooby==0.7.1
 six==1.16.0
 urllib3==1.26.15
 vtk==9.2.6
-pyvistaqt~=0.10.0
+pyvistaqt~=0.9.1

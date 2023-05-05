@@ -7,7 +7,7 @@ class Parser:
 
     # float, float e.g 123.123, 123.123
     def parse_two_floats(self, input_string: str) -> [float, float]:
-        check = re.match("-?\d+(.\d+)? *, *-?\d+(.\d+)?", input_string)
+        check = re.match("^-?(0|[1-9]\d*)(\.\d*)? *, *-?(0|[1-9]\d*)(\.\d*)?", input_string)
         if check:
             return [float(x) for x in input_string.split(",")]
         return False
