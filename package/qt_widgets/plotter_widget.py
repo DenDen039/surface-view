@@ -88,9 +88,9 @@ class PlotterWidget(QtWidgets.QWidget):
         self.remove_mesh(uid)
         self.actors[uid] = self.plotter.add_mesh(self.meshes[uid], show_edges=False, **self.actors_settings[uid])
 
-    def add_intersections(self, intersections, color='red', opacity=0.5):
+    def add_intersections(self, intersections, **kwargs):
         for item in intersections:
-            new_intersection = self.plotter.add_mesh(item, color=color, opacity=opacity, render_lines_as_tubes=True)
+            new_intersection = self.plotter.add_mesh(item, render_lines_as_tubes=True, **kwargs)
             self.intersections_list.append(new_intersection)
 
     def remove_intersections(self):
@@ -169,11 +169,12 @@ class PlotterWidget(QtWidgets.QWidget):
         self.plotter.screenshot(f"package\photos\{file_name}")
 
     def untitled_counter(self) -> int:
-        import os, re
+        import os
         files = os.listdir("package/photos/")
         numbers = list(filter(lambda str: str.startswith("untitled_"), files))
-        numbers = [numbers[i].split('untitled_')[-1].split('.png')[0] for i in range(len(numbers))]
+        numbers = [int(numbers[i].split('untitled_')[-1].split('.png')[0]) for i in range(len(numbers))]
         if numbers:
-            return int(numbers[-1]) + 1
+            print(numbers)
+            return max(numbers) + 1
         else:
             return 0
