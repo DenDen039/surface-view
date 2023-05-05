@@ -1,5 +1,5 @@
 import sys, numpy as np
-#sys.path.append("C:\\surface-view\\package")
+sys.path.append("C:\\surface-view\\package")
 from package.figures.figure import Figure, FigureTypes
 from package.figures.primitives.cone import Cone
 from package.figures.primitives.cylinder import Cylinder
@@ -131,7 +131,7 @@ class Example(QWidget):
             myWidget.view_yz()
 
         def screenshot():
-            myWidget.take_screenshot('photo1.jpg')
+            myWidget.take_screenshot('zhoto1.jpg')
             myWidget.take_screenshot()
 
         def show_intersections():

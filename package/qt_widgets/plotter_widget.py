@@ -27,7 +27,7 @@ class PlotterWidget(QtWidgets.QWidget):
         self.actors_labels = dict()
         self.actors_drawed_labels = dict()
         self.intersections_list = list()
-        self.photo_counter = 0
+        self.photo_counter = self.untitled_counter()
 
     def add_mesh(self, uid: str, mesh, figure_type, labels, **kwargs):
         if uid in self.actors:
@@ -167,4 +167,13 @@ class PlotterWidget(QtWidgets.QWidget):
             file_name = 'untitled_' + str(self.photo_counter) + '.png'
             self.photo_counter += 1
         self.plotter.screenshot(f"package\photos\{file_name}")
-        
+
+    def untitled_counter(self) -> int:
+        import os, re
+        files = os.listdir("package/photos/")
+        numbers = list(filter(lambda str: str.startswith("untitled_"), files))
+        numbers = [numbers[i].split('untitled_')[-1].split('.png')[0] for i in range(len(numbers))]
+        if numbers:
+            return int(numbers[-1]) + 1
+        else:
+            return 0
