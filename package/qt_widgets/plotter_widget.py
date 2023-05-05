@@ -3,12 +3,11 @@ from package.figures.figure import FigureTypes
 from PyQt5 import QtWidgets
 
 class PlotterWidget(QtWidgets.QWidget):
-    def __init__(self, parent=None, window_size=[1280, 720]):
+    def __init__(self, parent=None):
         super().__init__(parent=parent)
 
         self.plotter = BackgroundPlotter(show=False)
         self.plotter.enable_anti_aliasing()
-        self.plotter.window_size = window_size
         
         self.plotter.enable_depth_peeling()
 
@@ -28,6 +27,7 @@ class PlotterWidget(QtWidgets.QWidget):
         self.actors_labels = dict()
         self.actors_drawed_labels = dict()
         self.intersections_list = list()
+        self.photo_counter = 0
 
     def add_mesh(self, uid: str, mesh, figure_type, labels, **kwargs):
         if uid in self.actors:
@@ -132,7 +132,7 @@ class PlotterWidget(QtWidgets.QWidget):
     def update_camera(self):
         self.plotter.view_isometric()
 
-    def get_bounds(self):
+    def get_bounds(self) -> tuple:
         return self.plotter.bounds
         
     def view_xy(self):
@@ -159,8 +159,12 @@ class PlotterWidget(QtWidgets.QWidget):
     def remove_blur(self):
         self.plotter.remove_blurring()
 
-    def take_screenshot(self, file_name='untitled.png'):
-        if file_name.split('.')[-1] not in ['png', 'jpeg', 'jpg', 'bmp', 'tif', 'tiff']:
-            raise Exception("Unfortunately, this graphic format is not supported")
-        self.plotter.screenshot(f"photos\{file_name}")
+    def take_screenshot(self, file_name=''):
+        if file_name != '':
+            if file_name.split('.')[-1] not in ['png', 'jpeg', 'jpg', 'bmp', 'tif', 'tiff']:
+                raise Exception("Unfortunately, this graphic format is not supported")
+        else:
+            file_name = 'untitled_' + str(self.photo_counter) + '.png'
+            self.photo_counter += 1
+        self.plotter.screenshot(f"package\photos\{file_name}")
         

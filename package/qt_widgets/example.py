@@ -96,11 +96,10 @@ class Example(QWidget):
             myWidget.add_mesh(uid1, manager.get_figure_mesh(uid1), "Cone", labels, color='blue')
             myWidget.add_label(uid1)
             #myWidget.show_edges_mesh(uid1)
-            #myWidget.highlight_mesh(uid1, color='red', line_width=4)
+            myWidget.highlight_mesh(uid1, color='red', line_width=4)
 
-            #myWidget.add_mesh(uid2, manager.get_figure_mesh(uid2), "Cylinder", color='cyan')
-            #myWidget.show_edges_mesh(uid2)
-            #myWidget.highlight_mesh(uid2, color='blue', line_width=4)
+            # myWidget.add_mesh(uid2, manager.get_figure_mesh(uid2), "Cylinder", color='cyan')
+            # myWidget.highlight_mesh(uid2, color='red', line_width=4)
             
             #myWidget.add_mesh(uid3, manager.get_figure_mesh(uid3), "Plane", color='purple')
             #myWidget.show_edges_mesh(uid3)
@@ -132,6 +131,7 @@ class Example(QWidget):
             myWidget.view_yz()
 
         def screenshot():
+            myWidget.take_screenshot('photo1.jpg')
             myWidget.take_screenshot()
 
         def show_intersections():
