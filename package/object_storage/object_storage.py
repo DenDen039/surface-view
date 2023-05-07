@@ -13,8 +13,23 @@ class ObjectStorage:
         self.SWO = SWO
         self.PW = PW
         self.counter = 0
+        self.__enable_intersections = False
         self.label_counter = 0
-        self.feature_flag = False
+
+    @property
+    def enable_intersections(self):
+        return self.__enable_intersections
+
+    @enable_intersections.setter
+    def enable_intersections(self, value: bool):
+        if value:
+            intersections = self.objManager.compute_intersections()
+            self.PW.drawIntersections(intersections)
+            self.__enable_intersections = value
+        else:
+            intersections = []
+            self.PW.drawIntersections(intersections)
+            self.__enable_intersections = value
 
     def save(self, path):
         jsonString = json.dumps(self.storage)
@@ -25,25 +40,17 @@ class ObjectStorage:
     def load(self, path):
         with open(path, "r") as f:
             objects = json.load(f)
-
-        self.feature_flag = False
+        temp = self.__enable_intersections
+        self.__enable_intersections = False
         for obj in objects.values():
             self.create(obj)
-        self.feature_flag = True
-
-    def enable_intersections(self, intersections):
-        self.feature_flag = intersections
-        if self.feature_flag:
-            intersections = self.objManager.compute_intersections()
-            self.PW.drawIntersections(intersections)
-        else:
-            self.PW.drawIntersections([])
+        self.__enable_intersections = temp
 
     def delete(self, uid):
         del self.storage[uid]
         self.objManager.delete_figure(uid)
         self.PW.remove_mesh(uid)
-        if self.feature_flag:
+        if self.enable_intersections:
             intersections = self.objManager.compute_intersections()
             self.PW.drawIntersections(intersections)
         self.SWO.delete(uid)
@@ -69,7 +76,7 @@ class ObjectStorage:
 
         self.PW.remove_mesh(uid)
         self.PW.add_mesh(uid, self.objManager.get_figure_mesh(uid), **self.objManager.get_figure_settings(uid))
-        if self.feature_flag:
+        if self.enable_intersections:
             intersections = self.objManager.compute_intersections()
             self.PW.drawIntersections(intersections)
         self.SWO.update(uid, new_data["name"], new_data["FigureTypes"], new_data["color"])
@@ -78,7 +85,7 @@ class ObjectStorage:
         if to_create["name"] == '':
             to_create["name"] = 'untitled_' + str(self.counter)
             self.counter += 1
-        if self.feature_flag:
+        if self.enable_intersections:
             intersections = self.objManager.compute_intersections()
             self.PW.drawIntersections(intersections)
         if to_create["FigureTypes"] == FigureTypes.CONE:
@@ -98,9 +105,12 @@ class ObjectStorage:
 
         self.storage[uid] = to_create
         self.SWO.add(uid, to_create["name"], to_create["FigureTypes"], to_create["color"])
-        self.PW.add_mesh(uid, self.objManager.get_figure_mesh(uid), to_create["FigureTypes"],
-                         [self.objManager.get_label_lines(to_create), self.objManager.get_labels(to_create, self.label_counter)],
+        self.PW.add_mesh(uid, self.objManager.get_figure_mesh(uid),
+                         to_create["FigureTypes"],
+                         [self.objManager.get_label_lines(to_create),
+                          self.objManager.get_labels(to_create, self.label_counter)],
                          **self.objManager.get_figure_settings(uid))
+        self.enable_intersections = True
         self.label_counter += 1
 
         return uid
