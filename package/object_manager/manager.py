@@ -8,8 +8,6 @@ from package.figures.primitives.line import Line
 from package.figures.primitives.plane import Plane
 from package.figures.primitives.revolution_surface import RevolutionSurface
 
-from package.parser import Parser
-
 import uuid
 import copy
 
@@ -17,7 +15,6 @@ import copy
 class ObjectManager:
     def __init__(self):
         self.objects = dict()
-        self.parser = Parser()
 
     def create_cone(self, curve, point, t_bounds, v_bounds, **kwargs) -> str:
         uid = uuid.uuid4()
@@ -104,7 +101,7 @@ class ObjectManager:
                 continue
             mesh = pv.PolyData(self.objects[uid].get_mesh().extract_surface()).triangulate()
             for plane in planes:
-                intersection,_,_ = mesh.intersection(plane, split_first=False, split_second=False)
+                intersection,_,_ = mesh.intersection(plane)
                 if intersection.n_verts == 0:
                     intersections.append(intersection)
         return intersections
@@ -147,6 +144,101 @@ class ObjectManager:
             raise Exception("Object is not a plane")
 
         obj.update_parameters(**kwargs)
+
+    def get_labels(self, figure_type, counter):
+        labels = dict()
+        t = figure_type["t_bounds"]
+        if figure_type["FigureTypes"] == FigureTypes.CONE:
+            labels["C" + str(counter)] = figure_type["point"]
+            labels["Y" + str(counter)] = (figure_type["curve"][0](t[0] * 0.9),
+                                          figure_type["curve"][1](t[0] * 0.9),
+                                          figure_type["curve"][2](t[0] * 0.9))
+
+            labels["P" + str(counter)] = (figure_type["curve"][0](t[0] * 0.5),
+                                          figure_type["curve"][1](t[0] * 0.5),
+                                          figure_type["curve"][2](t[0] * 0.5))
+            s = tuple((ai + bi)/2 for ai, bi in zip(labels["P" + str(counter)], figure_type["direction"]))
+            labels["L" + str(counter)] = s
+            return labels
+
+        elif figure_type["FigureTypes"] == FigureTypes.CYLINDER:
+            labels["P" + str(counter)] = (figure_type["curve"][0](t[0] * 0.5),
+                                          figure_type["curve"][1](t[0] * 0.5),
+                                          figure_type["curve"][2](t[0] * 0.5))
+            s = tuple((ai + bi)/2 for ai, bi in zip(labels["P" + str(counter)], figure_type["direction"]))
+            labels["S" + str(counter)] = s
+
+            labels["Y" + str(counter)] = (figure_type["curve"][0](t[0] * 0.9),
+                                          figure_type["curve"][1](t[0] * 0.9),
+                                          figure_type["curve"][2](t[0] * 0.9))
+            return labels
+
+        elif figure_type["FigureTypes"] == FigureTypes.CURVE:
+            labels["P" + str(counter)] = (figure_type["curve"][0](t[0] * 0.5),
+                                          figure_type["curve"][1](t[0] * 0.5),
+                                          figure_type["curve"][2](t[0] * 0.5))
+            return labels
+
+        elif figure_type["FigureTypes"] == FigureTypes.LINE:
+            labels["P" + str(counter)] = (figure_type["curve"][0](t[0] * 0.5),
+                                          figure_type["curve"][1](t[0] * 0.5),
+                                          figure_type["curve"][2](t[0] * 0.5))
+            return labels
+
+        elif figure_type["FigureTypes"] == FigureTypes.PLANE:
+            labels["M" + str(counter)] = figure_type["point"]
+            labels["n" + str(counter)] = tuple((ai + bi)/ 2 for ai, bi in zip(figure_type["point"], figure_type["normal"]))
+            return labels
+
+        elif figure_type["FigureTypes"] == FigureTypes.REVOLUTION:
+            labels["P" + str(counter)] = (figure_type["curve"][0](t[0] * 0.5),
+                                          figure_type["curve"][1](t[0] * 0.5),
+                                          figure_type["curve"][2](t[0] * 0.5))
+            s = tuple((ai + bi)/2 for ai, bi in zip(labels["P" + str(counter)], t))
+            labels["S" + str(counter)] = s
+            labels["Y" + str(counter)] = (figure_type["curve"][0](t[0] * 0.9),
+                                          figure_type["curve"][1](t[0] * 0.9),
+                                          figure_type["curve"][2](t[0] * 0.9))
+            return labels
+    def get_label_lines(self, figure_type):
+        meshes = []
+        t = figure_type["t_bounds"]
+        P = (figure_type["curve"][0](t[0] * 0.5),
+             figure_type["curve"][1](t[0] * 0.5),
+             figure_type["curve"][2](t[0] * 0.5))
+        if figure_type["FigureTypes"] == FigureTypes.CONE:
+            curve = self.create_curve(figure_type["curve"], t)
+            meshes.append(self.get_figure_mesh(curve))
+            line = self.create_line(figure_type["point"], P, t)
+            meshes.append(self.get_figure_mesh(line))
+            return meshes
+
+        elif figure_type["FigureTypes"] == FigureTypes.CYLINDER:
+
+            s = tuple(ai + bi for ai, bi in zip(P, figure_type["direction"]))
+            line = self.create_line(P, s, t)
+            meshes.append(self.get_figure_mesh(line))
+
+            curve = self.create_curve(figure_type["curve"], t)
+            meshes.append(self.get_figure_mesh(curve))
+            return meshes
+
+        elif figure_type["FigureTypes"] == FigureTypes.PLANE:
+            s = tuple(ai + bi for ai, bi in zip(figure_type["point"], figure_type["normal"]))
+
+            line = self.create_line(figure_type["point"], s, t)
+            meshes.append(self.get_figure_mesh(line))
+            return meshes
+
+        elif figure_type["FigureTypes"] == FigureTypes.REVOLUTION:
+
+            s = tuple(ai + bi for ai, bi in zip(P,figure_type["direction"]))
+            line = self.create_line(P, s, t)
+            meshes.append(self.get_figure_mesh(line))
+
+            curve = self.create_curve(figure_type["curve"], t)
+            meshes.append(self.get_figure_mesh(curve))
+            return meshes
 
     def get_figure(self, uid: str) -> Figure:
         if uid not in self.objects:
@@ -192,29 +284,20 @@ if __name__ == "__main__":
 
     manager = ObjectManager()
     curve = (lambda t: np.sin(t), lambda t: np.cos(t) * 0, lambda t: t)
-    t_bounds = (-10, 10 * 2 * np.pi)
-    v_bounds = (-10, 10)
+    t_bounds = (0, 2 * np.pi)
+    v_bounds = (0, 2)
     point = (5, 5, 5)
     direction = (2, 5, 3)
-
-
-    manager.create_plane((0,1,1), (0,0,0), 100)
-    manager.create_plane((0, 1, 1), (0, 0, 0), 100)
-    manager.create_plane((0, 1, 1), (0, 0, 0), 100)
 
     uid = manager.create_revolution_surface(curve, direction, point, t_bounds)
 
     p = pv.Plotter()
     p.add_mesh(manager.get_figure_mesh(uid))
-   # p.add_mesh(manager.get_figure_mesh(manager.create_plane((0,1,1), (0,0,0), 100)))
-    #p.add_mesh(manager.get_figure_mesh(manager.create_plane((0, 1, 1), (0, 1, 0), 100)))
-   # p.add_mesh(manager.get_figure_mesh(manager.create_plane((0, 1, 1), (0, 2, 0), 100)))
-   # manager.compute_intersections()
     p.show()
 
-   # curve1 = (lambda t: np.sin(t), lambda t: np.cos(t), lambda t: t * 0 + 5)
-   # vector = (0, 0, 1)
-   # uid = manager.create_curve(curve1, t_bounds)
-   # p = pv.Plotter()
-   # p.add_mesh(manager.get_figure_mesh(uid))
-   # p.show()
+    curve1 = (lambda t: np.sin(t), lambda t: np.cos(t), lambda t: t * 0 + 5)
+    vector = (0, 0, 1)
+    uid = manager.create_curve(curve1, t_bounds)
+    p = pv.Plotter()
+    p.add_mesh(manager.get_figure_mesh(uid))
+    p.show()
