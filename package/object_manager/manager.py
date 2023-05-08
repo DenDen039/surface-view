@@ -97,12 +97,15 @@ class ObjectManager:
         intersections = []
         
         for uid in self.objects:
-            if self.objects[uid].get_type() == FigureTypes.PLANE:
+            if self.objects[uid].get_type() in (FigureTypes.PLANE, FigureTypes.CURVE, FigureTypes.LINE):
                 continue
             mesh = pv.PolyData(self.objects[uid].get_mesh().extract_surface()).triangulate()
+            print("den loh")
             for plane in planes:
-                intersection,_,_ = mesh.intersection(plane)
-                if intersection.n_verts == 0:
+                intersection, _, _ = mesh.intersection(plane, split_first=False, split_second=False)
+
+                if intersection.n_points != 0:
+                    print("den krasava")
                     intersections.append(intersection)
         return intersections
             
@@ -200,17 +203,30 @@ class ObjectManager:
                                           figure_type["curve"][1](t[0] * 0.9),
                                           figure_type["curve"][2](t[0] * 0.9))
             return labels
+
     def get_label_lines(self, figure_type):
         meshes = []
+
         t = figure_type["t_bounds"]
+
+        if figure_type["FigureTypes"] == FigureTypes.PLANE:
+            s = tuple(ai + bi for ai, bi in zip(figure_type["point"], figure_type["normal"]))
+
+            line = self.create_line(figure_type["point"], s, t)
+            meshes.append(self.get_figure_mesh(line))
+            return meshes
+
+
         P = (figure_type["curve"][0](t[0] * 0.5),
              figure_type["curve"][1](t[0] * 0.5),
              figure_type["curve"][2](t[0] * 0.5))
+
         if figure_type["FigureTypes"] == FigureTypes.CONE:
-            curve = self.create_curve(figure_type["curve"], t)
-            meshes.append(self.get_figure_mesh(curve))
-            line = self.create_line(figure_type["point"], P, t)
-            meshes.append(self.get_figure_mesh(line))
+            curve = Curve(figure_type["curve"], t)
+            #curve = self.create_curve(figure_type["curve"], t)
+            meshes.append(curve.get_mesh())
+            line = Line(figure_type["point"], P, t)
+            meshes.append(line.get_mesh())
             return meshes
 
         elif figure_type["FigureTypes"] == FigureTypes.CYLINDER:
@@ -223,21 +239,16 @@ class ObjectManager:
             meshes.append(self.get_figure_mesh(curve))
             return meshes
 
-        elif figure_type["FigureTypes"] == FigureTypes.PLANE:
-            s = tuple(ai + bi for ai, bi in zip(figure_type["point"], figure_type["normal"]))
-
-            line = self.create_line(figure_type["point"], s, t)
-            meshes.append(self.get_figure_mesh(line))
-            return meshes
-
         elif figure_type["FigureTypes"] == FigureTypes.REVOLUTION:
 
             s = tuple(ai + bi for ai, bi in zip(P,figure_type["direction"]))
-            line = self.create_line(P, s, t)
-            meshes.append(self.get_figure_mesh(line))
+            line = Line(P, s, t, uuid.uuid4())
+            #line = self.create_line(P, s, t)
+            meshes.append(line.get_mesh())
 
-            curve = self.create_curve(figure_type["curve"], t)
-            meshes.append(self.get_figure_mesh(curve))
+            #curve = self.create_curve(figure_type["curve"], t)
+            curve = Curve(figure_type["curve"], t, uuid.uuid4())
+            meshes.append(curve.get_mesh())
             return meshes
 
     def get_figure(self, uid: str) -> Figure:

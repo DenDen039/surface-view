@@ -89,8 +89,10 @@ class PlotterWidget(QtWidgets.QWidget):
         self.actors[uid] = self.plotter.add_mesh(self.meshes[uid], show_edges=False, **self.actors_settings[uid])
 
     def add_intersections(self, intersections, **kwargs):
+        print(f"intersections:{intersections}")
         for item in intersections:
             new_intersection = self.plotter.add_mesh(item, render_lines_as_tubes=True, **kwargs)
+            print("kolya loh")
             self.intersections_list.append(new_intersection)
 
     def remove_intersections(self):
@@ -170,7 +172,7 @@ class PlotterWidget(QtWidgets.QWidget):
 
     def untitled_counter(self) -> int:
         import os
-        files = os.listdir("package/photos/")
+        files = os.listdir("photos/")
         numbers = list(filter(lambda str: str.startswith("untitled_"), files))
         numbers = [int(numbers[i].split('untitled_')[-1].split('.png')[0]) for i in range(len(numbers))]
         if numbers:

@@ -607,7 +607,7 @@ class UI(QMainWindow):
 
                     "normal": (vector_input_x, vector_input_y, vector_input_z),
                     "point": (point_input_x, point_input_y, point_input_z),
-                    "size": 1,
+                    "size": max(self.pyvista_widget.get_bounds()) * 2, # TODO: CHANGE TO TUPLE
                     "t_bounds": t_bounds,
                     "v_bounds": v_bounds,
                     "name": name,

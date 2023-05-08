@@ -41,8 +41,8 @@ class Cone(Figure):
         curve = self.__curve
         point = self.__point
         resolution = self.__resolution
-        t = np.linspace(t_bounds[0], t_bounds[1], resolution)
-        v = np.linspace(v_bounds[0], v_bounds[1], resolution)
+        t = np.arange(t_bounds[0], t_bounds[1], 0.05)
+        v = np.arange(v_bounds[0], v_bounds[1], 0.05)
 
         v, t = np.meshgrid(v, t)
 
