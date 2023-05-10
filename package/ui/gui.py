@@ -203,6 +203,12 @@ class UI(QMainWindow):
         self.add_object()
 
 
+    def set_intersections(self, mode: bool):
+        if mode:
+            self.object_storage.__enable_intersections = True
+        else:
+            self.object_storage.__enable_intersections = False
+
     def clear_right(self):
         for i in reversed(range(self.toolbox_layout.count())):
              self.toolbox_layout.itemAt(i).widget().setParent(None)

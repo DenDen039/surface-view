@@ -74,7 +74,10 @@ class PlotterWidget(QtWidgets.QWidget):
 
         elif self.actors_types[uid] in [FigureTypes.REVOLUTION]:
             self.remove_mesh(uid)
-            self.actors[uid] = self.plotter.add_mesh(self.meshes[uid], silhouette=dict(color=color, line_width=line_width), **self.actors_settings[uid])
+            self.actors[uid] = self.plotter.add_mesh(self.meshes[uid],
+                                                     silhouette=dict(color=color, line_width=line_width,
+                                                                     feature_angle=60), **self.actors_settings[uid])
+           # self.actors[uid] = self.plotter.add_mesh(self.meshes[uid], silhouette=dict(color=color, line_width=line_width), **self.actors_settings[uid])
             self.actors_HL[uid] = self.plotter.actors[list(self.plotter.actors.keys())[-2]]
         else:
             raise Exception("Unknown figure type")
