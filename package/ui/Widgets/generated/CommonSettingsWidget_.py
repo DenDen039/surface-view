@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'CommonSettingsWidget.ui'
+# Form implementation generated from reading ui file 'package/ui/Widgets/ui/CommonSettingsWidget.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.9
 #
@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_Form(object):
     def setupUi(self, Form):
         Form.setObjectName("Form")
-        Form.resize(534, 427)
+        Form.resize(153, 183)
         self.verticalLayout = QtWidgets.QVBoxLayout(Form)
         self.verticalLayout.setObjectName("verticalLayout")
         self.label_4 = QtWidgets.QLabel(Form)
@@ -34,9 +34,14 @@ class Ui_Form(object):
         self.label_2 = QtWidgets.QLabel(Form)
         self.label_2.setObjectName("label_2")
         self.horizontalLayout_2.addWidget(self.label_2)
-        self.inputColor = QtWidgets.QLineEdit(Form)
-        self.inputColor.setObjectName("inputColor")
-        self.horizontalLayout_2.addWidget(self.inputColor)
+        self.button_color = QtWidgets.QPushButton(Form)
+        self.button_color.setStyleSheet("backound-color : white")
+        self.button_color.setText("")
+        self.button_color.setCheckable(False)
+        self.button_color.setDefault(False)
+        self.button_color.setObjectName("button_color")
+        self.horizontalLayout_2.addWidget(self.button_color)
+        self.horizontalLayout_2.setStretch(1, 1)
         self.verticalLayout.addLayout(self.horizontalLayout_2)
         self.horizontalLayout_5 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_5.setObjectName("horizontalLayout_5")
@@ -45,7 +50,6 @@ class Ui_Form(object):
         self.horizontalLayout_5.addWidget(self.label_6)
         self.inputOpacity = QtWidgets.QLineEdit(Form)
         self.inputOpacity.setObjectName("inputOpacity")
-        self.inputOpacity.setDisabled(True)                             #DISABLED
         self.horizontalLayout_5.addWidget(self.inputOpacity)
         self.verticalLayout.addLayout(self.horizontalLayout_5)
         self.horizontalLayout_3 = QtWidgets.QHBoxLayout()

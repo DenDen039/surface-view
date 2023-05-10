@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'CreateVectorWidget.ui'
+# Form implementation generated from reading ui file 'package/ui/Widgets/ui/CreateVectorWidget.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.9
 #

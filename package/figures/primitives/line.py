@@ -35,7 +35,7 @@ class Line(Figure):
         point2 = self.__point2
         resolution = self.__resolution
 
-        t = np.linspace(t_bounds[0], t_bounds[1], resolution)
+        t = np.arange(t_bounds[0], t_bounds[1], 0.05)
 
         x = point1[0] + t * (point2[0] - point1[0])
         y = point1[1] + t * (point2[1] - point1[1])

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'userinterface.ui'
+# Form implementation generated from reading ui file 'package/ui/Widgets/ui/userinterface.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.9
 #
@@ -9,7 +9,7 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-import sys
+
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -82,12 +82,12 @@ class Ui_MainWindow(object):
         MainWindow.addToolBar(QtCore.Qt.TopToolBarArea, self.toolBar)
         self.open = QtWidgets.QAction(MainWindow)
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap("package\\ui\\assets\\folder-horizontal-open.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(QtGui.QPixmap("package/ui/Widgets/ui\\folder-horizontal-open.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.open.setIcon(icon)
         self.open.setObjectName("open")
         self.save_as = QtWidgets.QAction(MainWindow)
         icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap("package\\ui\\assets\\disks-black.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon1.addPixmap(QtGui.QPixmap("package/ui/Widgets/ui\\disks-black.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.save_as.setIcon(icon1)
         self.save_as.setObjectName("save_as")
         self.tools = QtWidgets.QAction(MainWindow)
@@ -95,7 +95,7 @@ class Ui_MainWindow(object):
         self.tools.setChecked(True)
         self.tools.setEnabled(True)
         icon2 = QtGui.QIcon()
-        icon2.addPixmap(QtGui.QPixmap("package\\ui\\assets\\hammer.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon2.addPixmap(QtGui.QPixmap("package/ui/Widgets/ui\\hammer.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.tools.setIcon(icon2)
         self.tools.setObjectName("tools")
         self.console = QtWidgets.QAction(MainWindow)
@@ -103,27 +103,27 @@ class Ui_MainWindow(object):
         self.console.setChecked(True)
         self.console.setEnabled(True)
         icon3 = QtGui.QIcon()
-        icon3.addPixmap(QtGui.QPixmap("package\\ui\\assets\\terminal.gif"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon3.addPixmap(QtGui.QPixmap("package/ui/Widgets/ui\\terminal.gif"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.console.setIcon(icon3)
         self.console.setObjectName("console")
         self.save = QtWidgets.QAction(MainWindow)
         icon4 = QtGui.QIcon()
-        icon4.addPixmap(QtGui.QPixmap("package\\ui\\assets\\disk-black.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon4.addPixmap(QtGui.QPixmap("package/ui/Widgets/ui\\disk-black.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.save.setIcon(icon4)
         self.save.setObjectName("save")
         self.new_scene = QtWidgets.QAction(MainWindow)
         icon5 = QtGui.QIcon()
-        icon5.addPixmap(QtGui.QPixmap("package\\ui\\assets\\plus-circle.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon5.addPixmap(QtGui.QPixmap("package/ui/Widgets/ui\\plus-circle.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.new_scene.setIcon(icon5)
         self.new_scene.setObjectName("new_scene")
         self.save_image = QtWidgets.QAction(MainWindow)
         icon6 = QtGui.QIcon()
-        icon6.addPixmap(QtGui.QPixmap("package\\ui\\assets\\image.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon6.addPixmap(QtGui.QPixmap("package/ui/Widgets/ui\\image.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.save_image.setIcon(icon6)
         self.save_image.setObjectName("save_image")
         self.settings = QtWidgets.QAction(MainWindow)
         icon7 = QtGui.QIcon()
-        icon7.addPixmap(QtGui.QPixmap("package\\ui\\assets\\gear.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon7.addPixmap(QtGui.QPixmap("package/ui/Widgets/ui\\gear.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.settings.setIcon(icon7)
         self.settings.setObjectName("settings")
         self.menu.addAction(self.save)

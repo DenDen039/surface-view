@@ -70,21 +70,27 @@ class PlotterWidget(QtWidgets.QWidget):
 
         elif self.actors_types[uid] in [FigureTypes.LINE, FigureTypes.CURVE]:
             self.remove_mesh(uid)
-            self.actors[uid] = self.plotter.add_mesh(self.meshes[uid], render_lines_as_tubes=True, line_width=line_width, **self.actors_settings[uid])
+            self.actors[uid] = self.plotter.add_mesh(self.meshes[uid], render_lines_as_tubes=True, **self.actors_settings[uid])
 
         elif self.actors_types[uid] in [FigureTypes.REVOLUTION]:
             self.remove_mesh(uid)
-            self.actors[uid] = self.plotter.add_mesh(self.meshes[uid], silhouette=dict(color=color, line_width=line_width), **self.actors_settings[uid])
+            self.actors[uid] = self.plotter.add_mesh(self.meshes[uid],
+                                                     silhouette=dict(color=color, line_width=line_width,
+                                                                     feature_angle=60), **self.actors_settings[uid])
+           # self.actors[uid] = self.plotter.add_mesh(self.meshes[uid], silhouette=dict(color=color, line_width=line_width), **self.actors_settings[uid])
             self.actors_HL[uid] = self.plotter.actors[list(self.plotter.actors.keys())[-2]]
         else:
             raise Exception("Unknown figure type")
         
     def remove_highlight(self, uid: str):
-        if self.actors_types[uid] in [FigureTypes.CONE, FigureTypes.CYLINDER, FigureTypes.PLANE, FigureTypes.REVOLUTION]:
-            self.plotter.remove_actor(self.actors_HL[uid])
-        elif self.actors_types[uid] in [FigureTypes.LINE, FigureTypes.CURVE]:
-            self.remove_mesh(uid)
-            self.actors[uid] = self.plotter.add_mesh(self.meshes[uid], **self.actors_settings[uid])
+
+        if uid in self.actors_HL:
+            if self.actors_types[uid] in [FigureTypes.CONE, FigureTypes.CYLINDER, FigureTypes.PLANE, FigureTypes.REVOLUTION]:
+                  self.plotter.remove_actor(self.actors_HL[uid])
+                  del self.actors_HL[uid]
+        if self.actors_types[uid] in [FigureTypes.LINE, FigureTypes.CURVE]:
+                  self.remove_mesh(uid)
+                  self.actors[uid] = self.plotter.add_mesh(self.meshes[uid], **self.actors_settings[uid])
 
 
     def show_edges_mesh(self, uid: str, color: str='white'):
@@ -100,6 +106,7 @@ class PlotterWidget(QtWidgets.QWidget):
         self.actors[uid] = self.plotter.add_mesh(self.meshes[uid], show_edges=False, **self.actors_settings[uid])
 
     def add_intersections(self, intersections, **kwargs):
+        print(f"intersections:{intersections}")
         for item in intersections:
             new_intersection = self.plotter.add_mesh(item, render_lines_as_tubes=True, **kwargs)
             self.intersections_list.append(new_intersection)
@@ -116,7 +123,7 @@ class PlotterWidget(QtWidgets.QWidget):
         drawed_meshes = list()
         for i in range(len(meshes)):
             drawed_meshes.append(self.plotter.add_mesh(meshes[i], color=colors[i], line_width=line_width, render_lines_as_tubes=True))
-        
+
         points = list(self.actors_labels[uid][1].values())
         labels = list(self.actors_labels[uid][1].keys())
         self.plotter.add_point_labels(points, labels, always_visible=True, italic=True, font_size=font_size, point_color='red', point_size=point_size, show_points=True, render_points_as_spheres=True)
@@ -177,11 +184,11 @@ class PlotterWidget(QtWidgets.QWidget):
         else:
             file_name = 'untitled_' + str(self.photo_counter) + '.png'
             self.photo_counter += 1
-        self.plotter.screenshot(f"package\photos\{file_name}")
+        self.plotter.screenshot(f"photos/{file_name}")
 
     def untitled_counter(self) -> int:
         import os
-        files = os.listdir("package/photos/")
+        files = os.listdir("photos/")
         numbers = list(filter(lambda str: str.startswith("untitled_"), files))
         numbers = [int(numbers[i].split('untitled_')[-1].split('.png')[0]) for i in range(len(numbers))]
         if numbers:

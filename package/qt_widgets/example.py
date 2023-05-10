@@ -1,5 +1,5 @@
 import sys, numpy as np
-sys.path.append("C:\\surface-view\\package")
+#sys.path.append("C:\\surface-view\\package")
 from package.figures.figure import Figure, FigureTypes
 from package.figures.primitives.cone import Cone
 from package.figures.primitives.cylinder import Cylinder

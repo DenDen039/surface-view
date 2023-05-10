@@ -9,42 +9,21 @@ from package.figures.figure import *
 from package.qt_widgets.plotter_widget import PlotterWidget
 
 from package.object_storage.object_storage import ObjectStorage
+from package.parser import Parser
 
 from numpy import *
 
 
 
-# TODO: add parser (maybe as class)
+# TODO: finish parses class
 #       add update_widget
 #       refactor gui
 #       better f(t) parser
-#       parser for CommonObjectWidget
-#       change object_storage to have strings at f(t) inputs
-#       fix opacity choice for object
-#       fix color don`t change on edit
+#
 
 import numpy as np
 import re
 
-
-
-
-def parse_expression(expression):
-    # Check that the expression only contains the variable "t"
-    if "t" not in expression.replace(" ", ""):
-        raise ValueError("Expression must contain the variable 't'")
-    # Check that the expression only contains valid numpy functions and operators
-    allowed_functions = set(np.__dict__.keys())
-    allowed_operators = set("+-*/()")
-    expression_functions = set(re.findall(r"\b\w+\b", expression)) - set(["t"])
-    if not expression_functions.issubset(allowed_functions):
-        raise ValueError("Expression contains invalid function(s)")
-    for token in expression.split():
-        if token not in allowed_operators and token not in expression_functions and not re.match(r"^\d+\.?\d*$", token):
-            raise ValueError(f"Invalid character(s) in expression token: {token}")
-    # Define the lambda function using the expression
-    f = lambda t: eval(expression, {"__builtins__": None, "np": np, "t": t})
-    return f
 
 def parse_expression(expresion):
 
@@ -188,9 +167,11 @@ class UI(QMainWindow):
         self.show_tools.triggered.connect(self.hide_unhide_tools)
         self.show_console.triggered.connect(self.hide_unhide_console)
 
+
+
         #self.new_scene.triggered.connect(self.add_object)
 
-        self.add_object()
+
 
         # Show the app
         self.show()
@@ -198,30 +179,60 @@ class UI(QMainWindow):
         # Keep track of hidden or not
         self.hidden_tools = False
         self.hidden_console = False
+        self.hide_unhide_console()
+        self.show_console.setChecked(0)
 
-        self.SWO = StorageObjectWidget(self)
-        self.object_storage = ObjectStorage(self.pyvista_widget, self.SWO)
+        self.SOW = StorageObjectWidget(self)
+        self.object_storage = ObjectStorage(self.pyvista_widget, self.SOW)
 
-        self.horizontal_layout.replaceWidget(self.scrollArea, self.SWO)
-      #  self.horizontal_layout.addWidget(self.SWO)
+        self.highlights_enabled = True
+        self.labels_enabled = True
+        self.object_storage.__enable_intersections = True
+
+        self.horizontal_layout.replaceWidget(self.scrollArea, self.SOW)
+        # self.horizontal_layout.addWidget(self.SOW)
         self.scrollArea.deleteLater()
         self.scrollAreaContents.deleteLater()
-        #self.parser = Parser()
+        self.parser = Parser()
 
+        self.save.triggered.connect(lambda: self.object_storage.save("scenes/file.json"))
+        self.open.triggered.connect(lambda: self.object_storage.load("scenes/file.json"))
+        self.save_image.triggered.connect(lambda: self.pyvista_widget.take_screenshot(''))
         self.objects_list = {}
 
+        self.add_object()
+
+
+    def set_intersections(self, mode: bool):
+        if mode:
+            self.object_storage.__enable_intersections = True
+        else:
+            self.object_storage.__enable_intersections = False
 
     def clear_right(self):
         for i in reversed(range(self.toolbox_layout.count())):
              self.toolbox_layout.itemAt(i).widget().setParent(None)
 
+    def remove_all_highlights(self):
+        for object in self.object_storage.storage:
+            print(f"trying to delete highlight from {str(object)}")
+            self.pyvista_widget.remove_highlight(object)
+        print(self.pyvista_widget.actors_HL)
 
-    def add_object(self): # DEBUG VERSION, SUBJECT TO CHANGE
+    def remove_all_labels(self):
+        for object in self.pyvista_widget.actors_drawed_labels:
+            print(f"trying to delete highlight from {str(object)}")
+            self.pyvista_widget.remove_label(object)
+
+    # CHOOSE NEW OBJECT WIDGET #
+    def add_object(self):
 
         #contextMenu = QMenu(self)
 
         #menu_choice_conical = contextMenu.addAction("Add conical surface")
         #menu_choice_conical.triggered.connect(lambda: self.openCreateWidget(0))
+
+        self.remove_all_highlights()
 
         self.clear_right()
 
@@ -264,7 +275,9 @@ class UI(QMainWindow):
         self.toolbox_layout.addWidget(self.inside)
         self.toolbox_layout.update()
 
+    # CREATE NEW OBJECT WIDGET #
     def openCreateWidget(self, _type: FigureTypes):
+
 
         self.clear_right()
 
@@ -274,28 +287,34 @@ class UI(QMainWindow):
         self.commonWidget.Form.button_color.setStyleSheet("background-color : white")
         self.commonWidget.Form.inputOpacity.setText("0.5")
         self.commonWidget.Form.inputTBounds.setText("-10, 10")
+        self.commonWidget.Form.inputTBounds.setEnabled(False)
         self.commonWidget.Form.inputVBounds.setText("0, 1")
+        self.commonWidget.Form.inputVBounds.setEnabled(False)
         self.commonWidget.Form.button_color.clicked.connect(self.change_color)
-
-
-
 
 
         applyButton = None
         match _type:
             case FigureTypes.CONE:
                 self.createWidget = self.creator.CreateConicalWidget()
+                self.commonWidget.Form.inputTBounds.setEnabled(True)
+                self.commonWidget.Form.inputVBounds.setEnabled(True)
             case FigureTypes.CURVE:
                 self.createWidget = self.creator.CreateCurveWidget()
+                self.commonWidget.Form.inputTBounds.setEnabled(True)
             case FigureTypes.CYLINDER:
                 self.createWidget = self.creator.CreateCylindricalWidget()
+                self.commonWidget.Form.inputTBounds.setEnabled(True)
+                self.commonWidget.Form.inputVBounds.setEnabled(True)
             case FigureTypes.LINE:
                 self.createWidget = self.creator.CreateLineWidget()
+                self.commonWidget.Form.inputTBounds.setEnabled(True)
             case FigureTypes.PLANE:
                 self.createWidget = self.creator.CreatePlaneWidget()
             case FigureTypes.POINT:
                 self.createWidget = self.creator.CreatePointWidget()
             case FigureTypes.REVOLUTION:
+                self.commonWidget.Form.inputTBounds.setEnabled(True)
                 self.createWidget = self.creator.CreateRotationFigureWidget()
            # case FigureTypes.VE:
            #    self.createWidget = self.creator.CreateVectorWidget()
@@ -356,15 +375,11 @@ class UI(QMainWindow):
         _curve_input_y_text = curve_input_y
         _curve_input_z_text = curve_input_z
 
-        try:
-            curve_input_x = parse_expression(curve_input_x)
-            curve_input_y = parse_expression(curve_input_y)
-            curve_input_z = parse_expression(curve_input_z)
-        except:
-            self.console.append("Incorrect value in curve input")
-            return False
+        if self.parser.check_expression_string(curve_input_x) and self.parser.check_expression_string(curve_input_y) and self.parser.check_expression_string(curve_input_z):
+            return curve_input_x, curve_input_y, curve_input_z
 
-        return curve_input_x, curve_input_y, curve_input_z
+        self.console.append("Incorrect value in curve input")
+        return False
 
     def input_line(self):
 
@@ -392,12 +407,16 @@ class UI(QMainWindow):
 
         return point_input_x_1, point_input_y_1, point_input_z_1, point_input_x_2, point_input_y_2, point_input_z_2
 
+
+    # EDIT OBJECT WIDGET #
     def edit_object(self, uid):
-        print(uid)
+        self.remove_all_labels()
+        self.remove_all_highlights()
+        print(f"editing {uid}")
         storage = self.object_storage.storage
-        print(storage)
         _type = storage[uid]["FigureTypes"]
         self.openCreateWidget(_type)
+
 
         button_delete = QPushButton("Delete")
         self.createWidget.Form.verticalLayout.addWidget(button_delete)
@@ -405,35 +424,51 @@ class UI(QMainWindow):
         self.commonWidget.Form.inputName.setText(storage[uid]["name"])
         self.commonWidget.Form.button_color.setStyleSheet(f"background-color : {storage[uid]['color']}")
         self.commonWidget.color = storage[uid]['color']
-        self.commonWidget.Form.inputOpacity.setText(storage[uid]["transparency"])
+        self.commonWidget.Form.inputOpacity.setText(str(storage[uid]["opacity"]))
         self.commonWidget.Form.inputTBounds.setText(str(storage[uid]["t_bounds"][0]) + ", " + str(storage[uid]["t_bounds"][1]))
+        self.commonWidget.Form.inputTBounds.setEnabled(False)
         self.commonWidget.Form.inputVBounds.setText(str(storage[uid]["v_bounds"][0]) + ", " + str(storage[uid]["v_bounds"][1]))
+        self.commonWidget.Form.inputVBounds.setEnabled(False)
 
         match  _type:
             case FigureTypes.CONE:
+
+                self.commonWidget.Form.inputTBounds.setEnabled(True)
+                self.commonWidget.Form.inputVBounds.setEnabled(True)
+
                 self.createWidget.Form.point_input_x.setText(str(storage[uid]["point"][0]))
                 self.createWidget.Form.point_input_y.setText(str(storage[uid]["point"][1]))
                 self.createWidget.Form.point_input_z.setText(str(storage[uid]["point"][2]))
 
-                self.createWidget.Form.curve_input_x.setText(str(storage[uid]["curve"][0]))
-                self.createWidget.Form.curve_input_y.setText(str(storage[uid]["curve"][1]))
-                self.createWidget.Form.curve_input_z.setText(str(storage[uid]["curve"][2]))
+                self.createWidget.Form.curve_input_x.setText(str(storage[uid]["curve_string"][0]))
+                self.createWidget.Form.curve_input_y.setText(str(storage[uid]["curve_string"][1]))
+                self.createWidget.Form.curve_input_z.setText(str(storage[uid]["curve_string"][2]))
 
             case FigureTypes.CURVE:
-                self.createWidget.Form.curve_input_x.setText(str(storage[uid]["curve"][0]))
-                self.createWidget.Form.curve_input_y.setText(str(storage[uid]["curve"][1]))
-                self.createWidget.Form.curve_input_z.setText(str(storage[uid]["curve"][2]))
+
+                self.commonWidget.Form.inputTBounds.setEnabled(True)
+
+                self.createWidget.Form.curve_input_x.setText(str(storage[uid]["curve_string"][0]))
+                self.createWidget.Form.curve_input_y.setText(str(storage[uid]["curve_string"][1]))
+                self.createWidget.Form.curve_input_z.setText(str(storage[uid]["curve_string"][2]))
 
             case FigureTypes.CYLINDER:
-                self.createWidget.Form.curve_input_x.setText(str(storage[uid]["curve"][0]))
-                self.createWidget.Form.curve_input_y.setText(str(storage[uid]["curve"][1]))
-                self.createWidget.Form.curve_input_z.setText(str(storage[uid]["curve"][2]))
+
+                self.commonWidget.Form.inputTBounds.setEnabled(True)
+                self.commonWidget.Form.inputVBounds.setEnabled(True)
+
+                self.createWidget.Form.curve_input_x.setText(str(storage[uid]["curve_string"][0]))
+                self.createWidget.Form.curve_input_y.setText(str(storage[uid]["curve_string"][1]))
+                self.createWidget.Form.curve_input_z.setText(str(storage[uid]["curve_string"][2]))
 
                 self.createWidget.Form.vector_input_x.setText(str(storage[uid]["direction"][0]))
                 self.createWidget.Form.vector_input_y.setText(str(storage[uid]["direction"][1]))
                 self.createWidget.Form.vector_input_z.setText(str(storage[uid]["direction"][2]))
 
             case FigureTypes.LINE:
+
+                self.commonWidget.Form.inputTBounds.setEnabled(True)
+
                 self.createWidget.Form.input_x_1.setText(str(storage[uid]["point1"][0]))
                 self.createWidget.Form.input_y_1.setText(str(storage[uid]["point1"][1]))
                 self.createWidget.Form.input_z_1.setText(str(storage[uid]["point1"][2]))
@@ -457,9 +492,12 @@ class UI(QMainWindow):
                 self.createWidget.Form.point_input_z.setText(str(storage[uid]["point"][2]))
 
             case FigureTypes.REVOLUTION:
-                self.createWidget.Form.curve_input_x.setText(str(storage[uid]["curve"][0]))
-                self.createWidget.Form.curve_input_y.setText(str(storage[uid]["curve"][1]))
-                self.createWidget.Form.curve_input_z.setText(str(storage[uid]["curve"][2]))
+
+                self.commonWidget.Form.inputTBounds.setEnabled(True)
+
+                self.createWidget.Form.curve_input_x.setText(str(storage[uid]["curve_string"][0]))
+                self.createWidget.Form.curve_input_y.setText(str(storage[uid]["curve_string"][1]))
+                self.createWidget.Form.curve_input_z.setText(str(storage[uid]["curve_string"][2]))
 
                 self.createWidget.Form.input_x_1.setText(str(storage[uid]["direction"][0]))
                 self.createWidget.Form.input_y_1.setText(str(storage[uid]["direction"][1]))
@@ -470,16 +508,45 @@ class UI(QMainWindow):
                 self.createWidget.Form.input_z_2.setText(str(storage[uid]["point"][2]))
 
         self.createWidget.Form.applyButton.disconnect()
-        self.createWidget.Form.applyButton.clicked.connect(lambda: self.createObject(_type, True, uid))
+
+        self.createWidget.Form.applyButton.clicked.connect(lambda: self.edit_apply_button_clicked(_type, uid))
+        self.createWidget.Form.cancelButton.clicked.connect(self.edit_cancel_button_clicked)
+
+        if not uid in self.pyvista_widget.actors_HL:
+            self.pyvista_widget.highlight_mesh(uid)
+
+        self.pyvista_widget.add_label(uid)
+
         button_delete.clicked.connect(lambda: self.deleteObject(uid))
 
+    def edit_apply_button_clicked(self, _type, uid):
+        self.pyvista_widget.remove_intersections()
+        self.createObject(_type, True,uid)
+        if uid not in self.pyvista_widget.actors_HL:
+            self.pyvista_widget.highlight_mesh(uid)
+
+    def edit_cancel_button_clicked(self):
+        self.remove_all_highlights()
+        self.remove_all_labels()
+        self.add_object()
+
+    # CREATE OR UPDATE OBJECT #
     def createObject(self, _type, update_mode, uid):
 
         name = self.commonWidget.Form.inputName.text()
         color = self.commonWidget.color
         opacity = self.commonWidget.Form.inputOpacity.text()
-        t_bounds = [float(x) for x in self.commonWidget.Form.inputTBounds.text().split(",")]
-        v_bounds = [float(x) for x in self.commonWidget.Form.inputVBounds.text().split(",")]
+
+        if not self.parser.parse_two_floats(self.commonWidget.Form.inputTBounds.text()):
+            self.console.append("Incorrect input in t_bounds")
+            return
+        t_bounds = self.parser.parse_two_floats(self.commonWidget.Form.inputTBounds.text())
+
+        if not self.parser.parse_two_floats(self.commonWidget.Form.inputVBounds.text()):
+            self.console.append("Incorrect input in v_bounds")
+            return
+        v_bounds = self.parser.parse_two_floats(self.commonWidget.Form.inputVBounds.text())
+
 
         input = {}
 
@@ -596,7 +663,7 @@ class UI(QMainWindow):
 
                     "normal": (vector_input_x, vector_input_y, vector_input_z),
                     "point": (point_input_x, point_input_y, point_input_z),
-                    "size": 1,
+                    "size": max(self.pyvista_widget.get_bounds()) * 2, # TODO: CHANGE TO TUPLE
                     "t_bounds": t_bounds,
                     "v_bounds": v_bounds,
                     "name": name,
@@ -651,7 +718,7 @@ class UI(QMainWindow):
                 ...
 
         input["color"] = color
-        input["transparency"] = opacity
+        input["opacity"] = float(opacity)
 
         if update_mode == 0:
             self.console.append(f"Created {input['FigureTypes']} object with name {input['name']}")
@@ -665,8 +732,10 @@ class UI(QMainWindow):
             print("updating object")
             self.object_storage.update(uid, input)
 
+    # DELETE OBJECT #
     def deleteObject(self, uid):
 
+        self.pyvista_widget.remove_intersections()
         self.object_storage.delete(uid)
         self.console.append(f"Deleted object {uid}")
 
