@@ -1,56 +1,150 @@
-import numpy as np
-import pyvista as pv
 from pyvistaqt import BackgroundPlotter
+from package.figures.figure import FigureTypes
 from PyQt5 import QtWidgets
 
 class PlotterWidget(QtWidgets.QWidget):
-    def __init__(self,
-                 #objects: dict,
-                 parent=None, window_size=[1280, 720], zoom=-10):
+    def __init__(self, parent=None):
         super().__init__(parent=parent)
-
 
         self.plotter = BackgroundPlotter(show=False)
         self.plotter.enable_anti_aliasing()
-        self.zoom = zoom
-        self.plotter.window_size = window_size
+        
+        self.plotter.enable_depth_peeling()
+
 
         self.plotter.add_axes()
         self.plotter.show_grid()
-        self.plotter.camera.Zoom(self.zoom)
-        self.plotter.enable_terrain_style()
+        self.plotter.enable_terrain_style(mouse_wheel_zooms=True)
+        self.plotter.view_isometric()
 
         self.layout = QtWidgets.QVBoxLayout(self)
         self.layout.addWidget(self.plotter.interactor)
 
-        #self.objects = objects
+        self.meshes = dict()
         self.actors = dict()
+        self.actors_types = dict()
+        self.actors_settings = dict()
+        self.actors_HL = dict()
+        self.actors_labels = dict()
+        self.actors_drawed_labels = dict()
+        self.intersections_list = list()
+        self.photo_counter = self.untitled_counter()
 
-    def add_mesh(self, uid: str, mesh, **kwargs):
-        #if uid not in self.objects:
-        #    raise Exception("Figure not found")
-        self.actors[uid] = self.plotter.add_mesh(mesh, **kwargs)
+    def add_mesh(self, uid: str, mesh, figure_type, labels, **kwargs):
+        if uid in self.actors:
+            raise Exception("Figure already exists")
+        self.meshes[uid] = mesh
+        self.actors[uid] = self.plotter.add_mesh(self.meshes[uid], **kwargs)
+        self.actors_types[uid] = figure_type
+        self.actors_settings[uid] = kwargs
+        self.actors_labels[uid] = labels
         self.update_camera()
+
+    def hide_mesh(self, uid: str):
+        if uid not in self.actors:
+            raise Exception("Figure not exist")
+        self.remove_mesh(uid)
+        self.actors[uid] = self.plotter.add_mesh(self.meshes[uid], opacity=0, **self.actors_settings[uid])
+
+    def show_mesh(self, uid: str):
+        if uid not in self.actors:
+            raise Exception("Figure not exist")
+        self.remove_mesh(uid)
+        self.actors[uid] = self.plotter.add_mesh(self.meshes[uid], **self.actors_settings[uid])
 
     def remove_mesh(self, uid: str):
         if uid not in self.actors:
             raise Exception("Figure not exist")
+        if uid in self.actors_HL:
+            self.remove_highlight(uid)
         self.plotter.remove_actor(self.actors[uid])
         self.actors.pop(uid)
         self.update_camera()
 
+    def highlight_mesh(self, uid: str, color: str='red', line_width: float=2.5):
+        if uid not in self.actors:
+                raise Exception("Figure not exist")
+        if self.actors_types[uid] in [FigureTypes.CONE, FigureTypes.CYLINDER, FigureTypes.PLANE]:
+            boundary = self.meshes[uid].extract_feature_edges(boundary_edges=True, non_manifold_edges=True, manifold_edges=True)
+            self.actors_HL[uid] = self.plotter.add_mesh(boundary, color=color, line_width=line_width)
+
+        elif self.actors_types[uid] in [FigureTypes.LINE, FigureTypes.CURVE]:
+            self.remove_mesh(uid)
+            self.actors[uid] = self.plotter.add_mesh(self.meshes[uid], render_lines_as_tubes=True, line_width=line_width, **self.actors_settings[uid])
+
+        elif self.actors_types[uid] in [FigureTypes.REVOLUTION]:
+            self.remove_mesh(uid)
+            self.actors[uid] = self.plotter.add_mesh(self.meshes[uid], silhouette=dict(color=color, line_width=line_width), **self.actors_settings[uid])
+            self.actors_HL[uid] = self.plotter.actors[list(self.plotter.actors.keys())[-2]]
+        else:
+            raise Exception("Unknown figure type")
+        
+    def remove_highlight(self, uid: str):
+        if self.actors_types[uid] in [FigureTypes.CONE, FigureTypes.CYLINDER, FigureTypes.PLANE, FigureTypes.REVOLUTION]:
+            self.plotter.remove_actor(self.actors_HL[uid])
+        elif self.actors_types[uid] in [FigureTypes.LINE, FigureTypes.CURVE]:
+            self.remove_mesh(uid)
+            self.actors[uid] = self.plotter.add_mesh(self.meshes[uid], **self.actors_settings[uid])
+
+
+    def show_edges_mesh(self, uid: str, color: str='white'):
+        if uid not in self.actors:
+            raise Exception("Figure not exist")
+        self.remove_mesh(uid)
+        self.actors[uid] = self.plotter.add_mesh(self.meshes[uid], show_edges=True, edge_color=color, **self.actors_settings[uid])
+
+    def hide_edges_mesh(self, uid: str):
+        if uid not in self.actors_HL:
+            raise Exception("Figure not exist")
+        self.remove_mesh(uid)
+        self.actors[uid] = self.plotter.add_mesh(self.meshes[uid], show_edges=False, **self.actors_settings[uid])
+
+    def add_intersections(self, intersections, **kwargs):
+        for item in intersections:
+            new_intersection = self.plotter.add_mesh(item, render_lines_as_tubes=True, **kwargs)
+            self.intersections_list.append(new_intersection)
+
+    def remove_intersections(self):
+        for item in self.intersections_list:
+            self.plotter.remove_actor(item)
+        self.intersections_list.clear()
+        self.update_camera()
+
+    def add_label(self, uid, point_size=14, line_width=5, font_size=12):
+        meshes = self.actors_labels[uid][0]
+        colors = ["green", "blue", "yellow", "purple", "cyan", "red"]
+        drawed_meshes = list()
+        for i in range(len(meshes)):
+            drawed_meshes.append(self.plotter.add_mesh(meshes[i], color=colors[i], line_width=line_width, render_lines_as_tubes=True))
+        
+        points = list(self.actors_labels[uid][1].values())
+        labels = list(self.actors_labels[uid][1].keys())
+        self.plotter.add_point_labels(points, labels, always_visible=True, italic=True, font_size=font_size, point_color='red', point_size=point_size, show_points=True, render_points_as_spheres=True)
+
+        drawed_points = [self.plotter.actors[list(self.plotter.actors.keys())[-2]], self.plotter.actors[list(self.plotter.actors.keys())[-1]]]
+        self.actors_drawed_labels[uid] = drawed_meshes + drawed_points
+
+    def remove_label(self, uid):
+        for actor in self.actors_drawed_labels[uid]:
+            self.plotter.remove_actor(actor)
+
     def clear_actors(self):
-        for actor in self.actors:
+        for actor in list(self.actors.keys()):
             self.remove_mesh(actor)
         self.actors = dict()
+        self.update_camera()
 
     def unlock_camera(self):
-        self.plotter.enable_fly_to_right_click()
+        self.fly = self.plotter.enable_fly_to_right_click()
+
+    def lock_camera(self):
+        self.update_camera()
 
     def update_camera(self):
-        x_min, x_max, y_min, y_max, z_min, z_max = self.plotter.bounds
-        new_position = tuple([(x_min + x_max) / 2, (y_min + y_max) / 2, (z_min + z_max) / 2])
-        self.plotter.fly_to(new_position)
+        self.plotter.view_isometric()
+
+    def get_bounds(self) -> tuple:
+        return self.plotter.bounds
         
     def view_xy(self):
         self.plotter.view_xy()
@@ -70,17 +164,28 @@ class PlotterWidget(QtWidgets.QWidget):
     def view_zy(self):
         self.plotter.view_zy()
 
-    def zoom_in(self):
-        self.zoom += 1
-        self.plotter.camera.Zoom(self.zoom)
+    def blur(self):
+        self.plotter.add_blurring()
+    
+    def remove_blur(self):
+        self.plotter.remove_blurring()
 
-    def zoom_out(self):
-        self.zoom -= 1
-        self.plotter.camera.Zoom(self.zoom)
+    def take_screenshot(self, file_name=''):
+        if file_name != '':
+            if file_name.split('.')[-1] not in ['png', 'jpeg', 'jpg', 'bmp', 'tif', 'tiff']:
+                raise Exception("Unfortunately, this graphic format is not supported")
+        else:
+            file_name = 'untitled_' + str(self.photo_counter) + '.png'
+            self.photo_counter += 1
+        self.plotter.screenshot(f"package\photos\{file_name}")
 
-    def take_screenshot(self, file_name='untitled.png'):
-        if file_name.split('.')[-1] not in ['png', 'jpeg', 'jpg', 'bmp', 'tif', 'tiff']:
-            print(file_name.split('.')[-1])
-            raise Exception("Unfortunately, this graphic format is not supported")
-        self.plotter.screenshot(f"photos\{file_name}")
-        
+    def untitled_counter(self) -> int:
+        import os
+        files = os.listdir("package/photos/")
+        numbers = list(filter(lambda str: str.startswith("untitled_"), files))
+        numbers = [int(numbers[i].split('untitled_')[-1].split('.png')[0]) for i in range(len(numbers))]
+        if numbers:
+            print(numbers)
+            return max(numbers) + 1
+        else:
+            return 0
