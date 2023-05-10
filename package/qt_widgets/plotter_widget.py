@@ -11,6 +11,7 @@ class PlotterWidget(QtWidgets.QWidget):
         
         self.plotter.enable_depth_peeling()
 
+
         self.plotter.add_axes()
         self.plotter.show_grid()
         self.plotter.enable_terrain_style(mouse_wheel_zooms=True)
@@ -66,6 +67,11 @@ class PlotterWidget(QtWidgets.QWidget):
         if self.actors_types[uid] in [FigureTypes.CONE, FigureTypes.CYLINDER, FigureTypes.PLANE]:
             boundary = self.meshes[uid].extract_feature_edges(boundary_edges=True, non_manifold_edges=True, manifold_edges=True)
             self.actors_HL[uid] = self.plotter.add_mesh(boundary, color=color, line_width=line_width)
+
+        elif self.actors_types[uid] in [FigureTypes.LINE, FigureTypes.CURVE]:
+            self.remove_mesh(uid)
+            self.actors[uid] = self.plotter.add_mesh(self.meshes[uid], render_lines_as_tubes=True, line_width=line_width, **self.actors_settings[uid])
+
         elif self.actors_types[uid] in [FigureTypes.REVOLUTION]:
             self.remove_mesh(uid)
             self.actors[uid] = self.plotter.add_mesh(self.meshes[uid], silhouette=dict(color=color, line_width=line_width), **self.actors_settings[uid])
@@ -74,9 +80,15 @@ class PlotterWidget(QtWidgets.QWidget):
             raise Exception("Unknown figure type")
         
     def remove_highlight(self, uid: str):
-        if uid in self.actors_HL:
-            self.plotter.remove_actor(self.actors_HL[uid])
-            del self.actors_HL[uid]
+
+    if uid in self.actors_HL:
+        if self.actors_types[uid] in [FigureTypes.CONE, FigureTypes.CYLINDER, FigureTypes.PLANE, FigureTypes.REVOLUTION]:
+              self.plotter.remove_actor(self.actors_HL[uid])
+              del self.actors_HL[uid]
+        elif self.actors_types[uid] in [FigureTypes.LINE, FigureTypes.CURVE]:
+              self.remove_mesh(uid)
+              self.actors[uid] = self.plotter.add_mesh(self.meshes[uid], **self.actors_settings[uid])
+
 
     def show_edges_mesh(self, uid: str, color: str='white'):
         if uid not in self.actors:

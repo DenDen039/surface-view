@@ -56,7 +56,7 @@ class Example(QWidget):
 
         manager = ObjectManager()
 
-        curve = (lambda t: np.sin(t), lambda t: np.cos(t) * 0, lambda t: t)
+        curve = (lambda t: np.sin(t), lambda t: np.cos(t) * 0.5, lambda t: t)
         t_bounce = (0, 2 * np.pi)
         v_bounce = (0, 2)
         point = (5, 5, 5)
@@ -81,6 +81,8 @@ class Example(QWidget):
         uid4 = manager.create_revolution_surface(curve3, direction3, [0, 0, 0], t_bounce3, resolution=50)
 
         uid5 = manager.create_curve(curve, t_bounce)
+        uid6 = manager.create_line((0, 0, 0), (7, -3, 6), (0, 1))
+
 
         myWidget = PlotterWidget()
 
@@ -93,10 +95,18 @@ class Example(QWidget):
 
             labels = [meshes, points]
 
-            myWidget.add_mesh(uid1, manager.get_figure_mesh(uid1), "Cone", labels, color='blue')
-            myWidget.add_label(uid1)
-            #myWidget.show_edges_mesh(uid1)
-            myWidget.highlight_mesh(uid1, color='red', line_width=4)
+
+            myWidget.add_mesh(uid5, manager.get_figure_mesh(uid5), FigureTypes.CURVE, labels, color='blue')
+            myWidget.add_mesh(uid6, manager.get_figure_mesh(uid6), FigureTypes.LINE, labels, color='blue')
+
+            myWidget.highlight_mesh(uid6)
+            #myWidget.remove_highlight(uid6)
+
+            # myWidget.add_mesh(uid1, manager.get_figure_mesh(uid1), "Cone", labels, color='blue')
+            # myWidget.add_label(uid1)
+            # #myWidget.show_edges_mesh(uid1)
+            # myWidget.highlight_mesh(uid1, color='red', line_width=4)
+
 
             # myWidget.add_mesh(uid2, manager.get_figure_mesh(uid2), "Cylinder", color='cyan')
             # myWidget.highlight_mesh(uid2, color='red', line_width=4)
@@ -104,6 +114,7 @@ class Example(QWidget):
             #myWidget.add_mesh(uid3, manager.get_figure_mesh(uid3), "Plane", color='purple')
             #myWidget.show_edges_mesh(uid3)
             #myWidget.highlight_mesh(uid3)
+
 
             #myWidget.add_mesh(uid4, manager.get_figure_mesh(uid4), "Revolution", color='green')
             #myWidget.show_edges_mesh(uid4)
