@@ -3,6 +3,7 @@ from package.figures.figure import FigureTypes
 from unittest.mock import MagicMock
 from numpy import *
 import json
+from uuid import UUID
 
 
 class ObjectStorage:
@@ -31,15 +32,24 @@ class ObjectStorage:
             self.PW.drawIntersections(intersections)
             self.__enable_intersections = value
 
+    def convert_uuid_to_str(self, obj):
+        if isinstance(obj, UUID):
+            return str(obj)
+        raise TypeError(f"Неподдерживаемый тип: {type(obj)}")
+
     def save(self, path):
-        jsonString = json.dumps(self.storage)
-        jsonFile = open(path, "w")
-        jsonFile.write(jsonString) 
-        jsonFile.close()
+        with open(path, 'w') as json_file:
+            json.dump(self.storage, json_file, default=self.convert_uuid_to_str)
+
+    def convert_str_to_uuid(self, obj):
+        try:
+            return UUID(obj)
+        except ValueError:
+            return obj
 
     def load(self, path):
-        with open(path, "r") as f:
-            objects = json.load(f)
+        with open(path, 'r') as json_file:
+            objects = json.load(json_file, object_hook=self.convert_str_to_uuid)
         temp = self.__enable_intersections
         self.__enable_intersections = False
         for obj in objects.values():
