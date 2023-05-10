@@ -46,7 +46,6 @@ class ObjectStorage:
         converted_data = {str(key): value for key, value in self.storage.items()}
         with open(file_path, 'w') as json_file:
             json.dump(converted_data, json_file)
-        print(f"Словарь успешно сохранен в файл: {file_path}")
 
     def delete(self, uid):
         del self.storage[uid]
