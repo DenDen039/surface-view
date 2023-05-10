@@ -194,7 +194,7 @@ class ObjectManager:
             labels["P" + str(counter)] = (figure_type["curve"][0](t[0] * 0.5),
                                           figure_type["curve"][1](t[0] * 0.5),
                                           figure_type["curve"][2](t[0] * 0.5))
-            s = tuple((ai + bi)/2 for ai, bi in zip(labels["P" + str(counter)], t))
+            s = tuple((ai + bi)/2 for ai, bi in zip(labels["P" + str(counter)], figure_type["direction"]))
             labels["S" + str(counter)] = s
             labels["Y" + str(counter)] = (figure_type["curve"][0](t[0] * 0.9),
                                           figure_type["curve"][1](t[0] * 0.9),
