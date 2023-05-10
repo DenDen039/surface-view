@@ -506,7 +506,7 @@ class UI(QMainWindow):
         self.createWidget.Form.applyButton.clicked.connect(lambda: self.edit_apply_button_clicked(_type, uid))
         self.createWidget.Form.cancelButton.clicked.connect(self.edit_cancel_button_clicked)
 
-        if _type not in (FigureTypes.LINE, FigureTypes.CURVE) and not uid in self.pyvista_widget.actors_HL:
+        if not uid in self.pyvista_widget.actors_HL:
             self.pyvista_widget.highlight_mesh(uid)
 
         self.pyvista_widget.add_label(uid)
@@ -516,7 +516,7 @@ class UI(QMainWindow):
     def edit_apply_button_clicked(self, _type, uid):
         self.pyvista_widget.remove_intersections()
         self.createObject(_type, True,uid)
-        if _type not in (FigureTypes.LINE, FigureTypes.CURVE) and (uid not in self.pyvista_widget.actors_HL):
+        if uid not in self.pyvista_widget.actors_HL:
             self.pyvista_widget.highlight_mesh(uid)
 
     def edit_cancel_button_clicked(self):

@@ -36,31 +36,20 @@ class ObjectStorage:
             self.PW.add_intersections(intersections)
             self.__enable_intersections = value
 
-    def convert_uuid_to_str(self, obj):
-        if isinstance(obj, UUID):
-            return str(obj)
-        raise TypeError(f"Неподдерживаемый тип: {type(obj)}")
-
-    def save(self, path):
-        with open(path, 'w') as json_file:
-            json.dump(self.storage, json_file, default=self.convert_uuid_to_str)
-
-    def convert_str_to_uuid(self, obj):
-        try:
-            return UUID(obj)
-        except ValueError:
-            return obj
-
-
-    def load(self, path):
-        with open(path, 'r') as json_file:
-            objects = json.load(json_file, object_hook=self.convert_str_to_uuid)
+    def load(self, file_path):
+        with open(file_path, 'r') as json_file:
+            data = json.load(json_file)
+            converted_data = {UUID(key): value for key, value in data.items()}
         temp = self.__enable_intersections
         self.__enable_intersections = False
-        for obj in objects.values():
+        for obj in converted_data.values():
             self.create(obj)
         self.__enable_intersections = temp
-        self.parser = Parser()
+
+    def save(self, file_path):
+        converted_data = {str(key): value for key, value in self.storage.items()}
+        with open(file_path, 'w') as json_file:
+            json.dump(converted_data, json_file)
 
     def delete(self, uid):
         del self.storage[uid]

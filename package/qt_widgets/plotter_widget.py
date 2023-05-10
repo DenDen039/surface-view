@@ -70,7 +70,7 @@ class PlotterWidget(QtWidgets.QWidget):
 
         elif self.actors_types[uid] in [FigureTypes.LINE, FigureTypes.CURVE]:
             self.remove_mesh(uid)
-            self.actors[uid] = self.plotter.add_mesh(self.meshes[uid], render_lines_as_tubes=True, line_width=line_width, **self.actors_settings[uid])
+            self.actors[uid] = self.plotter.add_mesh(self.meshes[uid], render_lines_as_tubes=True, **self.actors_settings[uid])
 
         elif self.actors_types[uid] in [FigureTypes.REVOLUTION]:
             self.remove_mesh(uid)
@@ -81,13 +81,13 @@ class PlotterWidget(QtWidgets.QWidget):
         
     def remove_highlight(self, uid: str):
 
-    if uid in self.actors_HL:
-        if self.actors_types[uid] in [FigureTypes.CONE, FigureTypes.CYLINDER, FigureTypes.PLANE, FigureTypes.REVOLUTION]:
-              self.plotter.remove_actor(self.actors_HL[uid])
-              del self.actors_HL[uid]
-        elif self.actors_types[uid] in [FigureTypes.LINE, FigureTypes.CURVE]:
-              self.remove_mesh(uid)
-              self.actors[uid] = self.plotter.add_mesh(self.meshes[uid], **self.actors_settings[uid])
+        if uid in self.actors_HL:
+            if self.actors_types[uid] in [FigureTypes.CONE, FigureTypes.CYLINDER, FigureTypes.PLANE, FigureTypes.REVOLUTION]:
+                  self.plotter.remove_actor(self.actors_HL[uid])
+                  del self.actors_HL[uid]
+        if self.actors_types[uid] in [FigureTypes.LINE, FigureTypes.CURVE]:
+                  self.remove_mesh(uid)
+                  self.actors[uid] = self.plotter.add_mesh(self.meshes[uid], **self.actors_settings[uid])
 
 
     def show_edges_mesh(self, uid: str, color: str='white'):
