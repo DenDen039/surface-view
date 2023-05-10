@@ -192,9 +192,9 @@ class ObjectManager:
             return labels
 
         elif figure_type["FigureTypes"] == FigureTypes.REVOLUTION:
-            labels["P" + str(counter)] = (figure_type["curve"][0](t[0] * 0.5),
-                                          figure_type["curve"][1](t[0] * 0.5),
-                                          figure_type["curve"][2](t[0] * 0.5))
+
+            labels["P" + str(counter)] = figure_type["point"]
+
             s = tuple((ai + bi)/2 for ai, bi in zip(labels["P" + str(counter)], figure_type["direction"]))
             labels["S" + str(counter)] = s
             labels["Y" + str(counter)] = (figure_type["curve"][0](t[0] * 0.9),
@@ -252,16 +252,6 @@ class ObjectManager:
 
             curve = self.create_curve(figure_type["curve"], t)
             meshes.append(self.get_figure_mesh(curve))
-            return meshes
-
-            s = tuple(ai + bi for ai, bi in zip(P,figure_type["direction"]))
-            line = Line(P, s, t, uuid.uuid4())
-            #line = self.create_line(P, s, t)
-            meshes.append(line.get_mesh())
-
-            #curve = self.create_curve(figure_type["curve"], t)
-            curve = Curve(figure_type["curve"], t, uuid.uuid4())
-            meshes.append(curve.get_mesh())
             return meshes
 
     def get_figure(self, uid: str) -> Figure:
