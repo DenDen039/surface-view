@@ -1,5 +1,5 @@
-import re  # Denis, prosti menya, ya ne mogu bez regexov
-from numpy import * # required for parses to parse math functions e.g sin(), cos()
+import re
+from numpy import *  # required for parses to parse math functions e.g sin(), cos()
 
 class Parser:
     def __init__(self):
@@ -20,6 +20,9 @@ class Parser:
 
     # TODO vvv
     def parse_expression_string_to_lambda(self, input_string: str):
+        if 't' not in input_string.replace('', ' ').split(' '):
+            input_string += " + t*0"
+
         if self.check_expression_string(input_string):
             parsed_string = lambda t: eval(input_string)
         else:

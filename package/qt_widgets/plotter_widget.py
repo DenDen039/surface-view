@@ -74,7 +74,9 @@ class PlotterWidget(QtWidgets.QWidget):
             raise Exception("Unknown figure type")
         
     def remove_highlight(self, uid: str):
-        self.plotter.remove_actor(self.actors_HL[uid])
+        if uid in self.actors_HL:
+            self.plotter.remove_actor(self.actors_HL[uid])
+            del self.actors_HL[uid]
 
     def show_edges_mesh(self, uid: str, color: str='white'):
         if uid not in self.actors:
@@ -92,7 +94,6 @@ class PlotterWidget(QtWidgets.QWidget):
         print(f"intersections:{intersections}")
         for item in intersections:
             new_intersection = self.plotter.add_mesh(item, render_lines_as_tubes=True, **kwargs)
-            print("kolya loh")
             self.intersections_list.append(new_intersection)
 
     def remove_intersections(self):
@@ -107,7 +108,7 @@ class PlotterWidget(QtWidgets.QWidget):
         drawed_meshes = list()
         for i in range(len(meshes)):
             drawed_meshes.append(self.plotter.add_mesh(meshes[i], color=colors[i], line_width=line_width, render_lines_as_tubes=True))
-        
+
         points = list(self.actors_labels[uid][1].values())
         labels = list(self.actors_labels[uid][1].keys())
         self.plotter.add_point_labels(points, labels, always_visible=True, italic=True, font_size=font_size, point_color='red', point_size=point_size, show_points=True, render_points_as_spheres=True)
@@ -168,7 +169,7 @@ class PlotterWidget(QtWidgets.QWidget):
         else:
             file_name = 'untitled_' + str(self.photo_counter) + '.png'
             self.photo_counter += 1
-        self.plotter.screenshot(f"package\photos\{file_name}")
+        self.plotter.screenshot(f"photos/{file_name}")
 
     def untitled_counter(self) -> int:
         import os

@@ -9,11 +9,11 @@ from unittest.mock import MagicMock
 from numpy import *
 
 class ObjectStorage:
-    def __init__(self, PW, SWO):
+    def __init__(self, PW, SOW):
 
         self.objManager = ObjectManager()
         self.storage = dict()
-        self.SWO = SWO
+        self.SOW = SOW
         self.PW = PW
         self.counter = 0
         self.__enable_intersections = True
@@ -53,12 +53,15 @@ class ObjectStorage:
 
     def delete(self, uid):
         del self.storage[uid]
+        self.PW.remove_label(uid)
+        self.label_counter -= 1
         self.objManager.delete_figure(uid)
         self.PW.remove_mesh(uid)
         if self.enable_intersections:
             intersections = self.objManager.compute_intersections()
             self.PW.add_intersections(intersections)
-        self.SWO.delete(uid)
+        self.SOW.delete(uid)
+
 
     def update(self, uid, new_data: dict):
         self.storage[uid] = new_data
@@ -107,6 +110,8 @@ class ObjectStorage:
         self.objManager.update_object_settings(uid, **new_data)
 
         self.PW.remove_mesh(uid)
+        self.PW.remove_label(uid)
+
         #self.PW.add_mesh(uid, self.objManager.get_figure_mesh(uid), **self.objManager.get_figure_settings(uid))
 
         self.PW.add_mesh(uid, self.objManager.get_figure_mesh(uid),
@@ -115,11 +120,14 @@ class ObjectStorage:
                           self.objManager.get_labels(new_data, self.label_counter)],
                          **self.objManager.get_figure_settings(uid))
 
+
+        self.PW.add_label(uid)
+
         if self.enable_intersections:
             intersections = self.objManager.compute_intersections()
             self.PW.add_intersections(intersections, color="red", line_width=5)
 
-        self.SWO.update(uid, new_data["name"], new_data["FigureTypes"], new_data["color"])
+        self.SOW.update(uid, new_data["name"], new_data["FigureTypes"], new_data["color"])
 
     def create(self, to_create: dict):
         if to_create["name"] == '':
@@ -163,7 +171,7 @@ class ObjectStorage:
 
 
         self.storage[uid] = to_create
-        self.SWO.add(uid, to_create["name"], to_create["FigureTypes"], to_create["color"])
+        self.SOW.add(uid, to_create["name"], to_create["FigureTypes"], to_create["color"])
         self.PW.add_mesh(uid, self.objManager.get_figure_mesh(uid),
                          to_create["FigureTypes"],
                          [self.objManager.get_label_lines(to_create),
@@ -172,9 +180,9 @@ class ObjectStorage:
        # self.enable_intersections = True
         if self.__enable_intersections:
             intersections = self.objManager.compute_intersections()
-            print("leha loh")
             self.PW.add_intersections(intersections, color="red", line_width=5)
 
+        #self.PW.add_label(uid)
         self.label_counter += 1
 
         return uid

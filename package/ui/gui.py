@@ -167,9 +167,11 @@ class UI(QMainWindow):
         self.show_tools.triggered.connect(self.hide_unhide_tools)
         self.show_console.triggered.connect(self.hide_unhide_console)
 
+
+
         #self.new_scene.triggered.connect(self.add_object)
 
-        self.add_object()
+
 
         # Show the app
         self.show()
@@ -180,29 +182,51 @@ class UI(QMainWindow):
         self.hide_unhide_console()
         self.show_console.setChecked(0)
 
-        self.SWO = StorageObjectWidget(self)
-        self.object_storage = ObjectStorage(self.pyvista_widget, self.SWO)
+        self.SOW = StorageObjectWidget(self)
+        self.object_storage = ObjectStorage(self.pyvista_widget, self.SOW)
 
-        self.horizontal_layout.replaceWidget(self.scrollArea, self.SWO)
-        # self.horizontal_layout.addWidget(self.SWO)
+        self.highlights_enabled = True
+        self.labels_enabled = True
+        self.object_storage.__enable_intersections = True
+
+        self.horizontal_layout.replaceWidget(self.scrollArea, self.SOW)
+        # self.horizontal_layout.addWidget(self.SOW)
         self.scrollArea.deleteLater()
         self.scrollAreaContents.deleteLater()
         self.parser = Parser()
 
+        self.save.triggered.connect(lambda: self.object_storage.save("scenes/file.json"))
+        self.open.triggered.connect(lambda: self.object_storage.load("scenes/file.json"))
+        self.save_image.triggered.connect(lambda: self.pyvista_widget.take_screenshot(''))
         self.objects_list = {}
 
+        self.add_object()
 
 
     def clear_right(self):
         for i in reversed(range(self.toolbox_layout.count())):
              self.toolbox_layout.itemAt(i).widget().setParent(None)
 
+    def remove_all_highlights(self):
+        for object in self.object_storage.storage:
+            print(f"trying to delete highlight from {str(object)}")
+            self.pyvista_widget.remove_highlight(object)
+        print(self.pyvista_widget.actors_HL)
+
+    def remove_all_labels(self):
+        for object in self.pyvista_widget.actors_drawed_labels:
+            print(f"trying to delete highlight from {str(object)}")
+            self.pyvista_widget.remove_label(object)
+
+    # CHOOSE NEW OBJECT WIDGET #
     def add_object(self):
 
         #contextMenu = QMenu(self)
 
         #menu_choice_conical = contextMenu.addAction("Add conical surface")
         #menu_choice_conical.triggered.connect(lambda: self.openCreateWidget(0))
+
+        self.remove_all_highlights()
 
         self.clear_right()
 
@@ -245,7 +269,9 @@ class UI(QMainWindow):
         self.toolbox_layout.addWidget(self.inside)
         self.toolbox_layout.update()
 
+    # CREATE NEW OBJECT WIDGET #
     def openCreateWidget(self, _type: FigureTypes):
+
 
         self.clear_right()
 
@@ -375,12 +401,16 @@ class UI(QMainWindow):
 
         return point_input_x_1, point_input_y_1, point_input_z_1, point_input_x_2, point_input_y_2, point_input_z_2
 
+
+    # EDIT OBJECT WIDGET #
     def edit_object(self, uid):
-        print(uid)
+        self.remove_all_labels()
+        self.remove_all_highlights()
+        print(f"editing {uid}")
         storage = self.object_storage.storage
-        print(storage)
         _type = storage[uid]["FigureTypes"]
         self.openCreateWidget(_type)
+
 
         button_delete = QPushButton("Delete")
         self.createWidget.Form.verticalLayout.addWidget(button_delete)
@@ -472,9 +502,29 @@ class UI(QMainWindow):
                 self.createWidget.Form.input_z_2.setText(str(storage[uid]["point"][2]))
 
         self.createWidget.Form.applyButton.disconnect()
-        self.createWidget.Form.applyButton.clicked.connect(lambda: self.createObject(_type, True, uid))
+
+        self.createWidget.Form.applyButton.clicked.connect(lambda: self.edit_apply_button_clicked(_type, uid))
+        self.createWidget.Form.cancelButton.clicked.connect(self.edit_cancel_button_clicked)
+
+        if _type not in (FigureTypes.LINE, FigureTypes.CURVE) and not uid in self.pyvista_widget.actors_HL:
+            self.pyvista_widget.highlight_mesh(uid)
+
+        self.pyvista_widget.add_label(uid)
+
         button_delete.clicked.connect(lambda: self.deleteObject(uid))
 
+    def edit_apply_button_clicked(self, _type, uid):
+        self.pyvista_widget.remove_intersections()
+        self.createObject(_type, True,uid)
+        if _type not in (FigureTypes.LINE, FigureTypes.CURVE) and (uid not in self.pyvista_widget.actors_HL):
+            self.pyvista_widget.highlight_mesh(uid)
+
+    def edit_cancel_button_clicked(self):
+        self.remove_all_highlights()
+        self.remove_all_labels()
+        self.add_object()
+
+    # CREATE OR UPDATE OBJECT #
     def createObject(self, _type, update_mode, uid):
 
         name = self.commonWidget.Form.inputName.text()
@@ -676,8 +726,10 @@ class UI(QMainWindow):
             print("updating object")
             self.object_storage.update(uid, input)
 
+    # DELETE OBJECT #
     def deleteObject(self, uid):
 
+        self.pyvista_widget.remove_intersections()
         self.object_storage.delete(uid)
         self.console.append(f"Deleted object {uid}")
 
