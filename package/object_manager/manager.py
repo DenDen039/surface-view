@@ -150,58 +150,81 @@ class ObjectManager:
         labels = dict()
         t = figure_type["t_bounds"]
         if figure_type["FigureTypes"] == FigureTypes.CONE:
-            labels["C" + str(counter)] = figure_type["point"]
-            labels["Y" + str(counter)] = (figure_type["curve"][0](t[0] * 0.9),
-                                          figure_type["curve"][1](t[0] * 0.9),
-                                          figure_type["curve"][2](t[0] * 0.9))
-
-            labels["P" + str(counter)] = (figure_type["curve"][0](t[0] * 0.5),
-                                          figure_type["curve"][1](t[0] * 0.5),
-                                          figure_type["curve"][2](t[0] * 0.5))
-            s = tuple((ai + bi)/2 for ai, bi in zip(labels["P" + str(counter)], figure_type["point"]))
-            labels["L" + str(counter)] = s
+            c = figure_type["point"]
+            c_r = tuple(round(coord, 2) for coord in c)
+            labels["C" + str(c_r)] = c
+            y = (figure_type["curve"][0](t[0] * 0.9),
+                  figure_type["curve"][1](t[0] * 0.9),
+                  figure_type["curve"][2](t[0] * 0.9))
+            y_r = tuple(round(coord, 2) for coord in y)
+            labels["Y" + str(y_r)] = y
+            P = (figure_type["curve"][0](t[0] * 0.5),
+                 figure_type["curve"][1](t[0] * 0.5),
+                 figure_type["curve"][2](t[0] * 0.5))
+            P_r = tuple(round(coord, 2) for coord in P)
+            labels["P" + str(P_r)] = P
+            s = tuple((ai + bi)/2 for ai, bi in zip(labels["P" + str(P_r)], figure_type["point"]))
+            s_r = tuple(round(coord, 2) for coord in s)
+            labels["L" + str(s_r)] = s
             return labels
 
         elif figure_type["FigureTypes"] == FigureTypes.CYLINDER:
-            labels["P" + str(counter)] = (figure_type["curve"][0](t[0] * 0.5),
-                                          figure_type["curve"][1](t[0] * 0.5),
-                                          figure_type["curve"][2](t[0] * 0.5))
-            s = tuple((ai + bi)/2 for ai, bi in zip(labels["P" + str(counter)], figure_type["direction"]))
-            labels["S" + str(counter)] = s
+            P = (figure_type["curve"][0](t[0] * 0.5),
+                 figure_type["curve"][1](t[0] * 0.5),
+                 figure_type["curve"][2](t[0] * 0.5))
+            P_r = tuple(round(coord, 2) for coord in P)
+            labels["P" + str(P_r)] = P
+            s = tuple((ai + bi) for ai, bi in zip(labels["P" + str(P_r)], figure_type["direction"]))
+            s_r = tuple(round(coord, 2) for coord in s)
+            labels["S" + str(s_r)] = s
 
-            labels["Y" + str(counter)] = (figure_type["curve"][0](t[0] * 0.9),
-                                          figure_type["curve"][1](t[0] * 0.9),
-                                          figure_type["curve"][2](t[0] * 0.9))
+            y = (figure_type["curve"][0](t[0] * 0.9),
+                 figure_type["curve"][1](t[0] * 0.9),
+                 figure_type["curve"][2](t[0] * 0.9))
+            y_r = tuple(round(coord, 2) for coord in y)
+            labels["Y" + str(y_r)] = y
             return labels
 
         elif figure_type["FigureTypes"] == FigureTypes.CURVE:
-            labels["P" + str(counter)] = (figure_type["curve"][0](t[0] * 0.5),
-                                          figure_type["curve"][1](t[0] * 0.5),
-                                          figure_type["curve"][2](t[0] * 0.5))
+            P = (figure_type["curve"][0](t[0] * 0.5),
+                 figure_type["curve"][1](t[0] * 0.5),
+                 figure_type["curve"][2](t[0] * 0.5))
+            P_r = tuple(round(coord, 2) for coord in P)
+            labels["P" + str(P_r)] = P
             return labels
 
         elif figure_type["FigureTypes"] == FigureTypes.LINE:
-            labels["P" + str(counter)] = tuple(
-                (ai + bi) / 2 for ai, bi in zip(figure_type["point1"], figure_type["point2"]))
+            P = tuple((ai + bi) / 2 for ai, bi in zip(figure_type["point1"], figure_type["point2"]))
+            P_r = tuple(round(coord, 2) for coord in P)
+            labels["P" + str(P_r)] = P
             return labels
 
 
         elif figure_type["FigureTypes"] == FigureTypes.PLANE:
-            labels["M" + str(counter)] = figure_type["point"]
-            labels["n" + str(counter)] = tuple((ai + bi) / 2 for ai, bi in zip(figure_type["point"], figure_type["normal"]))
+            m = figure_type["point"]
+            m_r = tuple(round(coord, 2) for coord in m)
+            labels["M" + str(m_r)] = m
+            n = tuple((ai + bi) for ai, bi in zip(figure_type["point"], figure_type["normal"]))
+            n_r = tuple(round(coord, 2) for coord in n)
+            labels["n" + str(n_r)] = n
             return labels
 
         elif figure_type["FigureTypes"] == FigureTypes.REVOLUTION:
 
-            labels["P" + str(counter)] = figure_type["point"]
+            P = figure_type["point"]
+            P_r = tuple(round(coord, 2) for coord in P)
+            labels["P" + str(P_r)] = P
 
            # s = tuple((ai + bi)/2 for ai, bi in zip(labels["P" + str(counter)], figure_type["direction"]))
             #labels["S" + str(counter)] = s
-            s = tuple((ai + bi) for ai, bi in zip(labels["P" + str(counter)], figure_type["direction"]))
-            labels["S" + str(counter)] = s
-            labels["Y" + str(counter)] = (figure_type["curve"][0](t[0] * 0.9),
-                                          figure_type["curve"][1](t[0] * 0.9),
-                                          figure_type["curve"][2](t[0] * 0.9))
+            s = tuple((ai + bi) for ai, bi in zip(labels["P" + str(P_r)], figure_type["direction"]))
+            s_r = tuple(round(coord, 2) for coord in s)
+            labels["S" + str(s_r)] = s
+            y = (figure_type["curve"][0](t[0] * 0.9),
+                 figure_type["curve"][1](t[0] * 0.9),
+                 figure_type["curve"][2](t[0] * 0.9))
+            y_r = tuple(round(coord, 2) for coord in y)
+            labels["Y" + str(y_r)] = y
             return labels
 
     def get_label_lines(self, figure_type):
@@ -215,7 +238,7 @@ class ObjectManager:
         if figure_type["FigureTypes"] == FigureTypes.PLANE:
             s = tuple(ai + bi for ai, bi in zip(figure_type["point"], figure_type["normal"]))
 
-            line = self.create_line(figure_type["point"], s, t)
+            line = self.create_line(figure_type["point"], s, [0, 1.05])
             meshes.append(self.get_figure_mesh(line))
             return meshes
 
@@ -228,14 +251,14 @@ class ObjectManager:
             curve = Curve(figure_type["curve"], t, uuid.uuid4())
             #curve = self.create_curve(figure_type["curve"], t)
             meshes.append(curve.get_mesh())
-            line = Line(figure_type["point"], P, [t_i * 0.1 for t_i in t] , uuid.uuid4())
+            line = Line(P, figure_type["point"], figure_type["v_bounds"] , uuid.uuid4()) # [t_i * 0.1 for t_i in t]
             meshes.append(line.get_mesh())
             return meshes
 
         elif figure_type["FigureTypes"] == FigureTypes.CYLINDER:
 
             s = tuple(ai + bi for ai, bi in zip(P, figure_type["direction"]))
-            line = Line(P, s, [t_i * 0.1 for t_i in t], uuid.uuid4())
+            line = Line(P, s, figure_type["v_bounds"], uuid.uuid4())
             #line = self.create_line(P, s, t)
             #meshes.append(self.get_figure_mesh(line))
             meshes.append(line.get_mesh())
@@ -249,7 +272,7 @@ class ObjectManager:
         elif figure_type["FigureTypes"] == FigureTypes.REVOLUTION:
 
             s = tuple(ai + bi for ai, bi in zip(figure_type["point"], figure_type["direction"]))
-            line = self.create_line(figure_type["point"], s, t)
+            line = self.create_line(figure_type["point"], s, (t[0] * 0.7, t[1] *0.1))
             meshes.append(self.get_figure_mesh(line))
 
             curve = self.create_curve(figure_type["curve"], t)
