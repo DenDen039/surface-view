@@ -37,6 +37,9 @@ class ObjectStorage:
             self.__enable_intersections = value
 
     def load(self, file_path):
+        self.PW.clear_actors()
+        for obj in self.storage.keys():
+            self.SOW.delete(obj)
         with open(file_path, 'r') as json_file:
             data = json.load(json_file)
             converted_data = {UUID(key): value for key, value in data.items()}
@@ -48,6 +51,7 @@ class ObjectStorage:
 
     def save(self, file_path):
         converted_data = {str(key): value for key, value in self.storage.items()}
+        print(converted_data)
         with open(file_path, 'w') as json_file:
             json.dump(converted_data, json_file)
 
