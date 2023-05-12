@@ -16,7 +16,6 @@ from numpy import *
 
 
 # TODO: finish parses class
-#       add update_widget
 #       refactor gui
 #       better f(t) parser
 #
@@ -167,12 +166,6 @@ class UI(QMainWindow):
         self.show_tools.triggered.connect(self.hide_unhide_tools)
         self.show_console.triggered.connect(self.hide_unhide_console)
 
-
-
-        #self.new_scene.triggered.connect(self.add_object)
-
-
-
         # Show the app
         self.show()
 
@@ -195,12 +188,42 @@ class UI(QMainWindow):
         self.scrollAreaContents.deleteLater()
         self.parser = Parser()
 
-        self.save.triggered.connect(lambda: self.object_storage.save("scenes/file.json"))
-        self.open.triggered.connect(lambda: self.object_storage.load("scenes/file.json"))
+        self.save.triggered.connect(self.save_file)
+        self.save_as.triggered.connect(self.save_file_as)
+        self.open.triggered.connect(self.load_file)
         self.save_image.triggered.connect(lambda: self.pyvista_widget.take_screenshot(''))
         self.objects_list = {}
 
         self.add_object()
+
+
+    def save_file(self):
+        try:
+            self.object_storage.save()
+        except Exception as _:
+            self.console.append("Saving error")
+            print("Saving error while doing standart saving. Something is wrong in the code")
+
+    def save_file_as(self):
+        try:
+            fname = QFileDialog.getSaveFileName(self, "Save Scene", "/", ".json")
+            fname = str(fname[0]) + str(fname[1])
+            print(fname)
+            self.object_storage.save(fname)
+        except:
+            self.console.append("Saving error")
+            print("Saving error")
+        ...
+
+    def load_file(self):
+        try:
+            fname = QFileDialog.getOpenFileName(self, "Load Scene", "/", "JSON files (*.json)")
+
+            print(fname)
+            self.object_storage.load(fname[0])
+        except Exception as _:
+            self.console.append("Loading error")
+            print("Loading error")
 
 
     def set_intersections(self, mode: bool):
@@ -208,7 +231,7 @@ class UI(QMainWindow):
             self.object_storage.__enable_intersections = True
         else:
             self.object_storage.__enable_intersections = False
-
+            self.pyvista_widget.remove_intersections()
     def clear_right(self):
         for i in reversed(range(self.toolbox_layout.count())):
              self.toolbox_layout.itemAt(i).widget().setParent(None)
