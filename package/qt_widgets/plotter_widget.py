@@ -9,11 +9,11 @@ class PlotterWidget(QtWidgets.QWidget):
         self.plotter = BackgroundPlotter(show=False)
         self.plotter.enable_anti_aliasing()
         
-        self.plotter.enable_depth_peeling()
-
+        #self.plotter.enable_depth_peeling()
 
         self.plotter.add_axes()
         self.plotter.show_grid()
+        self.plotter.enable_zoom_style()
         self.plotter.enable_terrain_style(mouse_wheel_zooms=True)
         self.plotter.view_isometric()
 
@@ -117,7 +117,7 @@ class PlotterWidget(QtWidgets.QWidget):
         self.intersections_list.clear()
         self.update_camera()
 
-    def add_label(self, uid, point_size=14, line_width=5, font_size=12):
+    def add_label(self, uid, point_size=14, line_width=8, font_size=12):
         meshes = self.actors_labels[uid][0]
         colors = ["green", "blue", "yellow", "purple", "cyan", "red"]
         drawed_meshes = list()
@@ -177,18 +177,26 @@ class PlotterWidget(QtWidgets.QWidget):
     def remove_blur(self):
         self.plotter.remove_blurring()
 
-    def take_screenshot(self, file_name=''):
-        if file_name != '':
-            if file_name.split('.')[-1] not in ['png', 'jpeg', 'jpg', 'bmp', 'tif', 'tiff']:
-                raise Exception("Unfortunately, this graphic format is not supported")
-        else:
+    def take_screenshot(self, file_path=''):
+        if file_path == '':
             file_name = 'untitled_' + str(self.photo_counter) + '.png'
             self.photo_counter += 1
-        self.plotter.screenshot(f"photos/{file_name}")
+
+            self.plotter.screenshot(f"package/photos/{file_name}")
+        else:
+            if file_path.split('.')[-1] not in ['png', 'jpeg', 'jpg', 'bmp', 'tif', 'tiff']:
+                raise Exception("Unfortunately, this graphic format is not supported")
+            self.plotter.screenshot(file_path)
 
     def untitled_counter(self) -> int:
         import os
-        files = os.listdir("photos/")
+        
+        if os.path.isdir(os.path.join("package/", "photos")) == False:
+            dir_path = os.path.join("package/", "photos")
+            os.mkdir(dir_path)
+
+        files = os.listdir("package/photos/")
+
         numbers = list(filter(lambda str: str.startswith("untitled_"), files))
         numbers = [int(numbers[i].split('untitled_')[-1].split('.png')[0]) for i in range(len(numbers))]
         if numbers:
@@ -196,3 +204,12 @@ class PlotterWidget(QtWidgets.QWidget):
             return max(numbers) + 1
         else:
             return 0
+        
+        # files = os.listdir("package/photos/")
+        #     numbers = list(filter(lambda str: str.startswith("untitled_"), files))
+        #     numbers = [int(numbers[i].split('untitled_')[-1].split('.png')[0]) for i in range(len(numbers))]
+        #     if numbers:
+        #         print(numbers)
+        #         return max(numbers) + 1
+        #     else:
+        #         return 0

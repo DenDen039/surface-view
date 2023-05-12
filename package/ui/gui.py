@@ -165,6 +165,7 @@ class UI(QMainWindow):
         # Click the action
         self.show_tools.triggered.connect(self.hide_unhide_tools)
         self.show_console.triggered.connect(self.hide_unhide_console)
+        #self.new_scene.triggered.connect(self.add_object)
 
         # Show the app
         self.show()
@@ -188,13 +189,16 @@ class UI(QMainWindow):
         self.scrollAreaContents.deleteLater()
         self.parser = Parser()
 
+
         self.save.triggered.connect(self.save_file)
         self.save_as.triggered.connect(self.save_file_as)
         self.open.triggered.connect(self.load_file)
+
         self.save_image.triggered.connect(lambda: self.pyvista_widget.take_screenshot(''))
         self.objects_list = {}
 
         self.add_object()
+
 
 
     def save_file(self):
@@ -203,6 +207,7 @@ class UI(QMainWindow):
         except Exception as _:
             self.console.append("Saving error")
             print("Saving error while doing standart saving. Something is wrong in the code")
+
 
     def save_file_as(self):
         try:
@@ -242,10 +247,12 @@ class UI(QMainWindow):
             self.pyvista_widget.remove_highlight(object)
         print(self.pyvista_widget.actors_HL)
 
+
     def remove_all_labels(self):
         for object in self.pyvista_widget.actors_drawed_labels:
             print(f"trying to delete highlight from {str(object)}")
             self.pyvista_widget.remove_label(object)
+
 
     # CHOOSE NEW OBJECT WIDGET #
     def add_object(self):
