@@ -12,6 +12,7 @@ class FigureTypes(str, Enum):
     FIGURE = "Figure"
     POINT = "Point"
     REVOLUTION = "Revolution"
+    PARAMETRIC_SURFACE = "Parametric surface"
 
 
 class Figure:

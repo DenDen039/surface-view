@@ -6,6 +6,7 @@ from package.figures.primitives.cylinder import Cylinder
 from package.figures.primitives.curve import Curve
 from package.figures.primitives.line import Line
 from package.figures.primitives.plane import Plane
+from package.figures.primitives.parametric_surface import ParametricSurface
 from package.figures.primitives.revolution_surface import RevolutionSurface
 
 import uuid
@@ -145,6 +146,26 @@ class ObjectManager:
             raise Exception("Object is not a plane")
 
         obj.update_parameters(**kwargs)
+    
+    def create_paramteric_surface(self, surface, t_bounds, v_bounds, **kwargs) -> str:
+        uid = uuid.uuid4()
+
+        surface = ParametricSurface(surface, t_bounds, v_bounds, uid, **kwargs)
+        self.objects[uid] = surface
+
+        return uid
+
+    def update_plane(self, uid, **kwargs):
+        if uid not in self.objects:
+            raise Exception("Figure not found")
+
+        obj = self.objects[uid]
+
+        if obj.get_type() != FigureTypes.PARAMETRIC_SURFACE:
+            raise Exception("Object is not a parametric surface")
+
+        obj.update_parameters(**kwargs)
+
 
     def get_labels(self, figure_type, counter):
         labels = dict()
@@ -327,23 +348,19 @@ class ObjectManager:
 # Example
 if __name__ == "__main__":
     import numpy as np
-
     manager = ObjectManager()
-    curve = (lambda t: np.sin(t), lambda t: np.cos(t) * 0, lambda t: t)
-    t_bounds = (0, 2 * np.pi)
-    v_bounds = (0, 2)
-    point = (5, 5, 5)
-    direction = (2, 5, 3)
+    theta_bounds = (-100,100)
+    phi_bounds = (0,2*np.pi)
+    a = 3
+    b = 3
+    c = 5
+    surface = (lambda theta,phi: a*np.cosh(theta)*np.cos(phi),
+               lambda theta,phi: b*np.cosh(theta)*np.sin(phi),
+               lambda theta,phi: c * np.sinh(theta))
+    
 
-    uid = manager.create_revolution_surface(curve, direction, point, t_bounds)
+    uid = manager.create_paramteric_surface(surface, theta_bounds, phi_bounds)
 
-    p = pv.Plotter()
-    p.add_mesh(manager.get_figure_mesh(uid))
-    p.show()
-
-    curve1 = (lambda t: np.sin(t), lambda t: np.cos(t), lambda t: t * 0 + 5)
-    vector = (0, 0, 1)
-    uid = manager.create_curve(curve1, t_bounds)
     p = pv.Plotter()
     p.add_mesh(manager.get_figure_mesh(uid))
     p.show()
