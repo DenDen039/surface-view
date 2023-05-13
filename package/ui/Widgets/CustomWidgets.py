@@ -19,6 +19,8 @@ import package.ui.Widgets.generated.CreateCylindricalWidget_ as CreateCylindrica
 import package.ui.Widgets.generated.CreateVectorWidget_ as CreateVectorWidget_
 import package.ui.Widgets.generated.CommonSettingsWidget_ as CommonSettingsWidget_
 import package.ui.Widgets.generated.ObjectWidget_ as ObjectWidget_
+import package.ui.Widgets.generated.SettingsWidget_ as SettingsWidget_
+
 
 class Creator:
 
@@ -109,7 +111,14 @@ class Creator:
         Form.setupUi(Widget)
         Widget.Form = Form
 
+        return Widget
 
+    def SettingsWidget(self):
+
+        Widget = QtWidgets.QWidget()
+        Form = SettingsWidget_.Ui_Form()
+        Form.setupUi(Widget)
+        Widget.Form = Form
 
         return Widget
 

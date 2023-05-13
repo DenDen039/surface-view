@@ -136,9 +136,10 @@ class UI(QMainWindow):
         self.save_image = self.findChild(QAction, 'save_image')
         self.open = self.findChild(QAction, 'open')
         self.new_scene = self.findChild(QAction, 'new_scene')
+
         self.show_tools = self.findChild(QAction, 'tools')
         self.show_console = self.findChild(QAction, 'console')
-        self.setting = self.findChild(QAction, 'setting')
+        self.settings = self.findChild(QAction, 'settings')
 
         self.horizontal_layout = self.findChild(QHBoxLayout, "horizontalLayout_2")
 
@@ -165,6 +166,7 @@ class UI(QMainWindow):
         # Click the action
         self.show_tools.triggered.connect(self.hide_unhide_tools)
         self.show_console.triggered.connect(self.hide_unhide_console)
+        self.settings.triggered.connect(self.open_settings_widget)
         #self.new_scene.triggered.connect(self.add_object)
 
         # Show the app
@@ -189,6 +191,7 @@ class UI(QMainWindow):
         self.scrollAreaContents.deleteLater()
         self.parser = Parser()
 
+        self.settingsWidget = self.creator.SettingsWidget()
 
         self.save.triggered.connect(self.save_file)
         self.save_as.triggered.connect(self.save_file_as)
@@ -200,6 +203,31 @@ class UI(QMainWindow):
         self.add_object()
 
 
+
+    def open_settings_widget(self):
+        self.settingsWidget.show()
+        #TODO: Import inputs from PW and SOW
+        self.settingsWidget.Form.intersectionsEnableCheckBox.setChecked(True)
+        self.settingsWidget.Form.intersectionsWidthLineEdit.setText("0.5")
+        self.settingsWidget.Form.randomIntersectionsColorCheckBox.setChecked(True)
+        self.settingsWidget.Form.intersectionsSelectColorButton.setStyleSheet(f"background-color : red")
+        self.settingsWidget.Form.intersectionsSelectColorButton.setEnabled(False)
+
+
+        self.settingsWidget.Form.outlineColorButton.setStyleSheet(f"background-color : red")
+        self.settingsWidget.Form.curveColorButton.setStyleSheet(f"background-color : green")
+        self.settingsWidget.Form.labelColorButton.setStyleSheet(f"background-color : blue")
+        self.settingsWidget.Form.vectorColorButton.setStyleSheet(f"background-color : green")
+        self.settingsWidget.Form.pointColorButton.setStyleSheet(f"background-color : red")
+
+        def apply():
+            ...
+
+        def cancel():
+            ...
+
+        def reset():
+            ...
 
     def save_file(self):
         try:

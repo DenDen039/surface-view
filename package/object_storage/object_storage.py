@@ -50,7 +50,13 @@ class ObjectStorage:
         self.__enable_intersections = temp
 
     def save(self, file_path):
-        converted_data = {str(key): value for key, value in self.storage.items()}
+        save_items = self.storage.items()
+        for item in save_items:
+            if 'curve' in item[1]:
+                item[1]['curve'], item[1]['curve_string'] = item[1]['curve_string'], None
+
+        converted_data = {str(key): value for key, value in save_items}
+
         print(converted_data)
         with open(file_path, 'w') as json_file:
             json.dump(converted_data, json_file)

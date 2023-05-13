@@ -26,7 +26,7 @@ class Curve(Figure):
                 self.__curve = value
 
     def get_mesh(self):
-        t = np.arange(self.__t_bounds[0], self.__t_bounds[1], 0.05)
+        t = np.arange(self.__t_bounds[0], self.__t_bounds[1] + 0.05, 0.05)
 
         x = self.__curve[0](t)
         y = self.__curve[1](t)
