@@ -150,6 +150,7 @@ class ObjectManager:
         labels = dict()
         t = figure_type["t_bounds"]
         if figure_type["FigureTypes"] == FigureTypes.CONE:
+
             c = figure_type["point"]
             c_r = tuple(round(coord, 2) for coord in c)
             labels["C" + str(c_r)] = c
@@ -164,6 +165,7 @@ class ObjectManager:
             labels["P" + str(P_r)] = P
             s = tuple((ai + bi)/2 for ai, bi in zip(labels["P" + str(P_r)], figure_type["point"]))
             labels["L" + str(counter)] = s
+
             return labels
 
         elif figure_type["FigureTypes"] == FigureTypes.CYLINDER:
@@ -191,9 +193,11 @@ class ObjectManager:
             return labels
 
         elif figure_type["FigureTypes"] == FigureTypes.LINE:
+
             P = tuple((ai + bi) / 2 for ai, bi in zip(figure_type["point1"], figure_type["point2"]))
             P_r = tuple(round(coord, 2) for coord in P)
             labels["P" + str(P_r)] = P
+
             return labels
 
 
@@ -248,6 +252,7 @@ class ObjectManager:
             curve = Curve(figure_type["curve"], t, uuid.uuid4())
             #curve = self.create_curve(figure_type["curve"], t)
             meshes.append(curve.get_mesh())
+
             line = Line(P, figure_type["point"], figure_type["v_bounds"] , uuid.uuid4()) # [t_i * 0.1 for t_i in t]
             meshes.append(line.get_mesh())
             return meshes
@@ -255,7 +260,9 @@ class ObjectManager:
         elif figure_type["FigureTypes"] == FigureTypes.CYLINDER:
 
             s = tuple(ai + bi for ai, bi in zip(P, figure_type["direction"]))
+
             line = Line(P, s, figure_type["v_bounds"], uuid.uuid4())
+
             #line = self.create_line(P, s, t)
             #meshes.append(self.get_figure_mesh(line))
             meshes.append(line.get_mesh())

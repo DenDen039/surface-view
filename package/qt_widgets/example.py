@@ -142,8 +142,8 @@ class Example(QWidget):
             myWidget.view_yz()
 
         def screenshot():
-            myWidget.take_screenshot('zhoto1.jpg')
             myWidget.take_screenshot()
+            #myWidget.take_screenshot()
 
         def show_intersections():
             intersec = [manager.get_figure_mesh(uid2), manager.get_figure_mesh(uid3)]

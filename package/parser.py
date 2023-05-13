@@ -23,6 +23,7 @@ class Parser:
         if 't' not in input_string.replace('', ' ').split(' '):
             input_string += " + t*0"
 
+
         if self.check_expression_string(input_string):
             parsed_string = lambda t: eval(input_string)
         else:
