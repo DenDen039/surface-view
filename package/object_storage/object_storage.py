@@ -10,7 +10,7 @@ from unittest.mock import MagicMock
 from numpy import *
 
 class ObjectStorage:
-    def __init__(self, PW, SOW):
+    def __init__(self, PW, SOW, intersections_color, line_width):
 
         self.objManager = ObjectManager()
         self.storage = dict()
@@ -21,33 +21,67 @@ class ObjectStorage:
         self.label_counter = 0
         self.parser = Parser()
 
+        self.__intersections_color = intersections_color
+        self.__line_width = line_width
+
     @property
     def enable_intersections(self):
         return self.__enable_intersections
 
     @enable_intersections.setter
     def enable_intersections(self, value: bool):
-        if value:
-            intersections = self.objManager.compute_intersections()
-            self.PW.add_intersections(intersections)
-            self.__enable_intersections = value
+        self.__enable_intersections = value
+        self.__draw_intersections()
+
+    @property
+    def intersections_color(self):
+        return self.__intersections_color
+
+    @intersections_color.setter
+    def intersections_color(self, value):
+        self.__intersections_color = value
+        self.__draw_intersections()
+
+    @property
+    def line_width(self):
+        return self.__line_width
+
+    @line_width.setter
+    def line_width(self, value: bool):
+        self.line_width = value
+        self.__draw_intersections()
+
+    def __draw_intersections(self):
+        if not self.__enable_intersections:
+            self.PW.remove_intersections()
+            return
+        intersections = self.objManager.compute_intersections()
+        if self.__intersections_color is not None:
+            colors = [self.intersections_color for i in range(len(intersections))]
         else:
-            intersections = []
-            self.PW.add_intersections(intersections)
-            self.__enable_intersections = value
+            r = lambda: random.randint(150, 255)
+            colors = ['#%02X%02X%02X' % (r(), r(), r()) for i in range(len(intersections))]
+
+        self.PW.add_intersections(intersections, colors, self.line_width)
 
     def load(self, file_path):
         self.PW.clear_actors()
+        self.PW.remove_intersections()
+        self.objManager.wipe()
+        for item in self.storage.keys():
+            self.PW.remove_label(item)
+
         for obj in self.storage.keys():
             self.SOW.delete(obj)
+
         with open(file_path, 'r') as json_file:
             data = json.load(json_file)
             converted_data = {UUID(key): value for key, value in data.items()}
-        temp = self.__enable_intersections
-        self.__enable_intersections = False
+        temp = self.enable_intersections
+        self.enable_intersections = False
         for obj in converted_data.values():
             self.create(obj)
-        self.__enable_intersections = temp
+        self.enable_intersections = temp
 
     def save(self, file_path):
         save_items = self.storage.items()
@@ -67,11 +101,9 @@ class ObjectStorage:
         self.label_counter -= 1
         self.objManager.delete_figure(uid)
         self.PW.remove_mesh(uid)
-        if self.enable_intersections:
-            intersections = self.objManager.compute_intersections()
-            self.PW.add_intersections(intersections)
+        if self.__enable_intersections:
+            self.__draw_intersections()
         self.SOW.delete(uid)
-
 
     def update(self, uid, new_data: dict):
         self.storage[uid] = new_data
@@ -133,9 +165,8 @@ class ObjectStorage:
 
         self.PW.add_label(uid)
 
-        if self.enable_intersections:
-            intersections = self.objManager.compute_intersections()
-            self.PW.add_intersections(intersections, color="red", line_width=5)
+        if self.__enable_intersections:
+            self.__draw_intersections()
 
         self.SOW.update(uid, new_data["name"], new_data["FigureTypes"], new_data["color"])
 
@@ -189,8 +220,7 @@ class ObjectStorage:
                          **self.objManager.get_figure_settings(uid))
        # self.enable_intersections = True
         if self.__enable_intersections:
-            intersections = self.objManager.compute_intersections()
-            self.PW.add_intersections(intersections, color="red", line_width=5)
+            self.__draw_intersections()
 
         #self.PW.add_label(uid)
         self.label_counter += 1

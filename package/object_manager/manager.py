@@ -323,6 +323,8 @@ class ObjectManager:
         obj.update_settings(**kwargs)
         return obj
 
+    def wipe(self):
+        self.objects = dict()
 
 # Example
 if __name__ == "__main__":

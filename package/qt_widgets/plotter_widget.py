@@ -50,7 +50,7 @@ class PlotterWidget(QtWidgets.QWidget):
         if uid not in self.actors:
             raise Exception("Figure not exist")
         self.remove_mesh(uid)
-        self.actors[uid] = self.plotter.add_mesh(self.meshes[uid], opacity=0, **self.actors_settings[uid])
+        self.actors[uid] = self.plotter.add_mesh(self.meshes[uid], opacity=0)#, **self.actors_settings[uid])
 
     def show_mesh(self, uid: str):
         if uid not in self.actors:
@@ -110,10 +110,12 @@ class PlotterWidget(QtWidgets.QWidget):
         self.remove_mesh(uid)
         self.actors[uid] = self.plotter.add_mesh(self.meshes[uid], show_edges=False, **self.actors_settings[uid])
 
-    def add_intersections(self, intersections, **kwargs):
+    def add_intersections(self, intersections, colors, line_width):
         print(f"intersections:{intersections}")
-        for item in intersections:
-            new_intersection = self.plotter.add_mesh(item, render_lines_as_tubes=True, **kwargs)
+
+        for i in range(len(intersections)):
+            new_intersection = self.plotter.add_mesh(intersections[i], render_lines_as_tubes=True, color=colors[i],
+                                                     line_width=line_width)
             self.intersections_list.append(new_intersection)
 
     def remove_intersections(self):
@@ -137,6 +139,8 @@ class PlotterWidget(QtWidgets.QWidget):
         self.actors_drawed_labels[uid] = drawed_meshes + drawed_points
 
     def remove_label(self, uid):
+        if uid not in self.actors_drawed_labels.keys():
+            return
         for actor in self.actors_drawed_labels[uid]:
             self.plotter.remove_actor(actor)
 
@@ -209,7 +213,7 @@ class PlotterWidget(QtWidgets.QWidget):
             return max(numbers) + 1
         else:
             return 0
-        
+
         # files = os.listdir("package/photos/")
         #     numbers = list(filter(lambda str: str.startswith("untitled_"), files))
         #     numbers = [int(numbers[i].split('untitled_')[-1].split('.png')[0]) for i in range(len(numbers))]

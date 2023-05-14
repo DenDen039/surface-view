@@ -11,6 +11,8 @@ from package.qt_widgets.plotter_widget import PlotterWidget
 from package.object_storage.object_storage import ObjectStorage
 from package.parser import Parser
 
+from package.ui.input_warnings_handler import Handler
+
 from numpy import *
 
 
@@ -18,8 +20,11 @@ from numpy import *
 # TODO: finish parses class
 #       refactor gui
 #       better f(t) parser
-#
-
+#       visibility checkbox
+#       implement settings widget
+#       assign colors to objects
+#       create user input error handler
+#       opacity slider
 import numpy as np
 import re
 
@@ -64,6 +69,8 @@ class StorageObjectWidget(QScrollArea):
 
         self.scroll_area_content.setLayout(self.scroll_area_layout)
 
+        self.__object_visible = True
+
        # self.show()
 
         self.widgets = {}
@@ -82,13 +89,17 @@ class StorageObjectWidget(QScrollArea):
         objectWidget.Form.label_type.setText(type)
        # objectWidget.Form.label_color.setText(str(uid))
         objectWidget.Form.button_edit.clicked.connect(lambda: self.UI.edit_object(uid))
+        objectWidget.Form.visibiityCheckBox.stateChanged.connect(lambda: self.UI.edit_visibility(uid, objectWidget.Form.visibiityCheckBox.isChecked()))
 
         self.widgets[uid] = objectWidget
         self.scroll_area_layout.addWidget(self.widgets[uid])
         print("added new widget")
 
     def delete(self, uid):
-        self.widgets[uid].deleteLater()
+
+        if uid in self.widgets.keys():
+            self.widgets[uid].deleteLater()
+            del self.widgets[uid]
 
     def update(self, uid, name, type, color):
 
@@ -179,7 +190,7 @@ class UI(QMainWindow):
         self.show_console.setChecked(0)
 
         self.SOW = StorageObjectWidget(self)
-        self.object_storage = ObjectStorage(self.pyvista_widget, self.SOW)
+        self.object_storage = ObjectStorage(self.pyvista_widget, self.SOW, None, 2.5)
 
         self.highlights_enabled = True
         self.labels_enabled = True
@@ -191,6 +202,8 @@ class UI(QMainWindow):
         self.scrollAreaContents.deleteLater()
         self.parser = Parser()
 
+        self.handler = Handler(self)
+
         self.settingsWidget = self.creator.SettingsWidget()
 
         self.save.triggered.connect(self.save_file)
@@ -201,8 +214,6 @@ class UI(QMainWindow):
         self.objects_list = {}
 
         self.add_object()
-
-
 
     def open_settings_widget(self):
         self.settingsWidget.show()
@@ -224,18 +235,30 @@ class UI(QMainWindow):
             ...
 
         def cancel():
+            self.settingsWidget.hide()
             ...
 
         def reset():
+            self.settingsWidget.Form.intersectionsEnableCheckBox.setChecked(True)
+            self.settingsWidget.Form.intersectionsWidthLineEdit.setText("2.5")
+            self.settingsWidget.Form.randomIntersectionsColorCheckBox.setChecked(True)
+            self.settingsWidget.Form.intersectionsSelectColorButton.setStyleSheet(f"background-color : red")
+            self.settingsWidget.Form.intersectionsSelectColorButton.setEnabled(False)
+
+            self.settingsWidget.Form.outlineColorButton.setStyleSheet(f"background-color : red")
+            self.settingsWidget.Form.curveColorButton.setStyleSheet(f"background-color : green")
+            self.settingsWidget.Form.labelColorButton.setStyleSheet(f"background-color : blue")
+            self.settingsWidget.Form.vectorColorButton.setStyleSheet(f"background-color : green")
+            self.settingsWidget.Form.pointColorButton.setStyleSheet(f"background-color : red")
             ...
 
     def save_file(self):
         try:
             self.object_storage.save()
-        except Exception as _:
-            self.console.append("Saving error")
-            print("Saving error while doing standart saving. Something is wrong in the code")
-
+        except Exception as e:
+            self.handler.error("Saving error\n" + str(e))
+            print("Saving error")
+            print(e)
 
     def save_file_as(self):
         try:
@@ -243,9 +266,10 @@ class UI(QMainWindow):
             fname = str(fname[0]) + str(fname[1])
             print(fname)
             self.object_storage.save(fname)
-        except:
-            self.console.append("Saving error")
+        except Exception as e:
+            self.handler.error("Saving error\n" + str(e))
             print("Saving error")
+            print(e)
         ...
 
     def load_file(self):
@@ -254,10 +278,9 @@ class UI(QMainWindow):
 
             print(fname)
             self.object_storage.load(fname[0])
-        except Exception as _:
-            self.console.append("Loading error")
-            print("Loading error")
-
+        except Exception as e:
+            self.handler.error("Loading error \n" + str(e))
+            print(e)
 
     def set_intersections(self, mode: bool):
         if mode:
@@ -265,6 +288,7 @@ class UI(QMainWindow):
         else:
             self.object_storage.__enable_intersections = False
             self.pyvista_widget.remove_intersections()
+
     def clear_right(self):
         for i in reversed(range(self.toolbox_layout.count())):
              self.toolbox_layout.itemAt(i).widget().setParent(None)
@@ -275,12 +299,10 @@ class UI(QMainWindow):
             self.pyvista_widget.remove_highlight(object)
         print(self.pyvista_widget.actors_HL)
 
-
     def remove_all_labels(self):
         for object in self.pyvista_widget.actors_drawed_labels:
             print(f"trying to delete highlight from {str(object)}")
             self.pyvista_widget.remove_label(object)
-
 
     # CHOOSE NEW OBJECT WIDGET #
     def add_object(self):
@@ -403,7 +425,7 @@ class UI(QMainWindow):
             point_input_y = float(point_input_y)
             point_input_z = float(point_input_z)
         except:
-            self.console.append("Incorrect value in point input")
+            self.handler.warning("Incorrect value in point input")
             return False
 
         return point_input_x, point_input_y, point_input_z
@@ -417,8 +439,12 @@ class UI(QMainWindow):
             vector_input_y = float(vector_input_y)
             vector_input_z = float(vector_input_z)
         except:
-            self.console.append("Incorrect value in vector input")
+            self.handler.warning("Incorrect value in vector input")
             return False
+
+        if vector_input_x == 0 and vector_input_y == 0 and vector_input_z == 0:
+            self.handler.error("Zero vector input")
+            return
 
         return vector_input_x, vector_input_y, vector_input_z
 
@@ -436,7 +462,7 @@ class UI(QMainWindow):
         if self.parser.check_expression_string(curve_input_x) and self.parser.check_expression_string(curve_input_y) and self.parser.check_expression_string(curve_input_z):
             return curve_input_x, curve_input_y, curve_input_z
 
-        self.console.append("Incorrect value in curve input")
+        self.handler.warning("Incorrect value in curve input")
         return False
 
     def input_line(self):
@@ -449,7 +475,7 @@ class UI(QMainWindow):
             point_input_y_1 = float(point_input_y_1)
             point_input_z_1 = float(point_input_z_1)
         except:
-            self.console.append("Incorrect value in line`s point 1 input")
+            self.handler.warning("Incorrect value in line`s point 1 input")
             return False
 
         point_input_x_2 = self.findChild(QLineEdit, "input_x_2").text()
@@ -460,7 +486,7 @@ class UI(QMainWindow):
             point_input_y_2 = float(point_input_y_2)
             point_input_z_2 = float(point_input_z_2)
         except:
-            self.console.append("Incorrect value in line`s point 2 input")
+            self.handler.warning("Incorrect value in line`s point 2 input")
             return False
 
         return point_input_x_1, point_input_y_1, point_input_z_1, point_input_x_2, point_input_y_2, point_input_z_2
@@ -588,6 +614,12 @@ class UI(QMainWindow):
         self.remove_all_labels()
         self.add_object()
 
+    def edit_visibility(self, uid, state):
+        if uid in self.object_storage.storage.keys():
+            if state:
+                self.pyvista_widget.show_mesh(uid)
+            else:
+                self.pyvista_widget.hide_mesh(uid)
     # CREATE OR UPDATE OBJECT #
     def createObject(self, _type, update_mode, uid):
 
@@ -620,7 +652,21 @@ class UI(QMainWindow):
                 curve_input_x, curve_input_y, curve_input_z = self.input_curve()
 
 
-                print("test")
+                #checking if point is on curve
+                cx = self.parser.parse_expression_string_to_lambda(curve_input_x)
+                cy = self.parser.parse_expression_string_to_lambda(curve_input_y)
+                cz = self.parser.parse_expression_string_to_lambda(curve_input_z)
+
+                px,py,pz = point_input_x, point_input_y, point_input_z
+
+                epsilon = 0.5
+                bounds = np.arange(t_bounds[0], t_bounds[1], 0.1)
+                for t in bounds:
+                    if px - epsilon < cx(t) < px + epsilon:
+                        if py - epsilon < cy(t) < py + epsilon:
+                            if pz - epsilon < cz(t) < pz + epsilon:
+                                if not self.handler.warning("Point is lying on curve or very close to it"):
+                                    return
 
                 self.console.append(
                     f"For this conical surface point x = {point_input_x}, y = {point_input_y}, z = {point_input_z}")
@@ -757,8 +803,8 @@ class UI(QMainWindow):
                 input = {
 
                     "curve": (curve_input_x, curve_input_y, curve_input_z),
-                    "direction": np.array((line_x1, line_y1, line_z1)),
-                    "point": np.array((line_x2, line_y2, line_z2)),
+                    "direction": (line_x1, line_y1, line_z1),
+                    "point": (line_x2, line_y2, line_z2),
                     "t_bounds": t_bounds,
                     "v_bounds": v_bounds,
                     "name": name,
