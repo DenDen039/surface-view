@@ -22,7 +22,10 @@ class Handler:
         wg.setInformativeText(text)
         wg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
         result = wg.exec()
-        return result
+
+        if result == QMessageBox.Ok:
+            return True
+        return False
 
     def error(self, text: str):
 

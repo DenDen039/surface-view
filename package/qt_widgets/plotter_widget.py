@@ -191,7 +191,7 @@ class PlotterWidget(QtWidgets.QWidget):
             file_name = 'untitled_' + str(self.photo_counter) + '.png'
             self.photo_counter += 1
 
-            self.plotter.screenshot(f"package/photos/{file_name}")
+            self.plotter.screenshot(f"photos/{file_name}")
         else:
             if file_path.split('.')[-1] not in ['png', 'jpeg', 'jpg', 'bmp', 'tif', 'tiff']:
                 raise Exception("Unfortunately, this graphic format is not supported")
@@ -200,11 +200,11 @@ class PlotterWidget(QtWidgets.QWidget):
     def untitled_counter(self) -> int:
         import os
         
-        if os.path.isdir(os.path.join("package/", "photos")) == False:
-            dir_path = os.path.join("package/", "photos")
+        if os.path.isdir("photos") == False:
+            dir_path = "photos"
             os.mkdir(dir_path)
 
-        files = os.listdir("package/photos/")
+        files = os.listdir("photos/")
 
         numbers = list(filter(lambda str: str.startswith("untitled_"), files))
         numbers = [int(numbers[i].split('untitled_')[-1].split('.png')[0]) for i in range(len(numbers))]

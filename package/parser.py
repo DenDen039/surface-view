@@ -15,14 +15,24 @@ class Parser:
     # TODO vvv
     # Checks if string is a valid mathematical expression with only variable t
     def check_expression_string(self, input_string: str) -> bool:
+
+        if 't' not in input_string.replace('', ' ').split(' '):
+            input_string += " + t*0"
+
+        try:
+            parsed_string = lambda t: eval(input_string)
+            t = 0.456456
+            a = parsed_string(t)
+            print(parsed_string)
+        except NameError:
+            return False
         return True
-        ...
+
 
     # TODO vvv
     def parse_expression_string_to_lambda(self, input_string: str):
         if 't' not in input_string.replace('', ' ').split(' '):
             input_string += " + t*0"
-
 
         if self.check_expression_string(input_string):
             parsed_string = lambda t: eval(input_string)

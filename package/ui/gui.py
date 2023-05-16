@@ -23,7 +23,6 @@ from numpy import *
 #       visibility checkbox
 #       implement settings widget
 #       assign colors to objects
-#       create user input error handler
 #       opacity slider
 import numpy as np
 import re
@@ -196,6 +195,14 @@ class UI(QMainWindow):
         self.labels_enabled = True
         self.object_storage.__enable_intersections = True
 
+        self.standart_colors = dict()
+        self.standart_colors[FigureTypes.LINE] = '#FFFFFF'
+        self.standart_colors[FigureTypes.PLANE] = '#42f593'
+        self.standart_colors[FigureTypes.CURVE] = '#cfc951'
+        self.standart_colors[FigureTypes.CONE] = '#f57a16'
+        self.standart_colors[FigureTypes.CYLINDER] = '#4e3c99'
+        self.standart_colors[FigureTypes.REVOLUTION] = '#c842f5'
+
         self.horizontal_layout.replaceWidget(self.scrollArea, self.SOW)
         # self.horizontal_layout.addWidget(self.SOW)
         self.scrollArea.deleteLater()
@@ -364,7 +371,8 @@ class UI(QMainWindow):
         self.commonWidget = self.creator.CommonSettingsWidget()
         self.commonWidget.Form.inputName.setText("Object")
         self.commonWidget.Form.button_color.setText("")
-        self.commonWidget.Form.button_color.setStyleSheet("background-color : white")
+        self.commonWidget.Form.button_color.setStyleSheet(f"background-color : {self.standart_colors[_type]}")
+        self.commonWidget.color = self.standart_colors[_type]
         self.commonWidget.Form.inputOpacity.setText("0.5")
         self.commonWidget.Form.inputTBounds.setText("-10, 10")
         self.commonWidget.Form.inputTBounds.setEnabled(False)
@@ -459,6 +467,15 @@ class UI(QMainWindow):
         _curve_input_y_text = curve_input_y
         _curve_input_z_text = curve_input_z
 
+        try:
+            a = self.parser.parse_expression_string_to_lambda(curve_input_x)
+            a = self.parser.parse_expression_string_to_lambda(curve_input_x)
+            a = self.parser.parse_expression_string_to_lambda(curve_input_x)
+        except:
+            self.handler.error("Incorrect value in curve input")
+            return False
+
+
         if self.parser.check_expression_string(curve_input_x) and self.parser.check_expression_string(curve_input_y) and self.parser.check_expression_string(curve_input_z):
             return curve_input_x, curve_input_y, curve_input_z
 
@@ -490,7 +507,6 @@ class UI(QMainWindow):
             return False
 
         return point_input_x_1, point_input_y_1, point_input_z_1, point_input_x_2, point_input_y_2, point_input_z_2
-
 
     # EDIT OBJECT WIDGET #
     def edit_object(self, uid):
@@ -605,7 +621,7 @@ class UI(QMainWindow):
 
     def edit_apply_button_clicked(self, _type, uid):
         self.pyvista_widget.remove_intersections()
-        self.createObject(_type, True,uid)
+        self.createObject(_type, True, uid)
         if uid not in self.pyvista_widget.actors_HL:
             self.pyvista_widget.highlight_mesh(uid)
 
@@ -628,12 +644,12 @@ class UI(QMainWindow):
         opacity = self.commonWidget.Form.inputOpacity.text()
 
         if not self.parser.parse_two_floats(self.commonWidget.Form.inputTBounds.text()):
-            self.console.append("Incorrect input in t_bounds")
+            self.handler.error("Incorrect input in t_bounds")
             return
         t_bounds = self.parser.parse_two_floats(self.commonWidget.Form.inputTBounds.text())
 
         if not self.parser.parse_two_floats(self.commonWidget.Form.inputVBounds.text()):
-            self.console.append("Incorrect input in v_bounds")
+            self.handler.error("Incorrect input in v_bounds")
             return
         v_bounds = self.parser.parse_two_floats(self.commonWidget.Form.inputVBounds.text())
 
@@ -661,12 +677,16 @@ class UI(QMainWindow):
 
                 epsilon = 0.5
                 bounds = np.arange(t_bounds[0], t_bounds[1], 0.1)
+                _temp = False
                 for t in bounds:
                     if px - epsilon < cx(t) < px + epsilon:
                         if py - epsilon < cy(t) < py + epsilon:
                             if pz - epsilon < cz(t) < pz + epsilon:
-                                if not self.handler.warning("Point is lying on curve or very close to it"):
-                                    return
+                                _temp = True
+                                break
+                if _temp:
+                    if self.handler.warning("Point is lying on curve or very close to it"):
+                        return
 
                 self.console.append(
                     f"For this conical surface point x = {point_input_x}, y = {point_input_y}, z = {point_input_z}")
