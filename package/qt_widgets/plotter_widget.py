@@ -7,9 +7,9 @@ class PlotterWidget(QtWidgets.QWidget):
         super().__init__(parent=parent)
 
         self.plotter = BackgroundPlotter(show=False)
+
         self.plotter.enable_anti_aliasing()
-        
-        #self.plotter.enable_depth_peeling()
+        self.plotter.enable_depth_peeling()
 
         self.plotter.add_axes()
         self.plotter.show_grid()
@@ -30,6 +30,12 @@ class PlotterWidget(QtWidgets.QWidget):
         self.intersections_list = list()
         self.photo_counter = self.untitled_counter()
 
+        self.__highlight_color = "red"
+        self.__highlight_width = 2.5
+        self.__label_colors = ["green", "blue", "yellow", "purple", "cyan", "red"]
+        self.__intersection_color = "red"
+        self.__intersection_width = 2.5
+
     def add_mesh(self, uid: str, mesh, figure_type, labels, **kwargs):
         if uid in self.actors:
             raise Exception("Figure already exists")
@@ -44,7 +50,7 @@ class PlotterWidget(QtWidgets.QWidget):
         if uid not in self.actors:
             raise Exception("Figure not exist")
         self.remove_mesh(uid)
-        self.actors[uid] = self.plotter.add_mesh(self.meshes[uid], opacity=0, **self.actors_settings[uid])
+        self.actors[uid] = self.plotter.add_mesh(self.meshes[uid], opacity=0)#, **self.actors_settings[uid])
 
     def show_mesh(self, uid: str):
         if uid not in self.actors:
@@ -64,15 +70,15 @@ class PlotterWidget(QtWidgets.QWidget):
     def highlight_mesh(self, uid: str, color: str='red', line_width: float=2.5):
         if uid not in self.actors:
                 raise Exception("Figure not exist")
-        if self.actors_types[uid] in [FigureTypes.CONE, FigureTypes.CYLINDER, FigureTypes.PLANE]:
-            boundary = self.meshes[uid].extract_feature_edges(boundary_edges=True, non_manifold_edges=True, manifold_edges=True)
+        if self.actors_types[uid] in [FigureTypes.PLANE]:
+            boundary = self.meshes[uid].extract_feature_edges(boundary_edges=True, non_manifold_edges=False, manifold_edges=False)
             self.actors_HL[uid] = self.plotter.add_mesh(boundary, color=color, line_width=line_width)
 
         elif self.actors_types[uid] in [FigureTypes.LINE, FigureTypes.CURVE]:
             self.remove_mesh(uid)
             self.actors[uid] = self.plotter.add_mesh(self.meshes[uid], render_lines_as_tubes=True, **self.actors_settings[uid])
 
-        elif self.actors_types[uid] in [FigureTypes.REVOLUTION]:
+        elif self.actors_types[uid] in [FigureTypes.REVOLUTION, FigureTypes.CONE, FigureTypes.CYLINDER]:
             self.remove_mesh(uid)
             self.actors[uid] = self.plotter.add_mesh(self.meshes[uid],
                                                      silhouette=dict(color=color, line_width=line_width,
@@ -92,7 +98,6 @@ class PlotterWidget(QtWidgets.QWidget):
                   self.remove_mesh(uid)
                   self.actors[uid] = self.plotter.add_mesh(self.meshes[uid], **self.actors_settings[uid])
 
-
     def show_edges_mesh(self, uid: str, color: str='white'):
         if uid not in self.actors:
             raise Exception("Figure not exist")
@@ -105,10 +110,12 @@ class PlotterWidget(QtWidgets.QWidget):
         self.remove_mesh(uid)
         self.actors[uid] = self.plotter.add_mesh(self.meshes[uid], show_edges=False, **self.actors_settings[uid])
 
-    def add_intersections(self, intersections, **kwargs):
+    def add_intersections(self, intersections, colors, line_width):
         print(f"intersections:{intersections}")
-        for item in intersections:
-            new_intersection = self.plotter.add_mesh(item, render_lines_as_tubes=True, **kwargs)
+
+        for i in range(len(intersections)):
+            new_intersection = self.plotter.add_mesh(intersections[i], render_lines_as_tubes=True, color=colors[i],
+                                                     line_width=line_width)
             self.intersections_list.append(new_intersection)
 
     def remove_intersections(self):
@@ -132,6 +139,8 @@ class PlotterWidget(QtWidgets.QWidget):
         self.actors_drawed_labels[uid] = drawed_meshes + drawed_points
 
     def remove_label(self, uid):
+        if uid not in self.actors_drawed_labels.keys():
+            return
         for actor in self.actors_drawed_labels[uid]:
             self.plotter.remove_actor(actor)
 
@@ -182,7 +191,7 @@ class PlotterWidget(QtWidgets.QWidget):
             file_name = 'untitled_' + str(self.photo_counter) + '.png'
             self.photo_counter += 1
 
-            self.plotter.screenshot(f"package/photos/{file_name}")
+            self.plotter.screenshot(f"photos/{file_name}")
         else:
             if file_path.split('.')[-1] not in ['png', 'jpeg', 'jpg', 'bmp', 'tif', 'tiff']:
                 raise Exception("Unfortunately, this graphic format is not supported")
@@ -191,11 +200,11 @@ class PlotterWidget(QtWidgets.QWidget):
     def untitled_counter(self) -> int:
         import os
         
-        if os.path.isdir(os.path.join("package/", "photos")) == False:
-            dir_path = os.path.join("package/", "photos")
+        if os.path.isdir("photos") == False:
+            dir_path = "photos"
             os.mkdir(dir_path)
 
-        files = os.listdir("package/photos/")
+        files = os.listdir("photos/")
 
         numbers = list(filter(lambda str: str.startswith("untitled_"), files))
         numbers = [int(numbers[i].split('untitled_')[-1].split('.png')[0]) for i in range(len(numbers))]
@@ -204,7 +213,7 @@ class PlotterWidget(QtWidgets.QWidget):
             return max(numbers) + 1
         else:
             return 0
-        
+
         # files = os.listdir("package/photos/")
         #     numbers = list(filter(lambda str: str.startswith("untitled_"), files))
         #     numbers = [int(numbers[i].split('untitled_')[-1].split('.png')[0]) for i in range(len(numbers))]

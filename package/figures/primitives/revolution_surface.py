@@ -54,7 +54,7 @@ class RevolutionSurface(Figure):
         direction = self.__direction
         line_point = self.__point
 
-        t = np.arange(t_bounds[0], t_bounds[1], 0.05)
+        t = np.arange(t_bounds[0], t_bounds[1] + 0.05, 0.05)
         theta = np.linspace(0, 2 * np.pi, 180)
 
         direction = direction / np.linalg.norm(direction)
