@@ -178,16 +178,14 @@ class ObjectManager:
             y = (figure_type["curve"][0](t[0] * 0.9),
                   figure_type["curve"][1](t[0] * 0.9),
                   figure_type["curve"][2](t[0] * 0.9))
-            y_r = tuple(round(coord, 2) for coord in y)
-            labels["Y" + str(y_r)] = y
+            labels["Y" + str(counter)] = y
             P = (figure_type["curve"][0](t[0] * 0.5),
                  figure_type["curve"][1](t[0] * 0.5),
                  figure_type["curve"][2](t[0] * 0.5))
             P_r = tuple(round(coord, 2) for coord in P)
             labels["P" + str(P_r)] = P
             s = tuple((ai + bi)/2 for ai, bi in zip(labels["P" + str(P_r)], figure_type["point"]))
-            s_r = tuple(round(coord, 2) for coord in s)
-            labels["L" + str(s_r)] = s
+            labels["L" + str(counter)] = s
 
             return labels
 
@@ -204,8 +202,7 @@ class ObjectManager:
             y = (figure_type["curve"][0](t[0] * 0.9),
                  figure_type["curve"][1](t[0] * 0.9),
                  figure_type["curve"][2](t[0] * 0.9))
-            y_r = tuple(round(coord, 2) for coord in y)
-            labels["Y" + str(y_r)] = y
+            labels["Y" + str(counter)] = y
             return labels
 
         elif figure_type["FigureTypes"] == FigureTypes.CURVE:
@@ -248,8 +245,7 @@ class ObjectManager:
             y = (figure_type["curve"][0](t[0] * 0.9),
                  figure_type["curve"][1](t[0] * 0.9),
                  figure_type["curve"][2](t[0] * 0.9))
-            y_r = tuple(round(coord, 2) for coord in y)
-            labels["Y" + str(y_r)] = y
+            labels["Y" + str(counter)] = y
             return labels
 
     def get_label_lines(self, figure_type):
@@ -261,10 +257,11 @@ class ObjectManager:
         t = figure_type["t_bounds"]
 
         if figure_type["FigureTypes"] == FigureTypes.PLANE:
-            s = tuple(ai + bi for ai, bi in zip(figure_type["point"], figure_type["normal"]))
-
-            line = self.create_line(figure_type["point"], s, [0, 1.05])
-            meshes.append(self.get_figure_mesh(line))
+            # s = tuple(a * 0.1 for a in figure_type["normal"])
+            # nn = tuple(ai + bi for ai, bi in zip(figure_type["point"], s))
+            # line = self.create_line(figure_type["point"], s, [0, 1.05])
+            mesh = pv.Arrow(figure_type["point"], figure_type["normal"], tip_length=0.2, scale="auto")
+            meshes.append(mesh) #self.get_figure_mesh(line)
             return meshes
 
 
@@ -305,6 +302,9 @@ class ObjectManager:
 
             curve = self.create_curve(figure_type["curve"], t)
             meshes.append(self.get_figure_mesh(curve))
+
+            mesh = pv.Arrow(figure_type["point"], figure_type["direction"], tip_length=0.2, scale="auto")
+            meshes.append(mesh)  # self.get_figure_mesh(line)
             return meshes
 
     def get_figure(self, uid: str) -> Figure:
