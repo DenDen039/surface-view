@@ -19,13 +19,11 @@ from numpy import *
 
 
 
-# TODO: finish parses class
-#       refactor gui
-#       better f(t) parser
-#       visibility checkbox
+# TODO: refactor gui
 #       implement settings widget
 #       assign colors to objects
 #       opacity slider
+#       fix save
 import numpy as np
 import re
 
@@ -263,7 +261,7 @@ class UI(QMainWindow):
 
     def save_file(self):
         try:
-            self.object_storage.save()
+            self.object_storage.save(None)
         except Exception as e:
             self.handler.error("Saving error\n" + str(e))
             print("Saving error")
