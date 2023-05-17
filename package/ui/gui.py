@@ -1,3 +1,5 @@
+# Actual version @17.05.2023 13:45
+
 import PyQt5
 import PyQt5.QtCore
 from PyQt5.QtWidgets import *
