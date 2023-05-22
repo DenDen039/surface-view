@@ -155,7 +155,7 @@ class ObjectManager:
 
         return uid
 
-    def update_plane(self, uid, **kwargs):
+    def update_paramteric_surface(self, uid, **kwargs):
         if uid not in self.objects:
             raise Exception("Figure not found")
 

@@ -21,6 +21,7 @@ class ObjectStorage:
         self.label_counter = 0
         self.parser = Parser()
 
+        self.saves_counter = self.untitled_counter()
         self.__intersections_color = intersections_color
         self.__line_width = line_width
 
@@ -65,23 +66,25 @@ class ObjectStorage:
         self.PW.add_intersections(intersections, colors, self.line_width)
 
     def load(self, file_path):
-        self.PW.clear_actors()
-        self.PW.remove_intersections()
-        self.objManager.wipe()
-        for item in self.storage.keys():
-            self.PW.remove_label(item)
 
-        for obj in self.storage.keys():
-            self.SOW.delete(obj)
-
-        with open(file_path, 'r') as json_file:
+       with open(file_path, 'r') as json_file:
             data = json.load(json_file)
             converted_data = {UUID(key): value for key, value in data.items()}
-        temp = self.enable_intersections
-        self.enable_intersections = False
-        for obj in converted_data.values():
-            self.create(obj)
-        self.enable_intersections = temp
+
+            self.PW.clear_actors()
+            self.PW.remove_intersections()
+            self.objManager.wipe()
+            for item in self.storage.keys():
+                self.PW.remove_label(item)
+
+            for obj in self.storage.keys():
+                self.SOW.delete(obj)
+
+            temp = self.enable_intersections
+            self.enable_intersections = False
+            for obj in converted_data.values():
+                self.create(obj)
+            self.enable_intersections = temp
 
     def save(self, file_path):
         save_items = self.storage.items()
@@ -92,8 +95,35 @@ class ObjectStorage:
         converted_data = {str(key): value for key, value in save_items}
 
         print(converted_data)
-        with open(file_path, 'w') as json_file:
-            json.dump(converted_data, json_file)
+        if file_path is not None:
+            with open(file_path, 'w') as json_file:
+                json.dump(converted_data, json_file)
+        else:
+            file_name = f"untitled_{self.saves_counter}.json"
+            file_path = f"scenes/{file_name}"
+
+            print(file_path)
+            with open(file_path, 'w') as json_file:
+                json.dump(converted_data, json_file)
+                self.saves_counter += 1
+
+    def untitled_counter(self) -> int:
+        import os
+
+        if os.path.isdir("scenes") == False:
+            dir_path = "scenes"
+            os.mkdir(dir_path)
+
+        files = os.listdir("scenes/")
+
+        numbers = list(filter(lambda str: str.startswith("untitled_"), files))
+        numbers = [int(numbers[i].split('untitled_')[-1].split('.json')[0]) for i in range(len(numbers))]
+        if numbers:
+            print(numbers)
+            return max(numbers) + 1
+        else:
+            return 0
+
 
     def delete(self, uid):
         del self.storage[uid]
