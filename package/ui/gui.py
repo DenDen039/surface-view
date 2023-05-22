@@ -21,9 +21,8 @@ from numpy import *
 
 # TODO: refactor gui
 #       implement settings widget
-#       assign colors to objects
 #       opacity slider
-#       fix save
+#       add object type label on object creation/edit
 import numpy as np
 import re
 
@@ -168,7 +167,7 @@ class UI(QMainWindow):
         self.widget.deleteLater()
         self.main_layout.removeWidget(self.toolbox)
 
-        self.main_layout.addWidget(self.pyvista_widget, 2)
+        self.main_layout.addWidget(self.pyvista_widget, 4)
         #self.pyvista_widget.test_scene()
 
         self.main_layout.addWidget(self.toolbox)
@@ -212,6 +211,16 @@ class UI(QMainWindow):
         self.handler = Handler(self)
 
         self.settingsWidget = self.creator.SettingsWidget()
+        self.settingsWidget.highlight_color = "red"
+        self.settingsWidget.highlight_width = 2.5
+        self.settingsWidget.intersections_enabled = True
+        self.settingsWidget.intersections_width = 3.5
+        self.settingsWidget.intersections_color = None
+
+        self.settingsWidget.enable_intersections = True
+        self.settingsWidget.label_width = 8
+        self.settingsWidget.label_font_size = 12
+        self.settingsWidget.label_point_size = 14
 
         self.save.triggered.connect(self.save_file)
         self.save_as.triggered.connect(self.save_file_as)
@@ -225,20 +234,21 @@ class UI(QMainWindow):
     def open_settings_widget(self):
         self.settingsWidget.show()
         #TODO: Import inputs from PW and SOW
-        self.settingsWidget.Form.intersectionsEnableCheckBox.setChecked(True)
-        self.settingsWidget.Form.intersectionsWidthLineEdit.setText("0.5")
-        self.settingsWidget.Form.randomIntersectionsColorCheckBox.setChecked(True)
-        self.settingsWidget.Form.intersectionsSelectColorButton.setStyleSheet(f"background-color : red")
+        self.settingsWidget.Form.intersectionsEnableCheckBox.setChecked(self.settingsWidget.intersections_enabled)
+        self.settingsWidget.Form.intersectionsWidthLineEdit.setText(str(self.settingsWidget.intersections_width))
+        self.settingsWidget.Form.randomIntersectionsColorCheckBox.setChecked(True if self.settingsWidget.intersections_color is None else False)
+        self.settingsWidget.Form.intersectionsSelectColorButton.setStyleSheet(f"background-color : {self.settingsWidget.intersections_color if self.settingsWidget.intersections_width is not None else 'grey'}")
         self.settingsWidget.Form.intersectionsSelectColorButton.setEnabled(False)
 
-
         self.settingsWidget.Form.outlineColorButton.setStyleSheet(f"background-color : red")
-        self.settingsWidget.Form.curveColorButton.setStyleSheet(f"background-color : green")
-        self.settingsWidget.Form.labelColorButton.setStyleSheet(f"background-color : blue")
-        self.settingsWidget.Form.vectorColorButton.setStyleSheet(f"background-color : green")
-        self.settingsWidget.Form.pointColorButton.setStyleSheet(f"background-color : red")
 
         def apply():
+            self.settingsWidget.Form.intersectionsEnableCheckBox.setChecked(self.settingsWidget.intersections_enabled)
+            self.settingsWidget.Form.intersectionsWidthLineEdit.setText(str(self.settingsWidget.intersections_width))
+            self.settingsWidget.Form.randomIntersectionsColorCheckBox.setChecked()
+            self.settingsWidget.Form.intersectionsSelectColorButton.setStyleSheet(
+                f"background-color : {self.settingsWidget.intersections_color if self.settingsWidget.intersections_width is not None else 'grey'}")
+            self.settingsWidget.Form.intersectionsSelectColorButton.setEnabled(False)
             ...
 
         def cancel():
@@ -247,16 +257,12 @@ class UI(QMainWindow):
 
         def reset():
             self.settingsWidget.Form.intersectionsEnableCheckBox.setChecked(True)
-            self.settingsWidget.Form.intersectionsWidthLineEdit.setText("2.5")
+            self.settingsWidget.Form.intersectionsWidthLineEdit.setText("3.5")
             self.settingsWidget.Form.randomIntersectionsColorCheckBox.setChecked(True)
             self.settingsWidget.Form.intersectionsSelectColorButton.setStyleSheet(f"background-color : red")
             self.settingsWidget.Form.intersectionsSelectColorButton.setEnabled(False)
 
             self.settingsWidget.Form.outlineColorButton.setStyleSheet(f"background-color : red")
-            self.settingsWidget.Form.curveColorButton.setStyleSheet(f"background-color : green")
-            self.settingsWidget.Form.labelColorButton.setStyleSheet(f"background-color : blue")
-            self.settingsWidget.Form.vectorColorButton.setStyleSheet(f"background-color : green")
-            self.settingsWidget.Form.pointColorButton.setStyleSheet(f"background-color : red")
             ...
 
     def save_file(self):
@@ -599,13 +605,13 @@ class UI(QMainWindow):
                 self.createWidget.Form.curve_input_y.setText(str(storage[uid]["curve_string"][1]))
                 self.createWidget.Form.curve_input_z.setText(str(storage[uid]["curve_string"][2]))
 
-                self.createWidget.Form.input_x_1.setText(str(storage[uid]["direction"][0]))
-                self.createWidget.Form.input_y_1.setText(str(storage[uid]["direction"][1]))
-                self.createWidget.Form.input_z_1.setText(str(storage[uid]["direction"][2]))
+                self.createWidget.Form.input_x_1.setText(str(storage[uid]["point"][0]))
+                self.createWidget.Form.input_y_1.setText(str(storage[uid]["point"][1]))
+                self.createWidget.Form.input_z_1.setText(str(storage[uid]["point"][2]))
 
-                self.createWidget.Form.input_x_2.setText(str(storage[uid]["point"][0]))
-                self.createWidget.Form.input_y_2.setText(str(storage[uid]["point"][1]))
-                self.createWidget.Form.input_z_2.setText(str(storage[uid]["point"][2]))
+                self.createWidget.Form.input_x_2.setText(str(storage[uid]["direction"][0]))
+                self.createWidget.Form.input_y_2.setText(str(storage[uid]["direction"][1]))
+                self.createWidget.Form.input_z_2.setText(str(storage[uid]["direction"][2]))
 
         self.createWidget.Form.applyButton.disconnect()
 
@@ -783,11 +789,15 @@ class UI(QMainWindow):
                 self.console.append(
                     f"For this Plane normal vector x = {vector_input_x}, y = {vector_input_y}, z = {vector_input_z}")
 
+                bounds = [self.pyvista_widget.get_bounds()[0] - self.pyvista_widget.get_bounds()[1],
+                          self.pyvista_widget.get_bounds()[2] - self.pyvista_widget.get_bounds()[3],
+                          self.pyvista_widget.get_bounds()[4] - self.pyvista_widget.get_bounds()[5]]
+
                 input = {
 
                     "normal": (vector_input_x, vector_input_y, vector_input_z),
                     "point": (point_input_x, point_input_y, point_input_z),
-                    "size": max(self.pyvista_widget.get_bounds()) * 2, # TODO: CHANGE TO TUPLE
+                    "size": bounds, # TODO: CHANGE TO TUPLE
                     "t_bounds": t_bounds,
                     "v_bounds": v_bounds,
                     "name": name,
@@ -823,8 +833,8 @@ class UI(QMainWindow):
                 input = {
 
                     "curve": (curve_input_x, curve_input_y, curve_input_z),
-                    "direction": (line_x1, line_y1, line_z1),
-                    "point": (line_x2, line_y2, line_z2),
+                    "direction": (line_x2, line_y2, line_z2),
+                    "point": (line_x1, line_y1, line_z1),
                     "t_bounds": t_bounds,
                     "v_bounds": v_bounds,
                     "name": name,
