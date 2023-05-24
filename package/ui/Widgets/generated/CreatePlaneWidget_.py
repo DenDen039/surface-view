@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'package/ui/Widgets/ui/CreatePlaneWidget.ui'
+# Form implementation generated from reading ui file 'C:\Users\user\PycharmProjects\Project2023\package\ui\Widgets\ui\CreatePlaneWidget.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.9
 #
@@ -14,9 +14,12 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_Form(object):
     def setupUi(self, Form):
         Form.setObjectName("Form")
-        Form.resize(167, 350)
+        Form.resize(323, 345)
         self.verticalLayout = QtWidgets.QVBoxLayout(Form)
         self.verticalLayout.setObjectName("verticalLayout")
+        self.label_9 = QtWidgets.QLabel(Form)
+        self.label_9.setObjectName("label_9")
+        self.verticalLayout.addWidget(self.label_9)
         self.label_7 = QtWidgets.QLabel(Form)
         self.label_7.setObjectName("label_7")
         self.verticalLayout.addWidget(self.label_7)
@@ -50,10 +53,6 @@ class Ui_Form(object):
         self.horizontalLayout_3.addWidget(self.point_input_z)
         self.verticalLayout_point1.addLayout(self.horizontalLayout_3)
         self.verticalLayout.addLayout(self.verticalLayout_point1)
-        self.selectLineBox = QtWidgets.QComboBox(Form)
-        self.selectLineBox.setObjectName("selectLineBox")
-        self.selectLineBox.addItem("")
-        self.verticalLayout.addWidget(self.selectLineBox)
         self.line = QtWidgets.QFrame(Form)
         self.line.setFrameShape(QtWidgets.QFrame.HLine)
         self.line.setFrameShadow(QtWidgets.QFrame.Sunken)
@@ -92,10 +91,8 @@ class Ui_Form(object):
         self.horizontalLayout_6.addWidget(self.vector_input_z)
         self.verticalLayout_point1_2.addLayout(self.horizontalLayout_6)
         self.verticalLayout.addLayout(self.verticalLayout_point1_2)
-        self.selectVectorBox = QtWidgets.QComboBox(Form)
-        self.selectVectorBox.setObjectName("selectVectorBox")
-        self.selectVectorBox.addItem("")
-        self.verticalLayout.addWidget(self.selectVectorBox)
+        spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        self.verticalLayout.addItem(spacerItem)
         self.line_2 = QtWidgets.QFrame(Form)
         self.line_2.setFrameShape(QtWidgets.QFrame.HLine)
         self.line_2.setFrameShadow(QtWidgets.QFrame.Sunken)
@@ -114,15 +111,14 @@ class Ui_Form(object):
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
         Form.setWindowTitle(_translate("Form", "Form"))
+        self.label_9.setText(_translate("Form", "Creating plane"))
         self.label_7.setText(_translate("Form", "Point:"))
         self.label.setText(_translate("Form", "x:"))
         self.label_2.setText(_translate("Form", "y:"))
         self.label_3.setText(_translate("Form", "z:"))
-        self.selectLineBox.setItemText(0, _translate("Form", "No existing points found"))
         self.label_8.setText(_translate("Form", "Vector:"))
         self.label_4.setText(_translate("Form", "x:"))
         self.label_5.setText(_translate("Form", "y:"))
         self.label_6.setText(_translate("Form", "z:"))
-        self.selectVectorBox.setItemText(0, _translate("Form", "No existing vectors found"))
         self.applyButton.setText(_translate("Form", "Apply"))
         self.cancelButton.setText(_translate("Form", "Cancel"))

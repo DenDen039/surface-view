@@ -15,6 +15,9 @@ class Ui_Form(object):
     def setupUi(self, Form):
         Form.setObjectName("Form")
         Form.resize(400, 300)
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap("C:\\Users\\user\\PycharmProjects\\Project2023\\package\\ui\\Widgets\\ui\\../../assets/gear.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        Form.setWindowIcon(icon)
         self.gridLayout_3 = QtWidgets.QGridLayout(Form)
         self.gridLayout_3.setObjectName("gridLayout_3")
         self.intersectionsGroupBox = QtWidgets.QGroupBox(Form)
@@ -104,7 +107,7 @@ class Ui_Form(object):
 
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
-        Form.setWindowTitle(_translate("Form", "Form"))
+        Form.setWindowTitle(_translate("Form", "Settings"))
         self.intersectionsGroupBox.setTitle(_translate("Form", "Intersections"))
         self.label.setText(_translate("Form", "Enable Intersections"))
         self.label_2.setText(_translate("Form", "Intersection width"))

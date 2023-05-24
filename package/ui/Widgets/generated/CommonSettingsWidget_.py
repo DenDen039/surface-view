@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'package/ui/Widgets/ui/CommonSettingsWidget.ui'
+# Form implementation generated from reading ui file 'C:\Users\user\PycharmProjects\Project2023\package\ui\Widgets\ui\CommonSettingsWidget.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.9
 #
