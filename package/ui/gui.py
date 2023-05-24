@@ -22,7 +22,6 @@ from numpy import *
 # TODO: refactor gui
 #       implement settings widget
 #       opacity slider
-#       add object type label on object creation/edit
 import numpy as np
 import re
 
@@ -188,7 +187,7 @@ class UI(QMainWindow):
         self.show_console.setChecked(0)
 
         self.SOW = StorageObjectWidget(self)
-        self.object_storage = ObjectStorage(self.pyvista_widget, self.SOW, None, 2.5)
+        self.object_storage = ObjectStorage(self.pyvista_widget, self.SOW, None, 3.5)
 
         self.highlights_enabled = True
         self.labels_enabled = True
@@ -211,16 +210,16 @@ class UI(QMainWindow):
         self.handler = Handler(self)
 
         self.settingsWidget = self.creator.SettingsWidget()
-        self.settingsWidget.highlight_color = "red"
-        self.settingsWidget.highlight_width = 2.5
-        self.settingsWidget.intersections_enabled = True
-        self.settingsWidget.intersections_width = 3.5
-        self.settingsWidget.intersections_color = None
+        self.highlight_color = "red"
+        self.highlight_width = 2.5
+        self.intersections_enabled = True
+        self.intersections_width = 3.5
+        self.intersections_color = None
 
-        self.settingsWidget.enable_intersections = True
-        self.settingsWidget.label_width = 8
-        self.settingsWidget.label_font_size = 12
-        self.settingsWidget.label_point_size = 14
+        self.enable_intersections = True
+        self.label_width = 8
+        self.label_font_size = 12
+        self.label_point_size = 14
 
         self.save.triggered.connect(self.save_file)
         self.save_as.triggered.connect(self.save_file_as)
@@ -232,28 +231,54 @@ class UI(QMainWindow):
         self.add_object()
 
     def open_settings_widget(self):
+
         self.settingsWidget.show()
         #TODO: Import inputs from PW and SOW
-        self.settingsWidget.Form.intersectionsEnableCheckBox.setChecked(self.settingsWidget.intersections_enabled)
-        self.settingsWidget.Form.intersectionsWidthLineEdit.setText(str(self.settingsWidget.intersections_width))
-        self.settingsWidget.Form.randomIntersectionsColorCheckBox.setChecked(True if self.settingsWidget.intersections_color is None else False)
-        self.settingsWidget.Form.intersectionsSelectColorButton.setStyleSheet(f"background-color : {self.settingsWidget.intersections_color if self.settingsWidget.intersections_width is not None else 'grey'}")
+        print(self.intersections_width)
+        self.settingsWidget.Form.intersectionsEnableCheckBox.setChecked(self.intersections_enabled)
+        print(self.intersections_width)
+        self.settingsWidget.Form.intersectionsWidthLineEdit.setText(str(self.intersections_width))
+        self.settingsWidget.Form.randomIntersectionsColorCheckBox.setChecked(True if self.intersections_color is None else False)
+        self.settingsWidget.Form.intersectionsSelectColorButton.setStyleSheet(f"background-color : {self.intersections_color if self.intersections_width is not None else 'grey'}")
         self.settingsWidget.Form.intersectionsSelectColorButton.setEnabled(False)
 
         self.settingsWidget.Form.outlineColorButton.setStyleSheet(f"background-color : red")
 
         def apply():
-            self.settingsWidget.Form.intersectionsEnableCheckBox.setChecked(self.settingsWidget.intersections_enabled)
-            self.settingsWidget.Form.intersectionsWidthLineEdit.setText(str(self.settingsWidget.intersections_width))
-            self.settingsWidget.Form.randomIntersectionsColorCheckBox.setChecked()
-            self.settingsWidget.Form.intersectionsSelectColorButton.setStyleSheet(
-                f"background-color : {self.settingsWidget.intersections_color if self.settingsWidget.intersections_width is not None else 'grey'}")
-            self.settingsWidget.Form.intersectionsSelectColorButton.setEnabled(False)
-            ...
+
+            try:
+                self.intersection_width = float(self.settingsWidget.Form.intersectionsWidthLineEdit.text())
+                print(f"intersection width is now {self.intersection_width})")
+            except Exception as e:
+                self.handler.error(f"Incorrect input in intersections width input \n {e}")
+                return
+
+            self.intersection_width = float(self.settingsWidget.Form.intersectionsWidthLineEdit.text())
+            print(f"intersection width is now {self.intersection_width})")
+
+            print(type(self.intersections_width), self.intersection_width)
+
+            val = self.intersections_width
+
+            print(f"val = {val}")
+            self.object_storage.line_width = val
+            print(self.object_storage.line_width)
+            print(self.intersection_width)
+
+            self.console.append(f"Changed intersections width to {self.object_storage.line_width}")
+
+            self.settingsWidget.Form.applyButton.disconnect()
+            self.settingsWidget.Form.cancelButton.disconnect()
+            self.settingsWidget.hide()
+
 
         def cancel():
+
+            self.settingsWidget.Form.applyButton.disconnect()
+            self.settingsWidget.Form.cancelButton.disconnect()
             self.settingsWidget.hide()
-            ...
+
+
 
         def reset():
             self.settingsWidget.Form.intersectionsEnableCheckBox.setChecked(True)
@@ -263,7 +288,9 @@ class UI(QMainWindow):
             self.settingsWidget.Form.intersectionsSelectColorButton.setEnabled(False)
 
             self.settingsWidget.Form.outlineColorButton.setStyleSheet(f"background-color : red")
-            ...
+
+        self.settingsWidget.Form.applyButton.clicked.connect(apply)
+        self.settingsWidget.Form.cancelButton.clicked.connect(cancel)
 
     def save_file(self):
         try:
@@ -275,7 +302,7 @@ class UI(QMainWindow):
 
     def save_file_as(self):
         try:
-            fname = QFileDialog.getSaveFileName(self, "Save Scene", "/", ".json")
+            fname = QFileDialog.getSaveFileName(self, "Save Scene", "scenes/untitled", "JSON files (*.json)")
             fname = str(fname[0]) + str(fname[1])
             print(fname)
             self.object_storage.save(fname)
@@ -287,7 +314,7 @@ class UI(QMainWindow):
 
     def load_file(self):
         try:
-            fname = QFileDialog.getOpenFileName(self, "Load Scene", "/", "JSON files (*.json)")
+            fname = QFileDialog.getOpenFileName(self, "Load Scene", "scenes/", "JSON files (*.json)")
 
             print(fname)
             self.object_storage.load(fname[0])
@@ -355,6 +382,8 @@ class UI(QMainWindow):
         choice_rotation = QPushButton("Add rotation surface")
         choice_rotation.clicked.connect(lambda: self.openCreateWidget(FigureTypes.REVOLUTION))
         choiceWidgetLayout.addWidget(choice_rotation)
+
+        choiceWidgetLayout.addStretch()
 
         self.choiceWidget.setLayout(choiceWidgetLayout)
 
@@ -654,11 +683,18 @@ class UI(QMainWindow):
             return
         t_bounds = self.parser.parse_two_floats(self.commonWidget.Form.inputTBounds.text())
 
+        if t_bounds[0] >= t_bounds[1]:
+            self.handler.error("t bounds is zero or less")
+            return
+
         if not self.parser.parse_two_floats(self.commonWidget.Form.inputVBounds.text()):
             self.handler.error("Incorrect input in v_bounds")
             return
         v_bounds = self.parser.parse_two_floats(self.commonWidget.Form.inputVBounds.text())
 
+        if v_bounds[0] >= v_bounds[1]:
+            self.handler.error("v bounds is zero or less")
+            return
 
         input = {}
 
@@ -797,7 +833,7 @@ class UI(QMainWindow):
 
                     "normal": (vector_input_x, vector_input_y, vector_input_z),
                     "point": (point_input_x, point_input_y, point_input_z),
-                    "size": max(bounds), # TODO: CHANGE TO TUPLE
+                    "size": max(bounds)*2, # TODO: CHANGE TO TUPLE
                     "t_bounds": t_bounds,
                     "v_bounds": v_bounds,
                     "name": name,
