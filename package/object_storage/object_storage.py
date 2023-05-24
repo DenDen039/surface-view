@@ -48,8 +48,8 @@ class ObjectStorage:
         return self.__line_width
 
     @line_width.setter
-    def line_width(self, value: bool):
-        self.line_width = value
+    def line_width(self, value: float):
+        self.__line_width = value
         self.__draw_intersections()
 
     def __draw_intersections(self):
