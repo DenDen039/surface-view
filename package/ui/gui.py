@@ -195,7 +195,7 @@ class UI(QMainWindow):
         self.scrollAreaContents.deleteLater()
         self.parser = Parser()
 
-        self.save.triggered.connect(lambda: self.object_storage.save("scenes/file.json"))
+        self.save.triggered.connect(lambda: self.object_storage.save("scenes/"))
         self.open.triggered.connect(lambda: self.object_storage.load("scenes/file.json"))
         self.save_image.triggered.connect(lambda: self.pyvista_widget.take_screenshot(''))
         self.objects_list = {}

@@ -51,9 +51,26 @@ class ObjectStorage:
 
     def save(self, file_path):
         converted_data = {str(key): value for key, value in self.storage.items()}
-        print(converted_data)
-        with open(file_path, 'w') as json_file:
-            json.dump(converted_data, json_file)
+        if file_path.split('.')[-1] == "json":
+            with open(file_path, 'w') as json_file:
+                json.dump(converted_data, json_file)
+        else:
+            unique_file_name = 'untitled_' + str(self.untitled_counter()) + '.json'
+            new_file_path = file_path + unique_file_name
+
+            with open(new_file_path, 'w') as json_file:
+                json.dump(converted_data, json_file)
+
+    def untitled_counter(self) -> int:
+        import os
+        files = os.listdir("scenes/")
+        numbers = list(filter(lambda str: str.startswith("untitled_"), files))
+        numbers = [int(numbers[i].split('untitled_')[-1].split('.json')[0]) for i in range(len(numbers))]
+        if numbers:
+            print(numbers)
+            return max(numbers) + 1
+        else:
+            return 0
 
     def delete(self, uid):
         del self.storage[uid]
