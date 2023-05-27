@@ -1,3 +1,5 @@
+# Actual version @17.05.2023 13:45
+
 import PyQt5
 import PyQt5.QtCore
 from PyQt5.QtWidgets import *
@@ -11,16 +13,16 @@ from package.qt_widgets.plotter_widget import PlotterWidget
 from package.object_storage.object_storage import ObjectStorage
 from package.parser import Parser
 
+from package.ui.input_warnings_handler import Handler
+
 from numpy import *
 
 
 
-# TODO: finish parses class
-#       add update_widget
-#       refactor gui
-#       better f(t) parser
-#
-
+# TODO: refactor gui
+#       implement settings widget
+#       opacity slider
+#       add object type label on object creation/edit
 import numpy as np
 import re
 
@@ -65,6 +67,8 @@ class StorageObjectWidget(QScrollArea):
 
         self.scroll_area_content.setLayout(self.scroll_area_layout)
 
+        self.__object_visible = True
+
        # self.show()
 
         self.widgets = {}
@@ -83,13 +87,17 @@ class StorageObjectWidget(QScrollArea):
         objectWidget.Form.label_type.setText(type)
        # objectWidget.Form.label_color.setText(str(uid))
         objectWidget.Form.button_edit.clicked.connect(lambda: self.UI.edit_object(uid))
+        objectWidget.Form.visibiityCheckBox.stateChanged.connect(lambda: self.UI.edit_visibility(uid, objectWidget.Form.visibiityCheckBox.isChecked()))
 
         self.widgets[uid] = objectWidget
         self.scroll_area_layout.addWidget(self.widgets[uid])
         print("added new widget")
 
     def delete(self, uid):
-        self.widgets[uid].deleteLater()
+
+        if uid in self.widgets.keys():
+            self.widgets[uid].deleteLater()
+            del self.widgets[uid]
 
     def update(self, uid, name, type, color):
 
@@ -137,9 +145,10 @@ class UI(QMainWindow):
         self.save_image = self.findChild(QAction, 'save_image')
         self.open = self.findChild(QAction, 'open')
         self.new_scene = self.findChild(QAction, 'new_scene')
+
         self.show_tools = self.findChild(QAction, 'tools')
         self.show_console = self.findChild(QAction, 'console')
-        self.setting = self.findChild(QAction, 'setting')
+        self.settings = self.findChild(QAction, 'settings')
 
         self.horizontal_layout = self.findChild(QHBoxLayout, "horizontalLayout_2")
 
@@ -158,7 +167,7 @@ class UI(QMainWindow):
         self.widget.deleteLater()
         self.main_layout.removeWidget(self.toolbox)
 
-        self.main_layout.addWidget(self.pyvista_widget, 2)
+        self.main_layout.addWidget(self.pyvista_widget, 4)
         #self.pyvista_widget.test_scene()
 
         self.main_layout.addWidget(self.toolbox)
@@ -166,12 +175,8 @@ class UI(QMainWindow):
         # Click the action
         self.show_tools.triggered.connect(self.hide_unhide_tools)
         self.show_console.triggered.connect(self.hide_unhide_console)
-
-
-
+        self.settings.triggered.connect(self.open_settings_widget)
         #self.new_scene.triggered.connect(self.add_object)
-
-
 
         # Show the app
         self.show()
@@ -183,11 +188,19 @@ class UI(QMainWindow):
         self.show_console.setChecked(0)
 
         self.SOW = StorageObjectWidget(self)
-        self.object_storage = ObjectStorage(self.pyvista_widget, self.SOW)
+        self.object_storage = ObjectStorage(self.pyvista_widget, self.SOW, None, 2.5)
 
         self.highlights_enabled = True
         self.labels_enabled = True
         self.object_storage.__enable_intersections = True
+
+        self.standart_colors = dict()
+        self.standart_colors[FigureTypes.LINE] = '#FFFFFF'
+        self.standart_colors[FigureTypes.PLANE] = '#42f593'
+        self.standart_colors[FigureTypes.CURVE] = '#cfc951'
+        self.standart_colors[FigureTypes.CONE] = '#f57a16'
+        self.standart_colors[FigureTypes.CYLINDER] = '#4e3c99'
+        self.standart_colors[FigureTypes.REVOLUTION] = '#c842f5'
 
         self.horizontal_layout.replaceWidget(self.scrollArea, self.SOW)
         # self.horizontal_layout.addWidget(self.SOW)
@@ -195,19 +208,99 @@ class UI(QMainWindow):
         self.scrollAreaContents.deleteLater()
         self.parser = Parser()
 
-        self.save.triggered.connect(lambda: self.object_storage.save("scenes/"))
-        self.open.triggered.connect(lambda: self.object_storage.load("scenes/file.json"))
+        self.handler = Handler(self)
+
+        self.settingsWidget = self.creator.SettingsWidget()
+        self.settingsWidget.highlight_color = "red"
+        self.settingsWidget.highlight_width = 2.5
+        self.settingsWidget.intersections_enabled = True
+        self.settingsWidget.intersections_width = 3.5
+        self.settingsWidget.intersections_color = None
+
+        self.settingsWidget.enable_intersections = True
+        self.settingsWidget.label_width = 8
+        self.settingsWidget.label_font_size = 12
+        self.settingsWidget.label_point_size = 14
+
+        self.save.triggered.connect(self.save_file)
+        self.save_as.triggered.connect(self.save_file_as)
+        self.open.triggered.connect(self.load_file)
+
         self.save_image.triggered.connect(lambda: self.pyvista_widget.take_screenshot(''))
         self.objects_list = {}
 
         self.add_object()
 
+    def open_settings_widget(self):
+        self.settingsWidget.show()
+        #TODO: Import inputs from PW and SOW
+        self.settingsWidget.Form.intersectionsEnableCheckBox.setChecked(self.settingsWidget.intersections_enabled)
+        self.settingsWidget.Form.intersectionsWidthLineEdit.setText(str(self.settingsWidget.intersections_width))
+        self.settingsWidget.Form.randomIntersectionsColorCheckBox.setChecked(True if self.settingsWidget.intersections_color is None else False)
+        self.settingsWidget.Form.intersectionsSelectColorButton.setStyleSheet(f"background-color : {self.settingsWidget.intersections_color if self.settingsWidget.intersections_width is not None else 'grey'}")
+        self.settingsWidget.Form.intersectionsSelectColorButton.setEnabled(False)
+
+        self.settingsWidget.Form.outlineColorButton.setStyleSheet(f"background-color : red")
+
+        def apply():
+            self.settingsWidget.Form.intersectionsEnableCheckBox.setChecked(self.settingsWidget.intersections_enabled)
+            self.settingsWidget.Form.intersectionsWidthLineEdit.setText(str(self.settingsWidget.intersections_width))
+            self.settingsWidget.Form.randomIntersectionsColorCheckBox.setChecked()
+            self.settingsWidget.Form.intersectionsSelectColorButton.setStyleSheet(
+                f"background-color : {self.settingsWidget.intersections_color if self.settingsWidget.intersections_width is not None else 'grey'}")
+            self.settingsWidget.Form.intersectionsSelectColorButton.setEnabled(False)
+            ...
+
+        def cancel():
+            self.settingsWidget.hide()
+            ...
+
+        def reset():
+            self.settingsWidget.Form.intersectionsEnableCheckBox.setChecked(True)
+            self.settingsWidget.Form.intersectionsWidthLineEdit.setText("3.5")
+            self.settingsWidget.Form.randomIntersectionsColorCheckBox.setChecked(True)
+            self.settingsWidget.Form.intersectionsSelectColorButton.setStyleSheet(f"background-color : red")
+            self.settingsWidget.Form.intersectionsSelectColorButton.setEnabled(False)
+
+            self.settingsWidget.Form.outlineColorButton.setStyleSheet(f"background-color : red")
+            ...
+
+    def save_file(self):
+        try:
+            self.object_storage.save(None)
+        except Exception as e:
+            self.handler.error("Saving error\n" + str(e))
+            print("Saving error")
+            print(e)
+
+    def save_file_as(self):
+        try:
+            fname = QFileDialog.getSaveFileName(self, "Save Scene", "/", ".json")
+            fname = str(fname[0]) + str(fname[1])
+            print(fname)
+            self.object_storage.save(fname)
+        except Exception as e:
+            self.handler.error("Saving error\n" + str(e))
+            print("Saving error")
+            print(e)
+        ...
+
+    def load_file(self):
+        try:
+            fname = QFileDialog.getOpenFileName(self, "Load Scene", "/", "JSON files (*.json)")
+
+            print(fname)
+            self.object_storage.load(fname[0])
+        except Exception as e:
+            self.handler.error("Loading error \n" + str(e))
+            print(e)
 
     def set_intersections(self, mode: bool):
         if mode:
             self.object_storage.__enable_intersections = True
         else:
             self.object_storage.__enable_intersections = False
+            self.pyvista_widget.remove_intersections()
 
     def clear_right(self):
         for i in reversed(range(self.toolbox_layout.count())):
@@ -284,7 +377,8 @@ class UI(QMainWindow):
         self.commonWidget = self.creator.CommonSettingsWidget()
         self.commonWidget.Form.inputName.setText("Object")
         self.commonWidget.Form.button_color.setText("")
-        self.commonWidget.Form.button_color.setStyleSheet("background-color : white")
+        self.commonWidget.Form.button_color.setStyleSheet(f"background-color : {self.standart_colors[_type]}")
+        self.commonWidget.color = self.standart_colors[_type]
         self.commonWidget.Form.inputOpacity.setText("0.5")
         self.commonWidget.Form.inputTBounds.setText("-10, 10")
         self.commonWidget.Form.inputTBounds.setEnabled(False)
@@ -345,7 +439,7 @@ class UI(QMainWindow):
             point_input_y = float(point_input_y)
             point_input_z = float(point_input_z)
         except:
-            self.console.append("Incorrect value in point input")
+            self.handler.warning("Incorrect value in point input")
             return False
 
         return point_input_x, point_input_y, point_input_z
@@ -359,8 +453,12 @@ class UI(QMainWindow):
             vector_input_y = float(vector_input_y)
             vector_input_z = float(vector_input_z)
         except:
-            self.console.append("Incorrect value in vector input")
+            self.handler.warning("Incorrect value in vector input")
             return False
+
+        if vector_input_x == 0 and vector_input_y == 0 and vector_input_z == 0:
+            self.handler.error("Zero vector input")
+            return
 
         return vector_input_x, vector_input_y, vector_input_z
 
@@ -375,10 +473,19 @@ class UI(QMainWindow):
         _curve_input_y_text = curve_input_y
         _curve_input_z_text = curve_input_z
 
+        try:
+            a = self.parser.parse_expression_string_to_lambda(curve_input_x)
+            a = self.parser.parse_expression_string_to_lambda(curve_input_x)
+            a = self.parser.parse_expression_string_to_lambda(curve_input_x)
+        except:
+            self.handler.error("Incorrect value in curve input")
+            return False
+
+
         if self.parser.check_expression_string(curve_input_x) and self.parser.check_expression_string(curve_input_y) and self.parser.check_expression_string(curve_input_z):
             return curve_input_x, curve_input_y, curve_input_z
 
-        self.console.append("Incorrect value in curve input")
+        self.handler.warning("Incorrect value in curve input")
         return False
 
     def input_line(self):
@@ -391,7 +498,7 @@ class UI(QMainWindow):
             point_input_y_1 = float(point_input_y_1)
             point_input_z_1 = float(point_input_z_1)
         except:
-            self.console.append("Incorrect value in line`s point 1 input")
+            self.handler.warning("Incorrect value in line`s point 1 input")
             return False
 
         point_input_x_2 = self.findChild(QLineEdit, "input_x_2").text()
@@ -402,11 +509,10 @@ class UI(QMainWindow):
             point_input_y_2 = float(point_input_y_2)
             point_input_z_2 = float(point_input_z_2)
         except:
-            self.console.append("Incorrect value in line`s point 2 input")
+            self.handler.warning("Incorrect value in line`s point 2 input")
             return False
 
         return point_input_x_1, point_input_y_1, point_input_z_1, point_input_x_2, point_input_y_2, point_input_z_2
-
 
     # EDIT OBJECT WIDGET #
     def edit_object(self, uid):
@@ -499,13 +605,13 @@ class UI(QMainWindow):
                 self.createWidget.Form.curve_input_y.setText(str(storage[uid]["curve_string"][1]))
                 self.createWidget.Form.curve_input_z.setText(str(storage[uid]["curve_string"][2]))
 
-                self.createWidget.Form.input_x_1.setText(str(storage[uid]["direction"][0]))
-                self.createWidget.Form.input_y_1.setText(str(storage[uid]["direction"][1]))
-                self.createWidget.Form.input_z_1.setText(str(storage[uid]["direction"][2]))
+                self.createWidget.Form.input_x_1.setText(str(storage[uid]["point"][0]))
+                self.createWidget.Form.input_y_1.setText(str(storage[uid]["point"][1]))
+                self.createWidget.Form.input_z_1.setText(str(storage[uid]["point"][2]))
 
-                self.createWidget.Form.input_x_2.setText(str(storage[uid]["point"][0]))
-                self.createWidget.Form.input_y_2.setText(str(storage[uid]["point"][1]))
-                self.createWidget.Form.input_z_2.setText(str(storage[uid]["point"][2]))
+                self.createWidget.Form.input_x_2.setText(str(storage[uid]["direction"][0]))
+                self.createWidget.Form.input_y_2.setText(str(storage[uid]["direction"][1]))
+                self.createWidget.Form.input_z_2.setText(str(storage[uid]["direction"][2]))
 
         self.createWidget.Form.applyButton.disconnect()
 
@@ -521,7 +627,7 @@ class UI(QMainWindow):
 
     def edit_apply_button_clicked(self, _type, uid):
         self.pyvista_widget.remove_intersections()
-        self.createObject(_type, True,uid)
+        self.createObject(_type, True, uid)
         if uid not in self.pyvista_widget.actors_HL:
             self.pyvista_widget.highlight_mesh(uid)
 
@@ -530,6 +636,12 @@ class UI(QMainWindow):
         self.remove_all_labels()
         self.add_object()
 
+    def edit_visibility(self, uid, state):
+        if uid in self.object_storage.storage.keys():
+            if state:
+                self.pyvista_widget.show_mesh(uid)
+            else:
+                self.pyvista_widget.hide_mesh(uid)
     # CREATE OR UPDATE OBJECT #
     def createObject(self, _type, update_mode, uid):
 
@@ -538,12 +650,12 @@ class UI(QMainWindow):
         opacity = self.commonWidget.Form.inputOpacity.text()
 
         if not self.parser.parse_two_floats(self.commonWidget.Form.inputTBounds.text()):
-            self.console.append("Incorrect input in t_bounds")
+            self.handler.error("Incorrect input in t_bounds")
             return
         t_bounds = self.parser.parse_two_floats(self.commonWidget.Form.inputTBounds.text())
 
         if not self.parser.parse_two_floats(self.commonWidget.Form.inputVBounds.text()):
-            self.console.append("Incorrect input in v_bounds")
+            self.handler.error("Incorrect input in v_bounds")
             return
         v_bounds = self.parser.parse_two_floats(self.commonWidget.Form.inputVBounds.text())
 
@@ -562,7 +674,25 @@ class UI(QMainWindow):
                 curve_input_x, curve_input_y, curve_input_z = self.input_curve()
 
 
-                print("test")
+                #checking if point is on curve
+                cx = self.parser.parse_expression_string_to_lambda(curve_input_x)
+                cy = self.parser.parse_expression_string_to_lambda(curve_input_y)
+                cz = self.parser.parse_expression_string_to_lambda(curve_input_z)
+
+                px,py,pz = point_input_x, point_input_y, point_input_z
+
+                epsilon = 0.5
+                bounds = np.arange(t_bounds[0], t_bounds[1], 0.1)
+                _temp = False
+                for t in bounds:
+                    if px - epsilon < cx(t) < px + epsilon:
+                        if py - epsilon < cy(t) < py + epsilon:
+                            if pz - epsilon < cz(t) < pz + epsilon:
+                                _temp = True
+                                break
+                if _temp:
+                    if self.handler.warning("Point is lying on curve or very close to it"):
+                        return
 
                 self.console.append(
                     f"For this conical surface point x = {point_input_x}, y = {point_input_y}, z = {point_input_z}")
@@ -659,11 +789,15 @@ class UI(QMainWindow):
                 self.console.append(
                     f"For this Plane normal vector x = {vector_input_x}, y = {vector_input_y}, z = {vector_input_z}")
 
+                bounds = [self.pyvista_widget.get_bounds()[0] - self.pyvista_widget.get_bounds()[1],
+                          self.pyvista_widget.get_bounds()[2] - self.pyvista_widget.get_bounds()[3],
+                          self.pyvista_widget.get_bounds()[4] - self.pyvista_widget.get_bounds()[5]]
+
                 input = {
 
                     "normal": (vector_input_x, vector_input_y, vector_input_z),
                     "point": (point_input_x, point_input_y, point_input_z),
-                    "size": max(self.pyvista_widget.get_bounds()) * 2, # TODO: CHANGE TO TUPLE
+                    "size": max(bounds), # TODO: CHANGE TO TUPLE
                     "t_bounds": t_bounds,
                     "v_bounds": v_bounds,
                     "name": name,
@@ -699,8 +833,8 @@ class UI(QMainWindow):
                 input = {
 
                     "curve": (curve_input_x, curve_input_y, curve_input_z),
-                    "direction": np.array((line_x1, line_y1, line_z1)),
-                    "point": np.array((line_x2, line_y2, line_z2)),
+                    "direction": (line_x2, line_y2, line_z2),
+                    "point": (line_x1, line_y1, line_z1),
                     "t_bounds": t_bounds,
                     "v_bounds": v_bounds,
                     "name": name,

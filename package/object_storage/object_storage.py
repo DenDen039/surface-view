@@ -10,7 +10,7 @@ from unittest.mock import MagicMock
 from numpy import *
 
 class ObjectStorage:
-    def __init__(self, PW, SOW):
+    def __init__(self, PW, SOW, intersections_color, line_width):
 
         self.objManager = ObjectManager()
         self.storage = dict()
@@ -21,49 +21,101 @@ class ObjectStorage:
         self.label_counter = 0
         self.parser = Parser()
 
+        self.saves_counter = self.untitled_counter()
+        self.__intersections_color = intersections_color
+        self.__line_width = line_width
+
     @property
     def enable_intersections(self):
         return self.__enable_intersections
 
     @enable_intersections.setter
     def enable_intersections(self, value: bool):
-        if value:
-            intersections = self.objManager.compute_intersections()
-            self.PW.add_intersections(intersections)
-            self.__enable_intersections = value
+        self.__enable_intersections = value
+        self.__draw_intersections()
+
+    @property
+    def intersections_color(self):
+        return self.__intersections_color
+
+    @intersections_color.setter
+    def intersections_color(self, value):
+        self.__intersections_color = value
+        self.__draw_intersections()
+
+    @property
+    def line_width(self):
+        return self.__line_width
+
+    @line_width.setter
+    def line_width(self, value: bool):
+        self.line_width = value
+        self.__draw_intersections()
+
+    def __draw_intersections(self):
+        if not self.__enable_intersections:
+            self.PW.remove_intersections()
+            return
+        intersections = self.objManager.compute_intersections()
+        if self.__intersections_color is not None:
+            colors = [self.intersections_color for i in range(len(intersections))]
         else:
-            intersections = []
-            self.PW.add_intersections(intersections)
-            self.__enable_intersections = value
+            r = lambda: random.randint(150, 255)
+            colors = ['#%02X%02X%02X' % (r(), r(), r()) for i in range(len(intersections))]
+
+        self.PW.add_intersections(intersections, colors, self.line_width)
 
     def load(self, file_path):
-        self.PW.clear_actors()
-        for obj in self.storage.keys():
-            self.SOW.delete(obj)
-        with open(file_path, 'r') as json_file:
+
+       with open(file_path, 'r') as json_file:
             data = json.load(json_file)
             converted_data = {UUID(key): value for key, value in data.items()}
-        temp = self.__enable_intersections
-        self.__enable_intersections = False
-        for obj in converted_data.values():
-            self.create(obj)
-        self.__enable_intersections = temp
+
+            self.PW.clear_actors()
+            self.PW.remove_intersections()
+            self.objManager.wipe()
+            for item in self.storage.keys():
+                self.PW.remove_label(item)
+
+            for obj in self.storage.keys():
+                self.SOW.delete(obj)
+
+            temp = self.enable_intersections
+            self.enable_intersections = False
+            for obj in converted_data.values():
+                self.create(obj)
+            self.enable_intersections = temp
 
     def save(self, file_path):
-        converted_data = {str(key): value for key, value in self.storage.items()}
-        if file_path.split('.')[-1] == "json":
+        save_items = self.storage.items()
+        for item in save_items:
+            if 'curve' in item[1]:
+                item[1]['curve'], item[1]['curve_string'] = item[1]['curve_string'], None
+
+        converted_data = {str(key): value for key, value in save_items}
+
+        print(converted_data)
+        if file_path is not None:
             with open(file_path, 'w') as json_file:
                 json.dump(converted_data, json_file)
         else:
-            unique_file_name = 'untitled_' + str(self.untitled_counter()) + '.json'
-            new_file_path = file_path + unique_file_name
+            file_name = f"untitled_{self.saves_counter}.json"
+            file_path = f"scenes/{file_name}"
 
-            with open(new_file_path, 'w') as json_file:
+            print(file_path)
+            with open(file_path, 'w') as json_file:
                 json.dump(converted_data, json_file)
+                self.saves_counter += 1
 
     def untitled_counter(self) -> int:
         import os
+
+        if os.path.isdir("scenes") == False:
+            dir_path = "scenes"
+            os.mkdir(dir_path)
+
         files = os.listdir("scenes/")
+
         numbers = list(filter(lambda str: str.startswith("untitled_"), files))
         numbers = [int(numbers[i].split('untitled_')[-1].split('.json')[0]) for i in range(len(numbers))]
         if numbers:
@@ -72,17 +124,16 @@ class ObjectStorage:
         else:
             return 0
 
+
     def delete(self, uid):
         del self.storage[uid]
         self.PW.remove_label(uid)
         self.label_counter -= 1
         self.objManager.delete_figure(uid)
         self.PW.remove_mesh(uid)
-        if self.enable_intersections:
-            intersections = self.objManager.compute_intersections()
-            self.PW.add_intersections(intersections)
+        if self.__enable_intersections:
+            self.__draw_intersections()
         self.SOW.delete(uid)
-
 
     def update(self, uid, new_data: dict):
         self.storage[uid] = new_data
@@ -125,6 +176,15 @@ class ObjectStorage:
                                  self.parser.parse_expression_string_to_lambda(new_data["curve"][2])]
 
             self.objManager.update_revolution_surface(uid, **new_data)
+        elif new_data["FigureTypes"] == FigureTypes.PARAMETRIC_SURFACE:
+
+            new_data["curve_string"] = new_data["curve"]
+
+            new_data["curve"] = [self.parser.parse_expression_string_to_lambda(new_data["curve"][0]),
+                                 self.parser.parse_expression_string_to_lambda(new_data["curve"][1]),
+                                 self.parser.parse_expression_string_to_lambda(new_data["curve"][2])]
+
+            self.objManager.update_paramteric_surface(uid, **new_data)
         else:
             raise Exception(f"Invalid Figure type {new_data['FigureTypes']}")
 
@@ -144,9 +204,8 @@ class ObjectStorage:
 
         self.PW.add_label(uid)
 
-        if self.enable_intersections:
-            intersections = self.objManager.compute_intersections()
-            self.PW.add_intersections(intersections, color="red", line_width=5)
+        if self.__enable_intersections:
+            self.__draw_intersections()
 
         self.SOW.update(uid, new_data["name"], new_data["FigureTypes"], new_data["color"])
 
@@ -187,6 +246,13 @@ class ObjectStorage:
                                   self.parser.parse_expression_string_to_lambda(to_create["curve"][1]),
                                   self.parser.parse_expression_string_to_lambda(to_create["curve"][2])]
             uid = self.objManager.create_revolution_surface(**to_create)
+        elif to_create["FigureTypes"] == FigureTypes.PARAMETRIC_SURFACE:
+            to_create["curve_string"] = to_create["curve"]
+
+            to_create["curve"] = [self.parser.parse_expression_string_to_lambda(to_create["curve"][0]),
+                                  self.parser.parse_expression_string_to_lambda(to_create["curve"][1]),
+                                  self.parser.parse_expression_string_to_lambda(to_create["curve"][2])]
+            uid = self.objManager.create_paramteric_surface(**to_create)
         else:
             raise Exception(f"Invalid Figure type {to_create['FigureTypes']}")
 
@@ -200,8 +266,7 @@ class ObjectStorage:
                          **self.objManager.get_figure_settings(uid))
        # self.enable_intersections = True
         if self.__enable_intersections:
-            intersections = self.objManager.compute_intersections()
-            self.PW.add_intersections(intersections, color="red", line_width=5)
+            self.__draw_intersections()
 
         #self.PW.add_label(uid)
         self.label_counter += 1

@@ -41,8 +41,8 @@ class Cylinder(Figure):
         curve = self.__curve
         direction = self.__direction
         resolution = self.__resolution
-        t = np.arange(t_bounds[0], t_bounds[1], 0.05)
-        v = np.arange(v_bounds[0], v_bounds[1], 0.05)
+        t = np.arange(t_bounds[0], t_bounds[1] + 0.05, 0.05)
+        v = np.arange(v_bounds[0], v_bounds[1] + 0.05, 0.05)
 
         v, t = np.meshgrid(v, t)
 
