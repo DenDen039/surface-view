@@ -41,10 +41,12 @@ class ObjectStorage:
     @intersections_color.setter
     def intersections_color(self, value):
         self.__intersections_color = value
+        self.PW.remove_intersections()
         self.__draw_intersections()
 
     @property
     def line_width(self):
+        print("line_width getter invoked")
         return self.__line_width
 
     @line_width.setter
@@ -56,6 +58,7 @@ class ObjectStorage:
         if not self.__enable_intersections:
             self.PW.remove_intersections()
             return
+
         intersections = self.objManager.compute_intersections()
         if self.__intersections_color is not None:
             colors = [self.intersections_color for i in range(len(intersections))]

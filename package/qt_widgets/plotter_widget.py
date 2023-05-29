@@ -36,6 +36,38 @@ class PlotterWidget(QtWidgets.QWidget):
         self.__intersection_color = "red"
         self.__intersection_width = 2.5
 
+        self.__label_width = 8
+        self.__point_size = 14
+        self.__font_size = 12
+
+
+    @property
+    def label_width(self):
+        return self.__label_width
+
+    @label_width.setter
+    def label_width(self, value: float):
+        self.__label_width = value
+
+    @property
+    def point_size(self):
+        return self.__point_size
+
+    @point_size.setter
+    def point_size(self, value: float):
+        self.__point_size = value
+
+    @property
+    def font_size(self):
+        return self.__font_size
+
+    @font_size.setter
+    def font_size(self, value: float):
+        self.__font_size = value
+        
+        
+
+
     def add_mesh(self, uid: str, mesh, figure_type, labels, **kwargs):
         if uid in self.actors:
             raise Exception("Figure already exists")

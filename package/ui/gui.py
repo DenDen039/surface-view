@@ -20,16 +20,11 @@ from numpy import *
 
 
 # TODO: refactor gui
-#       implement settings widget
-#       opacity slider
+#       Planes size
+
 import numpy as np
 import re
 
-
-def parse_expression(expresion):
-
-    expr = lambda t: eval(expresion)
-    return expr
 
 class ColoredWidget(QWidget):
     def __init__(self, color):
@@ -209,12 +204,16 @@ class UI(QMainWindow):
 
         self.handler = Handler(self)
 
+        self.color_picker = QColorDialog()
+
+        # По хорошему конечно это всё в отдельный класс вынести, но пока сойдёт
         self.settingsWidget = self.creator.SettingsWidget()
         self.highlight_color = "red"
         self.highlight_width = 2.5
         self.intersections_enabled = True
         self.intersections_width = 3.5
         self.intersections_color = None
+        self.settingsWidget.palette = self.settingsWidget.palette()
 
         self.enable_intersections = True
         self.label_width = 8
@@ -233,52 +232,126 @@ class UI(QMainWindow):
     def open_settings_widget(self):
 
         self.settingsWidget.show()
+
+        self.settingsWidget.Form.intersectionsSelectColorButton.disconnect()
+
         #TODO: Import inputs from PW and SOW
-        print(self.intersections_width)
         self.settingsWidget.Form.intersectionsEnableCheckBox.setChecked(self.intersections_enabled)
-        print(self.intersections_width)
         self.settingsWidget.Form.intersectionsWidthLineEdit.setText(str(self.intersections_width))
         self.settingsWidget.Form.randomIntersectionsColorCheckBox.setChecked(True if self.intersections_color is None else False)
-        self.settingsWidget.Form.intersectionsSelectColorButton.setStyleSheet(f"background-color : {self.intersections_color if self.intersections_width is not None else 'grey'}")
-        self.settingsWidget.Form.intersectionsSelectColorButton.setEnabled(False)
+        self.settingsWidget.Form.intersectionsSelectColorButton.setStyleSheet(f"background-color : {self.intersections_color if self.intersections_color is not None else 'grey'}")
+        self.settingsWidget.Form.intersectionsSelectColorButton.setEnabled(False if self.intersections_color is None else True)
+        self.new_color_int = self.intersections_color
+        self.new_color_high = self.highlight_color
 
-        self.settingsWidget.Form.outlineColorButton.setStyleSheet(f"background-color : red")
+        self.settingsWidget.Form.labelsWidthLineEdit.setText(str(self.label_width))
+        self.settingsWidget.Form.labelsFontSizeLineEdit.setText(str(self.label_font_size))
+        self.settingsWidget.Form.labelsPointSizeLineEdit.setText(str(self.label_point_size))
+        self.settingsWidget.Form.checkBox.setChecked(True if self.labels_enabled else False)
+        self.settingsWidget.Form.outlineColorButton.setStyleSheet(f"background-color : {self.highlight_color}")
+
+
+        def block_unblock(state: bool):
+            self.settingsWidget.Form.intersectionsSelectColorButton.setEnabled(state)
+            print(f"button is now {state}")
+
+        def select_intersection_color():
+            new_color = self.color_picker.getColor()
+            if new_color.isValid():
+                self.new_color_int = new_color.name()
+                self.settingsWidget.Form.intersectionsSelectColorButton.setStyleSheet(f"background-color : {self.new_color_int}")
+
+        def select_outline_color():
+            new_color = self.color_picker.getColor()
+            if new_color.isValid():
+                self.new_color_high = new_color.name()
+                self.settingsWidget.Form.outlineColorButton.setStyleSheet(
+                    f"background-color : {self.new_color_high}")
+
+
 
         def apply():
 
             try:
-                self.intersection_width = float(self.settingsWidget.Form.intersectionsWidthLineEdit.text())
-                print(f"intersection width is now {self.intersection_width})")
+                self.intersections_width = float(self.settingsWidget.Form.intersectionsWidthLineEdit.text())
             except Exception as e:
                 self.handler.error(f"Incorrect input in intersections width input \n {e}")
                 return
 
-            self.intersection_width = float(self.settingsWidget.Form.intersectionsWidthLineEdit.text())
-            print(f"intersection width is now {self.intersection_width})")
+            try:
+                self.label_width = float(self.settingsWidget.Form.labelsWidthLineEdit.text())
+            except Exception as e:
+                self.handler.error(f"Incorrect input in labels width input \n {e}")
+                return
 
-            print(type(self.intersections_width), self.intersection_width)
+            try:
+                self.label_font_size = float(self.settingsWidget.Form.labelsFontSizeLineEdit.text())
+            except Exception as e:
+                self.handler.error(f"Incorrect input in labels font size input \n {e}")
+                return
 
-            val = self.intersections_width
+            try:
+                self.label_point_size = float(self.settingsWidget.Form.labelsPointSizeLineEdit.text())
+            except Exception as e:
+                self.handler.error(f"Incorrect input in labels point size input \n {e}")
+                return
 
-            print(f"val = {val}")
-            self.object_storage.line_width = val
-            print(self.object_storage.line_width)
-            print(self.intersection_width)
 
+
+            self.intersections_width = float(self.settingsWidget.Form.intersectionsWidthLineEdit.text())
+            self.object_storage.line_width = self.intersections_width
             self.console.append(f"Changed intersections width to {self.object_storage.line_width}")
+
+            self.label_width = float(self.settingsWidget.Form.labelsWidthLineEdit.text())
+            self.pyvista_widget.label_width = self.label_width
+            self.console.append(f"Changed label lines width to {self.pyvista_widget.label_width}")
+
+            self.label_font_size = float(self.settingsWidget.Form.labelsFontSizeLineEdit.text())
+            self.pyvista_widget.font_size = self.label_font_size
+            self.console.append(f"Changed font size to {self.object_storage.line_width}")
+
+            self.label_point_size = float(self.settingsWidget.Form.labelsPointSizeLineEdit.text())
+            self.pyvista_widget.point_size = self.label_point_size
+            self.console.append(f"Changed label point size to {self.pyvista_widget.point_size}")
+
+
+            if self.settingsWidget.Form.randomIntersectionsColorCheckBox.isChecked():
+                self.object_storage.intersections_color = None
+                self.intersections_color = None
+            else:
+                if self.new_color_int is None:
+                    self.new_color_int = "grey"
+                self.intersections_color = self.new_color_int
+                self.object_storage.intersections_color = self.intersections_color
+
+            if self.settingsWidget.Form.intersectionsEnableCheckBox.isChecked():
+                self.object_storage.enable_intersections = True
+                self.intersections_enabled = True
+            else:
+                self.object_storage.enable_intersections = False
+                self.intersections_enabled = False
+
+            if self.settingsWidget.Form.checkBox.isChecked():
+                self.object_storage.enable_intersections = True
+                self.labels_enabled = True
+            else:
+                self.object_storage.enable_intersections = False
+                self.intersections_enabled = False
+
+
+
 
             self.settingsWidget.Form.applyButton.disconnect()
             self.settingsWidget.Form.cancelButton.disconnect()
+            self.settingsWidget.Form.resetButton.disconnect()
             self.settingsWidget.hide()
-
 
         def cancel():
 
             self.settingsWidget.Form.applyButton.disconnect()
             self.settingsWidget.Form.cancelButton.disconnect()
+            self.settingsWidget.Form.resetButton.disconnect()
             self.settingsWidget.hide()
-
-
 
         def reset():
             self.settingsWidget.Form.intersectionsEnableCheckBox.setChecked(True)
@@ -289,8 +362,15 @@ class UI(QMainWindow):
 
             self.settingsWidget.Form.outlineColorButton.setStyleSheet(f"background-color : red")
 
+
         self.settingsWidget.Form.applyButton.clicked.connect(apply)
         self.settingsWidget.Form.cancelButton.clicked.connect(cancel)
+        self.settingsWidget.Form.resetButton.clicked.connect(reset)
+
+        self.settingsWidget.Form.randomIntersectionsColorCheckBox.stateChanged.connect(
+            lambda: block_unblock(not self.settingsWidget.Form.randomIntersectionsColorCheckBox.isChecked()))
+
+        self.settingsWidget.Form.intersectionsSelectColorButton.clicked.connect(select_intersection_color)
 
     def save_file(self):
         try:
@@ -709,16 +789,15 @@ class UI(QMainWindow):
                     return
                 curve_input_x, curve_input_y, curve_input_z = self.input_curve()
 
-
                 #checking if point is on curve
                 cx = self.parser.parse_expression_string_to_lambda(curve_input_x)
                 cy = self.parser.parse_expression_string_to_lambda(curve_input_y)
                 cz = self.parser.parse_expression_string_to_lambda(curve_input_z)
 
-                px,py,pz = point_input_x, point_input_y, point_input_z
+                px, py, pz = point_input_x, point_input_y, point_input_z
 
                 epsilon = 0.5
-                bounds = np.arange(t_bounds[0], t_bounds[1], 0.1)
+                bounds = np.arange(t_bounds[0], t_bounds[1], 0.4)
                 _temp = False
                 for t in bounds:
                     if px - epsilon < cx(t) < px + epsilon:
@@ -727,7 +806,7 @@ class UI(QMainWindow):
                                 _temp = True
                                 break
                 if _temp:
-                    if self.handler.warning("Point is lying on curve or very close to it"):
+                    if not self.handler.warning("Point is lying on curve or very close to it"):
                         return
 
                 self.console.append(
