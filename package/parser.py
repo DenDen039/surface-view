@@ -12,8 +12,40 @@ class Parser:
             return [float(x) for x in input_string.split(",")]
         return False
 
+    def check_expression_string_two_params(self, input_string: str) -> bool:
+
+        if 't' not in input_string.replace('', ' ').split(' '):
+            input_string += " + t*0"
+
+        if 'v' not in input_string.replace('', ' ').split(' '):
+            input_string += " + v*0"
+
+        try:
+            parsed_string = lambda t, v: eval(input_string)
+            t = 0.456456
+            v = 0.3326
+            a = parsed_string(t, v)
+            print(parsed_string)
+        except Exception:
+            return False
+        return True
+
+    def parse_expression_string_to_lambda_two_params(self, input_string: str):
+        if 't' not in input_string.replace('', ' ').split(' '):
+            input_string += " + t*0"
+
+        if 'v' not in input_string.replace('', ' ').split(' '):
+            input_string += " + v*0"
+
+        if self.check_expression_string_two_params(input_string):
+            parsed_string = lambda t, v: eval(input_string)
+            print(f"parsed string: {parsed_string(1,1)}")
+        else:
+            raise SyntaxError("Given statement is not correct math input, or has other variables than t and v")
+
+        return parsed_string
+
     # TODO vvv
-    # Checks if string is a valid mathematical expression with only variable t
     def check_expression_string(self, input_string: str) -> bool:
 
         if 't' not in input_string.replace('', ' ').split(' '):
@@ -29,7 +61,6 @@ class Parser:
         return True
 
 
-    # TODO vvv
     def parse_expression_string_to_lambda(self, input_string: str):
         if 't' not in input_string.replace('', ' ').split(' '):
             input_string += " + t*0"

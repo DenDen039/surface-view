@@ -195,6 +195,7 @@ class UI(QMainWindow):
         self.standart_colors[FigureTypes.CONE] = '#f57a16'
         self.standart_colors[FigureTypes.CYLINDER] = '#4e3c99'
         self.standart_colors[FigureTypes.REVOLUTION] = '#c842f5'
+        self.standart_colors[FigureTypes.PARAMETRIC_SURFACE] = '#ff00ff'
 
         self.horizontal_layout.replaceWidget(self.scrollArea, self.SOW)
         # self.horizontal_layout.addWidget(self.SOW)
@@ -215,10 +216,10 @@ class UI(QMainWindow):
         self.intersections_color = None
         self.settingsWidget.palette = self.settingsWidget.palette()
 
-        self.enable_intersections = True
         self.label_width = 8
         self.label_font_size = 12
         self.label_point_size = 14
+
 
         self.save.triggered.connect(self.save_file)
         self.save_as.triggered.connect(self.save_file_as)
@@ -382,7 +383,7 @@ class UI(QMainWindow):
 
     def save_file_as(self):
         try:
-            fname = QFileDialog.getSaveFileName(self, "Save Scene", "scenes/untitled", "JSON files (*.json)")
+            fname = QFileDialog.getSaveFileName(self, "Save Scene", "scenes/untitled", ".json")
             fname = str(fname[0]) + str(fname[1])
             print(fname)
             self.object_storage.save(fname)
@@ -463,6 +464,10 @@ class UI(QMainWindow):
         choice_rotation.clicked.connect(lambda: self.openCreateWidget(FigureTypes.REVOLUTION))
         choiceWidgetLayout.addWidget(choice_rotation)
 
+        choice_parametric_surface = QPushButton("Add parametric surface")
+        choice_parametric_surface.clicked.connect(lambda: self.openCreateWidget(FigureTypes.PARAMETRIC_SURFACE))
+        choiceWidgetLayout.addWidget(choice_parametric_surface)
+
         choiceWidgetLayout.addStretch()
 
         self.choiceWidget.setLayout(choiceWidgetLayout)
@@ -519,6 +524,11 @@ class UI(QMainWindow):
             case FigureTypes.REVOLUTION:
                 self.commonWidget.Form.inputTBounds.setEnabled(True)
                 self.createWidget = self.creator.CreateRotationFigureWidget()
+            case FigureTypes.PARAMETRIC_SURFACE:
+                self.commonWidget.Form.inputTBounds.setEnabled(True)
+                self.commonWidget.Form.inputVBounds.setEnabled(True)
+                self.createWidget = self.creator.CreateCurveWidget() # TODO: CHANGE TO param surface WIDGET
+
            # case FigureTypes.VE:
            #    self.createWidget = self.creator.CreateVectorWidget()
             case _:
@@ -595,6 +605,31 @@ class UI(QMainWindow):
             return curve_input_x, curve_input_y, curve_input_z
 
         self.handler.warning("Incorrect value in curve input")
+        return False
+
+    def input_parametric_surface(self):
+
+        curve_input_x = self.findChild(QLineEdit, "curve_input_x").text() #TODO: Currently using curve input, shall create surface input
+        curve_input_y = self.findChild(QLineEdit, "curve_input_y").text()
+        curve_input_z = self.findChild(QLineEdit, "curve_input_z").text()
+
+        _curve_input_x_text = curve_input_x
+        _curve_input_y_text = curve_input_y
+        _curve_input_z_text = curve_input_z
+
+        try:
+            a = self.parser.parse_expression_string_to_lambda_two_params(curve_input_x)
+            a = self.parser.parse_expression_string_to_lambda_two_params(curve_input_x)
+            a = self.parser.parse_expression_string_to_lambda_two_params(curve_input_x)
+        except:
+            self.handler.error("Incorrect value in parametric surface input")
+            return False
+
+        if self.parser.check_expression_string_two_params(curve_input_x) and self.parser.check_expression_string_two_params(
+                curve_input_y) and self.parser.check_expression_string_two_params(curve_input_z):
+            return curve_input_x, curve_input_y, curve_input_z
+
+        self.handler.error("Incorrect value in parametric surface input")
         return False
 
     def input_line(self):
@@ -722,6 +757,15 @@ class UI(QMainWindow):
                 self.createWidget.Form.input_y_2.setText(str(storage[uid]["direction"][1]))
                 self.createWidget.Form.input_z_2.setText(str(storage[uid]["direction"][2]))
 
+            case FigureTypes.PARAMETRIC_SURFACE:
+                self.commonWidget.Form.inputTBounds.setEnabled(True)
+                self.commonWidget.Form.inputVBounds.setEnabled(True)
+                self.createWidget.Form.curve_input_x.setText(str(storage[uid]["surface_string"][0])) #TODO: CHANGE TO PROPER WIDGET (param surface)
+                self.createWidget.Form.curve_input_y.setText(str(storage[uid]["surface_string"][1]))
+                self.createWidget.Form.curve_input_z.setText(str(storage[uid]["surface_string"][2]))
+
+
+
         self.createWidget.Form.applyButton.disconnect()
 
         self.createWidget.Form.applyButton.clicked.connect(lambda: self.edit_apply_button_clicked(_type, uid))
@@ -730,7 +774,8 @@ class UI(QMainWindow):
         if not uid in self.pyvista_widget.actors_HL:
             self.pyvista_widget.highlight_mesh(uid)
 
-        self.pyvista_widget.add_label(uid)
+        if self.labels_enabled and _type!=FigureTypes.PARAMETRIC_SURFACE:
+            self.pyvista_widget.add_label(uid)
 
         button_delete.clicked.connect(lambda: self.deleteObject(uid))
 
@@ -955,6 +1000,25 @@ class UI(QMainWindow):
                     "name": name,
                     "FigureTypes": FigureTypes.REVOLUTION,
                 }
+
+            case FigureTypes.PARAMETRIC_SURFACE:
+
+                if not self.input_parametric_surface():
+                    return
+                curve_input_x, curve_input_y, curve_input_z = self.input_parametric_surface()
+
+                self.console.append(
+                    f"For this parametric surface x = {curve_input_x}, y = {curve_input_y}, z = {curve_input_z}")
+
+                input = {
+
+                    "surface": (curve_input_x, curve_input_y, curve_input_z),
+                    "t_bounds": t_bounds,
+                    "v_bounds": v_bounds,
+                    "name": name,
+                    "FigureTypes": FigureTypes.PARAMETRIC_SURFACE,
+                }
+
 
             case 7: # Create vector
 

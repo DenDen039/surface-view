@@ -110,7 +110,7 @@ class PlotterWidget(QtWidgets.QWidget):
             self.remove_mesh(uid)
             self.actors[uid] = self.plotter.add_mesh(self.meshes[uid], render_lines_as_tubes=True, **self.actors_settings[uid])
 
-        elif self.actors_types[uid] in [FigureTypes.REVOLUTION, FigureTypes.CONE, FigureTypes.CYLINDER]:
+        elif self.actors_types[uid] in [FigureTypes.REVOLUTION, FigureTypes.CONE, FigureTypes.CYLINDER, FigureTypes.PARAMETRIC_SURFACE]:
             self.remove_mesh(uid)
             self.actors[uid] = self.plotter.add_mesh(self.meshes[uid],
                                                      silhouette=dict(color=color, line_width=line_width,
@@ -123,7 +123,7 @@ class PlotterWidget(QtWidgets.QWidget):
     def remove_highlight(self, uid: str):
 
         if uid in self.actors_HL:
-            if self.actors_types[uid] in [FigureTypes.CONE, FigureTypes.CYLINDER, FigureTypes.PLANE, FigureTypes.REVOLUTION]:
+            if self.actors_types[uid] in [FigureTypes.CONE, FigureTypes.CYLINDER, FigureTypes.PLANE, FigureTypes.REVOLUTION, FigureTypes.PARAMETRIC_SURFACE]:
                   self.plotter.remove_actor(self.actors_HL[uid])
                   del self.actors_HL[uid]
         if self.actors_types[uid] in [FigureTypes.LINE, FigureTypes.CURVE]:
