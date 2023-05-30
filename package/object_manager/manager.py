@@ -186,7 +186,6 @@ class ObjectManager:
             labels["P" + str(P_r)] = P
             s = tuple((ai + bi)/2 for ai, bi in zip(labels["P" + str(P_r)], figure_type["point"]))
             labels["L" + str(counter)] = s
-
             return labels
 
         elif figure_type["FigureTypes"] == FigureTypes.CYLINDER:

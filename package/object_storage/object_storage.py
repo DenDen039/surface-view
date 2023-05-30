@@ -179,6 +179,15 @@ class ObjectStorage:
                                  self.parser.parse_expression_string_to_lambda(new_data["curve"][2])]
 
             self.objManager.update_revolution_surface(uid, **new_data)
+        elif new_data["FigureTypes"] == FigureTypes.PARAMETRIC_SURFACE:
+
+            new_data["curve_string"] = new_data["curve"]
+
+            new_data["surface"] = [self.parser.parse_expression_string_to_lambda(new_data["surface"][0]),
+                                 self.parser.parse_expression_string_to_lambda(new_data["surface"][1]),
+                                 self.parser.parse_expression_string_to_lambda(new_data["surface"][2])]
+
+            self.objManager.update_paramteric_surface(uid, **new_data)
         else:
             raise Exception(f"Invalid Figure type {new_data['FigureTypes']}")
 
@@ -240,6 +249,13 @@ class ObjectStorage:
                                   self.parser.parse_expression_string_to_lambda(to_create["curve"][1]),
                                   self.parser.parse_expression_string_to_lambda(to_create["curve"][2])]
             uid = self.objManager.create_revolution_surface(**to_create)
+        elif to_create["FigureTypes"] == FigureTypes.PARAMETRIC_SURFACE:
+            to_create["curve_string"] = to_create["curve"]
+
+            to_create["surface"] = [self.parser.parse_expression_string_to_lambda(to_create["surface"][0]),
+                                  self.parser.parse_expression_string_to_lambda(to_create["surface"][1]),
+                                  self.parser.parse_expression_string_to_lambda(to_create["surface"][2])]
+            uid = self.objManager.create_paramteric_surface(**to_create)
         else:
             raise Exception(f"Invalid Figure type {to_create['FigureTypes']}")
 
