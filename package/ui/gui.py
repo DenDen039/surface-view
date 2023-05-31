@@ -988,7 +988,7 @@ class UI(QMainWindow):
                     f"              x2 = {line_x2}, y2 = {line_y2}, z2 = {line_z2}")
 
                 self.console.append(
-                    f"For this Cylindrical surface curve x = {str(curve_input_x)}, y = {str(curve_input_y)}, z = {str(curve_input_z)}")
+                    f"For this Rotation surface curve x = {str(curve_input_x)}, y = {str(curve_input_y)}, z = {str(curve_input_z)}")
 
                 input = {
 
