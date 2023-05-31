@@ -72,6 +72,7 @@ class ObjectStorage:
     def load(self, file_path):
 
        with open(file_path, 'r') as json_file:
+
             data = json.load(json_file)
             converted_data = {UUID(key): value for key, value in data.items()}
 
@@ -86,6 +87,8 @@ class ObjectStorage:
 
             temp = self.enable_intersections
             self.enable_intersections = False
+            self.storage.clear()
+
             for obj in converted_data.values():
                 self.create(obj)
             self.enable_intersections = temp
@@ -94,9 +97,9 @@ class ObjectStorage:
         save_items = self.storage.items()
         for item in save_items:
             if 'curve' in item[1]:
-                item[1]['curve'], item[1]['curve_string'] = item[1]['curve_string'], None
+                item[1]['curve'] = item[1]['curve_string']
             if 'surface' in item[1]:
-                item[1]['surface'], item[1]['surface_string'] = item[1]['surface_string'], None
+                item[1]['surface'] = item[1]['surface_string']
 
         converted_data = {str(key): value for key, value in save_items}
 
@@ -132,7 +135,7 @@ class ObjectStorage:
 
 
     def delete(self, uid):
-        del self.storage[uid]
+        self.storage.pop(uid)
         self.PW.remove_label(uid)
         self.label_counter -= 1
         self.objManager.delete_figure(uid)
