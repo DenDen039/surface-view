@@ -1,9 +1,7 @@
-from PyQt5.QtWidgets import QMessageBox
-
+from PyQt5.QtWidgets import QMessageBox, QStyle
 class Handler:
     def __init__(self, UI):
         self.parent = UI
-
 
     '''
         warning function returns True on "Ok" button and False on "Cancel"
@@ -17,6 +15,7 @@ class Handler:
             return True
 
         wg = QMessageBox()
+        wg.setWindowTitle("Warning")
         wg.setText("Warning")
         wg.setIcon(QMessageBox.Warning)
         wg.setInformativeText(text)
@@ -34,6 +33,7 @@ class Handler:
             return
 
         wg = QMessageBox()
+        wg.setWindowTitle("Error")
         wg.setText("Error")
         wg.setIcon(QMessageBox.Critical)
         wg.setInformativeText(text)

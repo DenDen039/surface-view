@@ -161,7 +161,7 @@
   <action name="open">
    <property name="icon">
     <iconset>
-     <normaloff>folder-horizontal-open.png</normaloff>folder-horizontal-open.png</iconset>
+     <normaloff>../../assets/folder-horizontal-open.png</normaloff>../../assets/folder-horizontal-open.png</iconset>
    </property>
    <property name="text">
     <string>Відкрити</string>
@@ -170,7 +170,7 @@
   <action name="save_as">
    <property name="icon">
     <iconset>
-     <normaloff>disks-black.png</normaloff>disks-black.png</iconset>
+     <normaloff>../../assets/disks-black.png</normaloff>../../assets/disks-black.png</iconset>
    </property>
    <property name="text">
     <string>Зберегти як...</string>
@@ -188,7 +188,7 @@
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>hammer.png</normaloff>hammer.png</iconset>
+     <normaloff>../../assets/hammer.png</normaloff>../../assets/hammer.png</iconset>
    </property>
    <property name="text">
     <string>Інструменти</string>
@@ -206,7 +206,7 @@
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>terminal.gif</normaloff>terminal.gif</iconset>
+     <normaloff>../../assets/terminal.gif</normaloff>../../assets/terminal.gif</iconset>
    </property>
    <property name="text">
     <string>Консоль</string>
@@ -215,7 +215,7 @@
   <action name="save">
    <property name="icon">
     <iconset>
-     <normaloff>disk-black.png</normaloff>disk-black.png</iconset>
+     <normaloff>../../assets/disk-black.png</normaloff>../../assets/disk-black.png</iconset>
    </property>
    <property name="text">
     <string>Зберегти</string>
@@ -224,7 +224,7 @@
   <action name="new_scene">
    <property name="icon">
     <iconset>
-     <normaloff>plus-circle.png</normaloff>plus-circle.png</iconset>
+     <normaloff>../../assets/plus-circle.png</normaloff>../../assets/plus-circle.png</iconset>
    </property>
    <property name="text">
     <string>Нова сцена</string>
@@ -233,7 +233,7 @@
   <action name="save_image">
    <property name="icon">
     <iconset>
-     <normaloff>image.png</normaloff>image.png</iconset>
+     <normaloff>../../assets/image.png</normaloff>../../assets/image.png</iconset>
    </property>
    <property name="text">
     <string>Зберегти зображення...</string>
@@ -242,7 +242,7 @@
   <action name="settings">
    <property name="icon">
     <iconset>
-     <normaloff>gear.png</normaloff>gear.png</iconset>
+     <normaloff>../../assets/gear.png</normaloff>../../assets/gear.png</iconset>
    </property>
    <property name="text">
     <string>Налаштування</string>

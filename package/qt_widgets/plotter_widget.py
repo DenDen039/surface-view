@@ -36,6 +36,38 @@ class PlotterWidget(QtWidgets.QWidget):
         self.__intersection_color = "red"
         self.__intersection_width = 2.5
 
+        self.__label_width = 8
+        self.__point_size = 14
+        self.__font_size = 12
+
+
+    @property
+    def label_width(self):
+        return self.__label_width
+
+    @label_width.setter
+    def label_width(self, value: float):
+        self.__label_width = value
+
+    @property
+    def point_size(self):
+        return self.__point_size
+
+    @point_size.setter
+    def point_size(self, value: float):
+        self.__point_size = value
+
+    @property
+    def font_size(self):
+        return self.__font_size
+
+    @font_size.setter
+    def font_size(self, value: float):
+        self.__font_size = value
+        
+        
+
+
     def add_mesh(self, uid: str, mesh, figure_type, labels, **kwargs):
         if uid in self.actors:
             raise Exception("Figure already exists")
@@ -78,7 +110,7 @@ class PlotterWidget(QtWidgets.QWidget):
             self.remove_mesh(uid)
             self.actors[uid] = self.plotter.add_mesh(self.meshes[uid], render_lines_as_tubes=True, **self.actors_settings[uid])
 
-        elif self.actors_types[uid] in [FigureTypes.REVOLUTION, FigureTypes.CONE, FigureTypes.CYLINDER]:
+        elif self.actors_types[uid] in [FigureTypes.REVOLUTION, FigureTypes.CONE, FigureTypes.CYLINDER, FigureTypes.PARAMETRIC_SURFACE]:
             self.remove_mesh(uid)
             self.actors[uid] = self.plotter.add_mesh(self.meshes[uid],
                                                      silhouette=dict(color=color, line_width=line_width,
@@ -91,7 +123,7 @@ class PlotterWidget(QtWidgets.QWidget):
     def remove_highlight(self, uid: str):
 
         if uid in self.actors_HL:
-            if self.actors_types[uid] in [FigureTypes.CONE, FigureTypes.CYLINDER, FigureTypes.PLANE, FigureTypes.REVOLUTION]:
+            if self.actors_types[uid] in [FigureTypes.CONE, FigureTypes.CYLINDER, FigureTypes.PLANE, FigureTypes.REVOLUTION, FigureTypes.PARAMETRIC_SURFACE]:
                   self.plotter.remove_actor(self.actors_HL[uid])
                   del self.actors_HL[uid]
         if self.actors_types[uid] in [FigureTypes.LINE, FigureTypes.CURVE]:

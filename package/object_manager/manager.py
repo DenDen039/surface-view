@@ -250,7 +250,9 @@ class ObjectManager:
     def get_label_lines(self, figure_type):
         meshes = []
 
-        if figure_type["FigureTypes"] in [FigureTypes.LINE, FigureTypes.CURVE, FigureTypes.POINT]:
+
+
+        if figure_type["FigureTypes"] in [FigureTypes.LINE, FigureTypes.CURVE, FigureTypes.POINT, FigureTypes.PARAMETRIC_SURFACE]:
             return meshes
 
         t = figure_type["t_bounds"]

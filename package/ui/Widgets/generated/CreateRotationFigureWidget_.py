@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'package/ui/Widgets/ui/CreateRotationFigureWidget.ui'
+# Form implementation generated from reading ui file 'C:\Users\user\PycharmProjects\Project2023\package\ui\Widgets\ui\CreateRotationFigureWidget.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.9
 #
@@ -14,9 +14,12 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_Form(object):
     def setupUi(self, Form):
         Form.setObjectName("Form")
-        Form.resize(215, 354)
+        Form.resize(295, 379)
         self.verticalLayout = QtWidgets.QVBoxLayout(Form)
         self.verticalLayout.setObjectName("verticalLayout")
+        self.label_12 = QtWidgets.QLabel(Form)
+        self.label_12.setObjectName("label_12")
+        self.verticalLayout.addWidget(self.label_12)
         self.label_10 = QtWidgets.QLabel(Form)
         self.label_10.setObjectName("label_10")
         self.verticalLayout.addWidget(self.label_10)
@@ -83,10 +86,6 @@ class Ui_Form(object):
         self.verticalLayout_point2.addLayout(self.horizontalLayout_7)
         self.create_line_layout.addLayout(self.verticalLayout_point2)
         self.verticalLayout.addLayout(self.create_line_layout)
-        self.selectLineBox = QtWidgets.QComboBox(Form)
-        self.selectLineBox.setObjectName("selectLineBox")
-        self.selectLineBox.addItem("")
-        self.verticalLayout.addWidget(self.selectLineBox)
         self.line_2 = QtWidgets.QFrame(Form)
         self.line_2.setFrameShape(QtWidgets.QFrame.HLine)
         self.line_2.setFrameShadow(QtWidgets.QFrame.Sunken)
@@ -128,10 +127,8 @@ class Ui_Form(object):
         self.verticalLayout_point1_2.addLayout(self.horizontalLayout_9)
         self.create_curve_layout.addLayout(self.verticalLayout_point1_2)
         self.verticalLayout.addLayout(self.create_curve_layout)
-        self.selectCurveBox = QtWidgets.QComboBox(Form)
-        self.selectCurveBox.setObjectName("selectCurveBox")
-        self.selectCurveBox.addItem("")
-        self.verticalLayout.addWidget(self.selectCurveBox)
+        spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        self.verticalLayout.addItem(spacerItem)
         self.line = QtWidgets.QFrame(Form)
         self.line.setFrameShape(QtWidgets.QFrame.HLine)
         self.line.setFrameShadow(QtWidgets.QFrame.Sunken)
@@ -150,6 +147,7 @@ class Ui_Form(object):
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
         Form.setWindowTitle(_translate("Form", "Form"))
+        self.label_12.setText(_translate("Form", "Creating surface of rotation"))
         self.label_10.setText(_translate("Form", "Line:"))
         self.label.setText(_translate("Form", "x:"))
         self.label_2.setText(_translate("Form", "y:"))
@@ -157,11 +155,9 @@ class Ui_Form(object):
         self.label_4.setText(_translate("Form", "x:"))
         self.label_5.setText(_translate("Form", "y:"))
         self.label_6.setText(_translate("Form", "z:"))
-        self.selectLineBox.setItemText(0, _translate("Form", "No existing lines found"))
         self.label_11.setText(_translate("Form", "Curve:"))
         self.label_7.setText(_translate("Form", "x(t) ="))
         self.label_8.setText(_translate("Form", "y(t) ="))
         self.label_9.setText(_translate("Form", "z(t) ="))
-        self.selectCurveBox.setItemText(0, _translate("Form", "No existing curves found"))
         self.applyButton.setText(_translate("Form", "Apply"))
         self.cancelButton.setText(_translate("Form", "Cancel"))

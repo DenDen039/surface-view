@@ -4,6 +4,7 @@ from unittest.mock import MagicMock
 from numpy import *
 import json
 from uuid import UUID
+import pyvista as pv
 
 from package.parser import Parser
 from unittest.mock import MagicMock
@@ -41,21 +42,24 @@ class ObjectStorage:
     @intersections_color.setter
     def intersections_color(self, value):
         self.__intersections_color = value
+        self.PW.remove_intersections()
         self.__draw_intersections()
 
     @property
     def line_width(self):
+        print("line_width getter invoked")
         return self.__line_width
 
     @line_width.setter
-    def line_width(self, value: bool):
-        self.line_width = value
+    def line_width(self, value: float):
+        self.__line_width = value
         self.__draw_intersections()
 
     def __draw_intersections(self):
         if not self.__enable_intersections:
             self.PW.remove_intersections()
             return
+
         intersections = self.objManager.compute_intersections()
         if self.__intersections_color is not None:
             colors = [self.intersections_color for i in range(len(intersections))]
@@ -91,6 +95,8 @@ class ObjectStorage:
         for item in save_items:
             if 'curve' in item[1]:
                 item[1]['curve'], item[1]['curve_string'] = item[1]['curve_string'], None
+            if 'surface' in item[1]:
+                item[1]['surface'], item[1]['surface_string'] = item[1]['surface_string'], None
 
         converted_data = {str(key): value for key, value in save_items}
 
@@ -176,13 +182,14 @@ class ObjectStorage:
                                  self.parser.parse_expression_string_to_lambda(new_data["curve"][2])]
 
             self.objManager.update_revolution_surface(uid, **new_data)
+
         elif new_data["FigureTypes"] == FigureTypes.PARAMETRIC_SURFACE:
 
-            new_data["curve_string"] = new_data["curve"]
+            new_data["surface_string"] = new_data["surface"]
 
-            new_data["surface"] = [self.parser.parse_expression_string_to_lambda(new_data["surface"][0]),
-                                 self.parser.parse_expression_string_to_lambda(new_data["surface"][1]),
-                                 self.parser.parse_expression_string_to_lambda(new_data["surface"][2])]
+            new_data["surface"] = [self.parser.parse_expression_string_to_lambda_two_params(new_data["surface"][0]),
+                                 self.parser.parse_expression_string_to_lambda_two_params(new_data["surface"][1]),
+                                 self.parser.parse_expression_string_to_lambda_two_params(new_data["surface"][2])]
 
             self.objManager.update_paramteric_surface(uid, **new_data)
         else:
@@ -193,7 +200,6 @@ class ObjectStorage:
         self.PW.remove_mesh(uid)
         self.PW.remove_label(uid)
 
-        #self.PW.add_mesh(uid, self.objManager.get_figure_mesh(uid), **self.objManager.get_figure_settings(uid))
 
         self.PW.add_mesh(uid, self.objManager.get_figure_mesh(uid),
                          new_data["FigureTypes"],
@@ -201,8 +207,8 @@ class ObjectStorage:
                           self.objManager.get_labels(new_data, self.label_counter)],
                          **self.objManager.get_figure_settings(uid))
 
-
-        self.PW.add_label(uid)
+        if new_data["FigureTypes"] != FigureTypes.PARAMETRIC_SURFACE:
+            self.PW.add_label(uid)
 
         if self.__enable_intersections:
             self.__draw_intersections()
@@ -247,15 +253,14 @@ class ObjectStorage:
                                   self.parser.parse_expression_string_to_lambda(to_create["curve"][2])]
             uid = self.objManager.create_revolution_surface(**to_create)
         elif to_create["FigureTypes"] == FigureTypes.PARAMETRIC_SURFACE:
-            to_create["curve_string"] = to_create["curve"]
+            to_create["surface_string"] = to_create["surface"]
 
-            to_create["surface"] = [self.parser.parse_expression_string_to_lambda(to_create["surface"][0]),
-                                  self.parser.parse_expression_string_to_lambda(to_create["surface"][1]),
-                                  self.parser.parse_expression_string_to_lambda(to_create["surface"][2])]
+            to_create["surface"] = [self.parser.parse_expression_string_to_lambda_two_params(to_create["surface"][0]),
+                                  self.parser.parse_expression_string_to_lambda_two_params(to_create["surface"][1]),
+                                  self.parser.parse_expression_string_to_lambda_two_params(to_create["surface"][2])]
             uid = self.objManager.create_paramteric_surface(**to_create)
         else:
             raise Exception(f"Invalid Figure type {to_create['FigureTypes']}")
-
 
         self.storage[uid] = to_create
         self.SOW.add(uid, to_create["name"], to_create["FigureTypes"], to_create["color"])

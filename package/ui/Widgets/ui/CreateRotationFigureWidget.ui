@@ -6,14 +6,21 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>215</width>
-    <height>354</height>
+    <width>295</width>
+    <height>379</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QLabel" name="label_12">
+     <property name="text">
+      <string>Creating surface of rotation</string>
+     </property>
+    </widget>
+   </item>
    <item>
     <widget class="QLabel" name="label_10">
      <property name="text">
@@ -118,15 +125,6 @@
     </layout>
    </item>
    <item>
-    <widget class="QComboBox" name="selectLineBox">
-     <item>
-      <property name="text">
-       <string>No existing lines found</string>
-      </property>
-     </item>
-    </widget>
-   </item>
-   <item>
     <widget class="Line" name="line_2">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -191,13 +189,17 @@
     </layout>
    </item>
    <item>
-    <widget class="QComboBox" name="selectCurveBox">
-     <item>
-      <property name="text">
-       <string>No existing curves found</string>
-      </property>
-     </item>
-    </widget>
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
    </item>
    <item>
     <widget class="Line" name="line">
