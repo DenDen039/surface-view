@@ -1,0 +1,1 @@
+{"e0a710f3-b385-4987-a8e4-915f9ae20b6e": {"curve": ["sin(t)", "cos(t)", "0"], "point": [0.0, 0.0, 5.0], "t_bounds": [-10.0, 10.0], "v_bounds": [0.0, 2.0], "name": "Object", "FigureTypes": "Cone", "color": "#f57a16", "opacity": 0.5, "curve_string": null}}

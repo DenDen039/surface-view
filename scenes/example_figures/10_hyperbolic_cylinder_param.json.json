@@ -1,0 +1,1 @@
+{"a4c40c04-bc98-4fb4-ba68-83726c2b8bd5": {"surface": ["cosh(t)", "sinh(t)", "v"], "t_bounds": [-1.0, 1.0], "v_bounds": [0.0, 1.0], "name": "Object", "FigureTypes": "Parametric surface", "color": "#ff00ff", "opacity": 0.5, "surface_string": ["cosh(t)", "sinh(t)", "v"]}}

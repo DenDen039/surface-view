@@ -1,0 +1,1 @@
+{"79b24508-4f17-408d-b775-fd034f28e701": {"curve": ["cosh(t)", "sinh(t)", "t"], "direction": [0.0, 0.0, 1.0], "point": [0.0, 0.0, 0.0], "t_bounds": [-1.0, 1.0], "v_bounds": [0.0, 1.0], "name": "Object", "FigureTypes": "Revolution", "color": "#c842f5", "opacity": 0.5, "curve_string": null}}

@@ -1,0 +1,1 @@
+{"bff17b88-9139-4327-8a8f-12c9c210dd6e": {"surface": ["t*cos(v)", "t*sin(v)", "t*t*cos(2*v)"], "t_bounds": [-1.0, 1.0], "v_bounds": [0.0, 7.0], "name": "Object", "FigureTypes": "Parametric surface", "color": "#ff00ff", "opacity": 0.5, "surface_string": null}}

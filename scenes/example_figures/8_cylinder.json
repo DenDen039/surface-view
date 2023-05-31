@@ -1,0 +1,1 @@
+{"7ba26c68-422c-42e5-94d6-3d395b277623": {"curve": ["sin(t)", "cos(t)", "0"], "direction": [0.0, 0.0, 3.0], "t_bounds": [-10.0, 10.0], "v_bounds": [0.0, 1.0], "name": "Object", "FigureTypes": "Cylinder", "color": "#55ffff", "opacity": 0.5, "curve_string": null}}
