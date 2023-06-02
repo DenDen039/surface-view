@@ -8,7 +8,7 @@ class Plane(Figure):
         self,
         normal: tuple[float, float, float],
         point: tuple[float, float, float],
-        size: float,
+        size: tuple[float,float],
         uid: str,
         resolution: int = 2,
         **kwargs,
@@ -34,8 +34,8 @@ class Plane(Figure):
     def get_mesh(self) -> pv.StructuredGrid:
 
         plane = pv.Plane(center=np.asarray(self.__point), direction=np.asarray(self.__normal),
-                            i_size=self.__size, j_size=self.__size,
-                            i_resolution=self.__resolution ,
+                            i_size=self.__size[0], j_size=self.__size[1],
+                            i_resolution=self.__resolution,
                             j_resolution=self.__resolution,
                             )
         bounds = plane.bounds

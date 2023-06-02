@@ -112,6 +112,7 @@ class UI(QMainWindow):
         _ui.retranslateUi(self)
 
         self.creator = Creator()
+        self.help_window = self.creator.HelpWidget()
 
         # Define our widgets
         self.toolbox = self.findChild(QGroupBox, 'tools_box')
@@ -139,10 +140,13 @@ class UI(QMainWindow):
         self.save_image = self.findChild(QAction, 'save_image')
         self.open = self.findChild(QAction, 'open')
         self.new_scene = self.findChild(QAction, 'new_scene')
+        self.help = self.findChild(QAction, 'help')
 
         self.show_tools = self.findChild(QAction, 'tools')
         self.show_console = self.findChild(QAction, 'console')
         self.settings = self.findChild(QAction, 'settings')
+
+
 
         self.horizontal_layout = self.findChild(QHBoxLayout, "horizontalLayout_2")
 
@@ -170,6 +174,7 @@ class UI(QMainWindow):
         self.show_tools.triggered.connect(self.hide_unhide_tools)
         self.show_console.triggered.connect(self.hide_unhide_console)
         self.settings.triggered.connect(self.open_settings_widget)
+        self.help.triggered.connect(self.open_help_window)
         #self.new_scene.triggered.connect(self.add_object)
 
         # Show the app
@@ -214,6 +219,7 @@ class UI(QMainWindow):
         self.intersections_enabled = True
         self.intersections_width = 3.5
         self.intersections_color = None
+        self.screenshot_extension = ".bmp"
         self.settingsWidget.palette = self.settingsWidget.palette()
 
         self.label_width = 8
@@ -225,10 +231,13 @@ class UI(QMainWindow):
         self.save_as.triggered.connect(self.save_file_as)
         self.open.triggered.connect(self.load_file)
 
-        self.save_image.triggered.connect(lambda: self.pyvista_widget.take_screenshot(''))
+        self.save_image.triggered.connect(lambda: self.pyvista_widget.take_screenshot(self.screenshot_extension, ''))
         self.objects_list = {}
 
         self.add_object()
+
+    def open_help_window(self):
+        self.help_window.show()
 
     def open_settings_widget(self):
 
@@ -250,6 +259,8 @@ class UI(QMainWindow):
         self.settingsWidget.Form.labelsPointSizeLineEdit.setText(str(self.label_point_size))
         self.settingsWidget.Form.checkBox.setChecked(True if self.labels_enabled else False)
         self.settingsWidget.Form.outlineColorButton.setStyleSheet(f"background-color : {self.highlight_color}")
+
+        self.settingsWidget.Form.screenshotFormatComboBox.setCurrentText(self.screenshot_extension)
 
 
         def block_unblock(state: bool):
@@ -339,8 +350,7 @@ class UI(QMainWindow):
                 self.object_storage.enable_intersections = False
                 self.intersections_enabled = False
 
-
-
+            self.screenshot_extension = self.settingsWidget.Form.screenshotFormatComboBox.currentText()
 
             self.settingsWidget.Form.applyButton.disconnect()
             self.settingsWidget.Form.cancelButton.disconnect()
@@ -949,15 +959,15 @@ class UI(QMainWindow):
                 self.console.append(
                     f"For this Plane normal vector x = {vector_input_x}, y = {vector_input_y}, z = {vector_input_z}")
 
-                bounds = [self.pyvista_widget.get_bounds()[0] - self.pyvista_widget.get_bounds()[1],
-                          self.pyvista_widget.get_bounds()[2] - self.pyvista_widget.get_bounds()[3],
-                          self.pyvista_widget.get_bounds()[4] - self.pyvista_widget.get_bounds()[5]]
+                bounds = [abs(self.pyvista_widget.get_bounds()[0]) + abs(self.pyvista_widget.get_bounds()[1]),
+                          abs(self.pyvista_widget.get_bounds()[2]) + abs(self.pyvista_widget.get_bounds()[3]),
+                          abs(self.pyvista_widget.get_bounds()[4]) + abs(self.pyvista_widget.get_bounds()[5])]
 
                 input = {
 
                     "normal": (vector_input_x, vector_input_y, vector_input_z),
                     "point": (point_input_x, point_input_y, point_input_z),
-                    "size": max(bounds)*2, # TODO: CHANGE TO TUPLE
+                    "size": (bounds[0], bounds[1]),
                     "t_bounds": t_bounds,
                     "v_bounds": v_bounds,
                     "name": name,
