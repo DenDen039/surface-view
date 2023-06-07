@@ -337,10 +337,10 @@ class UI(QMainWindow):
                 self.object_storage.intersections_color = self.intersections_color
 
             if self.settingsWidget.Form.intersectionsEnableCheckBox.isChecked():
-                self.object_storage.enable_intersections = True
+                self.set_intersections(True)
                 self.intersections_enabled = True
             else:
-                self.object_storage.enable_intersections = False
+                self.set_intersections(False)
                 self.intersections_enabled = False
 
             if self.settingsWidget.Form.checkBox.isChecked():
@@ -415,10 +415,11 @@ class UI(QMainWindow):
 
     def set_intersections(self, mode: bool):
         if mode:
-            self.object_storage.__enable_intersections = True
+            self.object_storage.enable_intersections = True
         else:
-            self.object_storage.__enable_intersections = False
+            self.object_storage.enable_intersections = False
             self.pyvista_widget.remove_intersections()
+        print(f"intersections are now {mode}")
 
     def clear_right(self):
         for i in reversed(range(self.toolbox_layout.count())):
@@ -967,7 +968,7 @@ class UI(QMainWindow):
 
                     "normal": (vector_input_x, vector_input_y, vector_input_z),
                     "point": (point_input_x, point_input_y, point_input_z),
-                    "size": (bounds[0], bounds[1]),
+                    "size": (max(bounds), max(bounds)),
                     "t_bounds": t_bounds,
                     "v_bounds": v_bounds,
                     "name": name,
