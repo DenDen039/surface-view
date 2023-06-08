@@ -157,6 +157,7 @@
    <addaction name="separator"/>
    <addaction name="save_image"/>
    <addaction name="separator"/>
+   <addaction name="help"/>
   </widget>
   <action name="open">
    <property name="icon">
@@ -246,6 +247,11 @@
    </property>
    <property name="text">
     <string>Налаштування</string>
+   </property>
+  </action>
+  <action name="help">
+   <property name="text">
+    <string>Довідка</string>
    </property>
   </action>
  </widget>

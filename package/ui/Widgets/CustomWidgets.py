@@ -20,7 +20,7 @@ import package.ui.Widgets.generated.CreateVectorWidget_ as CreateVectorWidget_
 import package.ui.Widgets.generated.CommonSettingsWidget_ as CommonSettingsWidget_
 import package.ui.Widgets.generated.ObjectWidget_ as ObjectWidget_
 import package.ui.Widgets.generated.SettingsWidget_ as SettingsWidget_
-
+import package.ui.Widgets.generated.HelpWidget_ as HelpWidget_
 
 class Creator:
 
@@ -122,3 +122,11 @@ class Creator:
 
         return Widget
 
+    def HelpWidget(self):
+
+        Widget = QtWidgets.QWidget()
+        Form = HelpWidget_.Ui_Form()
+        Form.setupUi(Widget)
+        Widget.Form = Form
+
+        return Widget

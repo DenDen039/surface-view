@@ -37,9 +37,11 @@ class Parser:
         if 'v' not in input_string.replace('', ' ').split(' '):
             input_string += " + v*0"
 
+        input_string = input_string.replace('^', '**')
+
         if self.check_expression_string_two_params(input_string):
             parsed_string = lambda t, v: eval(input_string)
-            print(f"parsed string: {parsed_string(1,1)}")
+
         else:
             raise SyntaxError("Given statement is not correct math input, or has other variables than t and v")
 
@@ -55,8 +57,7 @@ class Parser:
             parsed_string = lambda t: eval(input_string)
             t = 0.456456
             a = parsed_string(t)
-            print(parsed_string)
-        except NameError:
+        except Exception:
             return False
         return True
 
@@ -64,6 +65,8 @@ class Parser:
     def parse_expression_string_to_lambda(self, input_string: str):
         if 't' not in input_string.replace('', ' ').split(' '):
             input_string += " + t*0"
+
+        input_string = input_string.replace('^', '**')
 
         if self.check_expression_string(input_string):
             parsed_string = lambda t: eval(input_string)

@@ -1,0 +1,1 @@
+{"d6c214f0-faf6-4691-a10f-162cd813b737": {"curve": ["sin(t)", "cos(t)", "0"], "direction": [0.0, 1.0, 0.0], "point": [0.0, 0.0, 0.0], "t_bounds": [-10.0, 10.0], "v_bounds": [0.0, 1.0], "name": "Ellipse", "FigureTypes": "Revolution", "color": "#c842f5", "opacity": 0.2, "curve_string": ["sin(t)", "cos(t)", "0"]}}

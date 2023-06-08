@@ -56,7 +56,7 @@ class ObjectStorage:
         self.__draw_intersections()
 
     def __draw_intersections(self):
-        if not self.__enable_intersections:
+        if not self.enable_intersections:
             self.PW.remove_intersections()
             return
 
@@ -71,10 +71,41 @@ class ObjectStorage:
 
     def load(self, file_path):
 
-       with open(file_path, 'r') as json_file:
-            data = json.load(json_file)
-            converted_data = {UUID(key): value for key, value in data.items()}
+     with open(file_path, 'r') as json_file:
 
+        # Creating a backup of the scene in case of broken save file is loaded
+        save_items = self.storage.items()
+        for item in save_items:
+            if 'curve' in item[1]:
+                item[1]['curve'] = item[1]['curve_string']
+            if 'surface' in item[1]:
+                item[1]['surface'] = item[1]['surface_string']
+
+        old_data = {str(key): value for key, value in save_items}
+
+        data = json.load(json_file)
+        converted_data = {UUID(key): value for key, value in data.items()}
+
+        self.PW.clear_actors()
+        self.PW.remove_intersections()
+        self.objManager.wipe()
+
+        for item in self.storage.keys():
+            self.PW.remove_label(item)
+        for obj in self.storage.keys():
+            self.SOW.delete(obj)
+
+        temp = self.enable_intersections
+        self.enable_intersections = False
+        self.storage.clear()
+
+        try:
+            for obj in converted_data.values():
+                self.create(obj)
+        # Any error while loading file will result to the backup
+        except Exception:
+            print("Broken load")
+            print(old_data)
             self.PW.clear_actors()
             self.PW.remove_intersections()
             self.objManager.wipe()
@@ -84,19 +115,22 @@ class ObjectStorage:
             for obj in self.storage.keys():
                 self.SOW.delete(obj)
 
-            temp = self.enable_intersections
-            self.enable_intersections = False
-            for obj in converted_data.values():
+            self.storage.clear()
+
+            for obj in old_data.values():
+                print(obj)
                 self.create(obj)
-            self.enable_intersections = temp
+
+        self.enable_intersections = temp
 
     def save(self, file_path):
         save_items = self.storage.items()
         for item in save_items:
             if 'curve' in item[1]:
-                item[1]['curve'], item[1]['curve_string'] = item[1]['curve_string'], None
+                item[1]['curve'] = item[1]['curve_string']
             if 'surface' in item[1]:
-                item[1]['surface'], item[1]['surface_string'] = item[1]['surface_string'], None
+                item[1]['surface'] = item[1]['surface_string']
+
 
         converted_data = {str(key): value for key, value in save_items}
 
@@ -132,7 +166,7 @@ class ObjectStorage:
 
 
     def delete(self, uid):
-        del self.storage[uid]
+        self.storage.pop(uid)
         self.PW.remove_label(uid)
         self.label_counter -= 1
         self.objManager.delete_figure(uid)

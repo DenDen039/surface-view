@@ -1,0 +1,1 @@
+{"a9cd2b20-1df8-4030-b856-a008d3c5a25b": {"curve": ["t", "0.5*t**2", "0"], "direction": [0.0, 0.0, 5.0], "t_bounds": [-10.0, 10.0], "v_bounds": [0.0, 1.0], "name": "Object", "FigureTypes": "Cylinder", "color": "#4e3c99", "opacity": 0.5, "curve_string": ["t", "0.5*t**2", "0"]}}

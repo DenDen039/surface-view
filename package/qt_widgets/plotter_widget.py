@@ -64,9 +64,6 @@ class PlotterWidget(QtWidgets.QWidget):
     @font_size.setter
     def font_size(self, value: float):
         self.__font_size = value
-        
-        
-
 
     def add_mesh(self, uid: str, mesh, figure_type, labels, **kwargs):
         if uid in self.actors:
@@ -218,9 +215,9 @@ class PlotterWidget(QtWidgets.QWidget):
     def remove_blur(self):
         self.plotter.remove_blurring()
 
-    def take_screenshot(self, file_path=''):
+    def take_screenshot(self, extension: str, file_path=''):
         if file_path == '':
-            file_name = 'untitled_' + str(self.photo_counter) + '.png'
+            file_name = 'untitled_' + str(self.photo_counter) + extension
             self.photo_counter += 1
 
             self.plotter.screenshot(f"photos/{file_name}")
@@ -239,7 +236,7 @@ class PlotterWidget(QtWidgets.QWidget):
         files = os.listdir("photos/")
 
         numbers = list(filter(lambda str: str.startswith("untitled_"), files))
-        numbers = [int(numbers[i].split('untitled_')[-1].split('.png')[0]) for i in range(len(numbers))]
+        numbers = [int(numbers[i].split('untitled_')[-1].split(".")[0]) for i in range(len(numbers))]
         if numbers:
             print(numbers)
             return max(numbers) + 1

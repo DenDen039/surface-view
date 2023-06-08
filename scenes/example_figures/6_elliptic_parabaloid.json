@@ -1,0 +1,1 @@
+{"8e873c6e-f30e-4a20-be56-507d8516d2c5": {"curve": ["t", "t", "0.5*t**2"], "direction": [0.0, 0.0, 1.0], "point": [0.0, 0.0, 0.0], "t_bounds": [-10.0, 10.0], "v_bounds": [0.0, 1.0], "name": "Object", "FigureTypes": "Revolution", "color": "#c842f5", "opacity": 0.5, "curve_string": null}}
