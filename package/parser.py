@@ -41,6 +41,7 @@ class Parser:
 
         if self.check_expression_string_two_params(input_string):
             parsed_string = lambda t, v: eval(input_string)
+
         else:
             raise SyntaxError("Given statement is not correct math input, or has other variables than t and v")
 

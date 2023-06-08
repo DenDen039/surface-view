@@ -65,7 +65,6 @@ class PlotterWidget(QtWidgets.QWidget):
     def font_size(self, value: float):
         self.__font_size = value
 
-
     def add_mesh(self, uid: str, mesh, figure_type, labels, **kwargs):
         if uid in self.actors:
             raise Exception("Figure already exists")
