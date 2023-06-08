@@ -219,7 +219,9 @@ class UI(QMainWindow):
         self.intersections_enabled = True
         self.intersections_width = 3.5
         self.intersections_color = None
+
         self.screenshot_extension = ".bmp"
+
         self.settingsWidget.palette = self.settingsWidget.palette()
 
         self.label_width = 8
@@ -341,6 +343,7 @@ class UI(QMainWindow):
                 self.intersections_enabled = True
             else:
                 self.set_intersections(False)
+
                 self.intersections_enabled = False
 
             if self.settingsWidget.Form.checkBox.isChecked():
@@ -350,7 +353,9 @@ class UI(QMainWindow):
                 self.object_storage.enable_intersections = False
                 self.intersections_enabled = False
 
+
             self.screenshot_extension = self.settingsWidget.Form.screenshotFormatComboBox.currentText()
+
 
             self.settingsWidget.Form.applyButton.disconnect()
             self.settingsWidget.Form.cancelButton.disconnect()
@@ -968,7 +973,9 @@ class UI(QMainWindow):
 
                     "normal": (vector_input_x, vector_input_y, vector_input_z),
                     "point": (point_input_x, point_input_y, point_input_z),
+
                     "size": (max(bounds), max(bounds)),
+
                     "t_bounds": t_bounds,
                     "v_bounds": v_bounds,
                     "name": name,

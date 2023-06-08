@@ -17,6 +17,7 @@ class Ui_Form(object):
         Form.resize(365, 259)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(".\\package\\ui\\Widgets\\ui\\../../assets/gear.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+
         Form.setWindowIcon(icon)
         self.gridLayout_3 = QtWidgets.QGridLayout(Form)
         self.gridLayout_3.setObjectName("gridLayout_3")
@@ -123,6 +124,7 @@ class Ui_Form(object):
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
         Form.setWindowTitle(_translate("Form", "Settings"))
+
         self.resetButton.setText(_translate("Form", "Reset Settings"))
         self.labelsGroupBox.setTitle(_translate("Form", "Outlines and Labels"))
         self.label_6.setText(_translate("Form", "Enable labels"))
@@ -130,6 +132,7 @@ class Ui_Form(object):
         self.label_8.setText(_translate("Form", "Labels width"))
         self.label_9.setText(_translate("Form", "Labels font size"))
         self.label_7.setText(_translate("Form", "Labels point size"))
+
         self.intersectionsGroupBox.setTitle(_translate("Form", "Intersections"))
         self.label.setText(_translate("Form", "Enable Intersections"))
         self.label_2.setText(_translate("Form", "Intersection width"))
