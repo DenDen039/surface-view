@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>295</width>
-    <height>379</height>
+    <width>292</width>
+    <height>388</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -22,16 +22,16 @@
     </widget>
    </item>
    <item>
-    <widget class="QLabel" name="label_10">
-     <property name="text">
-      <string>Line:</string>
-     </property>
-    </widget>
-   </item>
-   <item>
     <layout class="QHBoxLayout" name="create_line_layout">
      <item>
       <layout class="QVBoxLayout" name="verticalLayout_point1">
+       <item>
+        <widget class="QLabel" name="label_10">
+         <property name="text">
+          <string>Point:</string>
+         </property>
+        </widget>
+       </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout">
          <item>
@@ -78,6 +78,13 @@
      </item>
      <item>
       <layout class="QVBoxLayout" name="verticalLayout_point2">
+       <item>
+        <widget class="QLabel" name="label_13">
+         <property name="text">
+          <string>Vector:</string>
+         </property>
+        </widget>
+       </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_5">
          <item>

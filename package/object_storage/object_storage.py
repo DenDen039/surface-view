@@ -42,7 +42,6 @@ class ObjectStorage:
     @intersections_color.setter
     def intersections_color(self, value):
         self.__intersections_color = value
-        self.PW.remove_intersections()
         self.__draw_intersections()
 
     @property
@@ -56,8 +55,9 @@ class ObjectStorage:
         self.__draw_intersections()
 
     def __draw_intersections(self):
+        self.PW.remove_intersections()
+        print(f"CALLED DRAW, intersections will {self.enable_intersections}")
         if not self.enable_intersections:
-            self.PW.remove_intersections()
             return
 
         intersections = self.objManager.compute_intersections()
@@ -69,7 +69,22 @@ class ObjectStorage:
 
         self.PW.add_intersections(intersections, colors, self.line_width)
 
+    def wipe_everything(self):
+        self.PW.clear_actors()
+        self.PW.remove_intersections()
+        self.objManager.wipe()
+
+        for item in self.storage.keys():
+            self.PW.remove_label(item)
+        for obj in self.storage.keys():
+            self.SOW.delete(obj)
+
+        self.storage.clear()
+
     def load(self, file_path):
+
+     if file_path == "":
+         return
 
      with open(file_path, 'r') as json_file:
 
@@ -163,7 +178,6 @@ class ObjectStorage:
             return max(numbers) + 1
         else:
             return 0
-
 
     def delete(self, uid):
         self.storage.pop(uid)
@@ -303,7 +317,7 @@ class ObjectStorage:
                          [self.objManager.get_label_lines(to_create),
                           self.objManager.get_labels(to_create, self.label_counter)],
                          **self.objManager.get_figure_settings(uid))
-       # self.enable_intersections = True
+
         if self.__enable_intersections:
             self.__draw_intersections()
 

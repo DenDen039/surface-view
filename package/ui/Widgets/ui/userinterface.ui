@@ -14,7 +14,7 @@
    <cursorShape>ArrowCursor</cursorShape>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Surface View</string>
   </property>
   <property name="whatsThis">
    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -250,6 +250,10 @@
    </property>
   </action>
   <action name="help">
+   <property name="icon">
+    <iconset>
+     <normaloff>../../assets/question-mark.png</normaloff>../../assets/question-mark.png</iconset>
+   </property>
    <property name="text">
     <string>Довідка</string>
    </property>
