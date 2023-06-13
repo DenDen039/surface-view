@@ -36,10 +36,26 @@ class PlotterWidget(QtWidgets.QWidget):
         self.__intersection_color = "red"
         self.__intersection_width = 2.5
 
+        self.__labels_enabled = True
         self.__label_width = 8
         self.__point_size = 14
         self.__font_size = 12
 
+    @property
+    def highlight_color(self):
+        return self.__highlight_color
+
+    @highlight_color.setter
+    def highlight_color(self, value: str):
+        self.__highlight_color = value
+
+    @property
+    def labels_enabled(self):
+        return self.__labels_enabled
+
+    @labels_enabled.setter
+    def labels_enabled(self, value: bool):
+        self.__labels_enabled = value
 
     @property
     def label_width(self):
@@ -97,6 +113,8 @@ class PlotterWidget(QtWidgets.QWidget):
         self.update_camera()
 
     def highlight_mesh(self, uid: str, color: str='red', line_width: float=2.5):
+
+        color = self.highlight_color
         if uid not in self.actors:
                 raise Exception("Figure not exist")
         if self.actors_types[uid] in [FigureTypes.PLANE]:
@@ -154,6 +172,11 @@ class PlotterWidget(QtWidgets.QWidget):
         self.update_camera()
 
     def add_label(self, uid, point_size=14, line_width=8, font_size=12):
+        if not self.labels_enabled:
+            return
+        point_size = self.__point_size
+        line_width = self.label_width
+        font_size = int(self.font_size)
         meshes = self.actors_labels[uid][0]
         colors = ["green", "blue", "yellow", "purple", "cyan", "red"]
         drawed_meshes = list()

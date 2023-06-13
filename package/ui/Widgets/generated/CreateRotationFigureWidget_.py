@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'C:\Users\user\PycharmProjects\Project2023\package\ui\Widgets\ui\CreateRotationFigureWidget.ui'
+# Form implementation generated from reading ui file '.\package\ui\Widgets\ui\CreateRotationFigureWidget.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.9
 #
@@ -14,19 +14,19 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_Form(object):
     def setupUi(self, Form):
         Form.setObjectName("Form")
-        Form.resize(295, 379)
+        Form.resize(292, 388)
         self.verticalLayout = QtWidgets.QVBoxLayout(Form)
         self.verticalLayout.setObjectName("verticalLayout")
         self.label_12 = QtWidgets.QLabel(Form)
         self.label_12.setObjectName("label_12")
         self.verticalLayout.addWidget(self.label_12)
-        self.label_10 = QtWidgets.QLabel(Form)
-        self.label_10.setObjectName("label_10")
-        self.verticalLayout.addWidget(self.label_10)
         self.create_line_layout = QtWidgets.QHBoxLayout()
         self.create_line_layout.setObjectName("create_line_layout")
         self.verticalLayout_point1 = QtWidgets.QVBoxLayout()
         self.verticalLayout_point1.setObjectName("verticalLayout_point1")
+        self.label_10 = QtWidgets.QLabel(Form)
+        self.label_10.setObjectName("label_10")
+        self.verticalLayout_point1.addWidget(self.label_10)
         self.horizontalLayout = QtWidgets.QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
         self.label = QtWidgets.QLabel(Form)
@@ -57,6 +57,9 @@ class Ui_Form(object):
         self.create_line_layout.addLayout(self.verticalLayout_point1)
         self.verticalLayout_point2 = QtWidgets.QVBoxLayout()
         self.verticalLayout_point2.setObjectName("verticalLayout_point2")
+        self.label_13 = QtWidgets.QLabel(Form)
+        self.label_13.setObjectName("label_13")
+        self.verticalLayout_point2.addWidget(self.label_13)
         self.horizontalLayout_5 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_5.setObjectName("horizontalLayout_5")
         self.label_4 = QtWidgets.QLabel(Form)
@@ -148,10 +151,11 @@ class Ui_Form(object):
         _translate = QtCore.QCoreApplication.translate
         Form.setWindowTitle(_translate("Form", "Form"))
         self.label_12.setText(_translate("Form", "Creating surface of rotation"))
-        self.label_10.setText(_translate("Form", "Line:"))
+        self.label_10.setText(_translate("Form", "Point:"))
         self.label.setText(_translate("Form", "x:"))
         self.label_2.setText(_translate("Form", "y:"))
         self.label_3.setText(_translate("Form", "z:"))
+        self.label_13.setText(_translate("Form", "Vector:"))
         self.label_4.setText(_translate("Form", "x:"))
         self.label_5.setText(_translate("Form", "y:"))
         self.label_6.setText(_translate("Form", "z:"))

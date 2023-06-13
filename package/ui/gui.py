@@ -1,4 +1,4 @@
-# Actual version @17.05.2023 13:45
+# Actual version @09.06.2023 12:55
 
 import PyQt5
 import PyQt5.QtCore
@@ -175,7 +175,7 @@ class UI(QMainWindow):
         self.show_console.triggered.connect(self.hide_unhide_console)
         self.settings.triggered.connect(self.open_settings_widget)
         self.help.triggered.connect(self.open_help_window)
-        #self.new_scene.triggered.connect(self.add_object)
+        self.new_scene.triggered.connect(self.wipe_scene)
 
         # Show the app
         self.show()
@@ -236,6 +236,7 @@ class UI(QMainWindow):
         self.save_image.triggered.connect(lambda: self.pyvista_widget.take_screenshot(self.screenshot_extension, ''))
         self.objects_list = {}
 
+
         self.add_object()
 
     def open_help_window(self):
@@ -246,6 +247,7 @@ class UI(QMainWindow):
         self.settingsWidget.show()
 
         self.settingsWidget.Form.intersectionsSelectColorButton.disconnect()
+        self.settingsWidget.Form.outlineColorButton.disconnect()
 
         #TODO: Import inputs from PW and SOW
         self.settingsWidget.Form.intersectionsEnableCheckBox.setChecked(self.intersections_enabled)
@@ -267,7 +269,6 @@ class UI(QMainWindow):
 
         def block_unblock(state: bool):
             self.settingsWidget.Form.intersectionsSelectColorButton.setEnabled(state)
-            print(f"button is now {state}")
 
         def select_intersection_color():
             new_color = self.color_picker.getColor()
@@ -310,24 +311,21 @@ class UI(QMainWindow):
                 self.handler.error(f"Incorrect input in labels point size input \n {e}")
                 return
 
-
-
-            self.intersections_width = float(self.settingsWidget.Form.intersectionsWidthLineEdit.text())
+            self.intersections_width = abs(float(self.settingsWidget.Form.intersectionsWidthLineEdit.text()))
             self.object_storage.line_width = self.intersections_width
             self.console.append(f"Changed intersections width to {self.object_storage.line_width}")
 
-            self.label_width = float(self.settingsWidget.Form.labelsWidthLineEdit.text())
+            self.label_width = abs(float(self.settingsWidget.Form.labelsWidthLineEdit.text()))
             self.pyvista_widget.label_width = self.label_width
             self.console.append(f"Changed label lines width to {self.pyvista_widget.label_width}")
 
-            self.label_font_size = float(self.settingsWidget.Form.labelsFontSizeLineEdit.text())
+            self.label_font_size = abs(float(self.settingsWidget.Form.labelsFontSizeLineEdit.text()))
             self.pyvista_widget.font_size = self.label_font_size
             self.console.append(f"Changed font size to {self.object_storage.line_width}")
 
-            self.label_point_size = float(self.settingsWidget.Form.labelsPointSizeLineEdit.text())
+            self.label_point_size = abs(float(self.settingsWidget.Form.labelsPointSizeLineEdit.text()))
             self.pyvista_widget.point_size = self.label_point_size
             self.console.append(f"Changed label point size to {self.pyvista_widget.point_size}")
-
 
             if self.settingsWidget.Form.randomIntersectionsColorCheckBox.isChecked():
                 self.object_storage.intersections_color = None
@@ -343,19 +341,19 @@ class UI(QMainWindow):
                 self.intersections_enabled = True
             else:
                 self.set_intersections(False)
-
                 self.intersections_enabled = False
 
             if self.settingsWidget.Form.checkBox.isChecked():
-                self.object_storage.enable_intersections = True
+                self.pyvista_widget.labels_enabled = True
                 self.labels_enabled = True
             else:
-                self.object_storage.enable_intersections = False
-                self.intersections_enabled = False
+                self.pyvista_widget.labels_enabled = False
+                self.labels_enabled = False
 
+            self.highlight_color = self.new_color_high
+            self.pyvista_widget.highlight_color = self.highlight_color
 
             self.screenshot_extension = self.settingsWidget.Form.screenshotFormatComboBox.currentText()
-
 
             self.settingsWidget.Form.applyButton.disconnect()
             self.settingsWidget.Form.cancelButton.disconnect()
@@ -378,7 +376,6 @@ class UI(QMainWindow):
 
             self.settingsWidget.Form.outlineColorButton.setStyleSheet(f"background-color : red")
 
-
         self.settingsWidget.Form.applyButton.clicked.connect(apply)
         self.settingsWidget.Form.cancelButton.clicked.connect(cancel)
         self.settingsWidget.Form.resetButton.clicked.connect(reset)
@@ -387,6 +384,18 @@ class UI(QMainWindow):
             lambda: block_unblock(not self.settingsWidget.Form.randomIntersectionsColorCheckBox.isChecked()))
 
         self.settingsWidget.Form.intersectionsSelectColorButton.clicked.connect(select_intersection_color)
+        self.settingsWidget.Form.outlineColorButton.clicked.connect(select_outline_color)
+
+    def wipe_scene(self):
+        if self.handler.warning("Create new scene? Current scene will be cleared"):
+            self.pyvista_widget.clear_actors()
+            self.pyvista_widget.remove_intersections()
+            self.object_storage.objManager.wipe()
+            self.openCreateWidget(FigureTypes.CONE)
+            self.add_object()
+            self.object_storage.wipe_everything()
+
+        return
 
     def save_file(self):
         try:
@@ -417,6 +426,10 @@ class UI(QMainWindow):
         except Exception as e:
             self.handler.error("Loading error \n" + str(e))
             print(e)
+        finally:
+            # Please don`t touch, it just works
+            self.openCreateWidget(FigureTypes.CONE)
+            self.add_object()
 
     def set_intersections(self, mode: bool):
         if mode:
@@ -543,7 +556,7 @@ class UI(QMainWindow):
             case FigureTypes.PARAMETRIC_SURFACE:
                 self.commonWidget.Form.inputTBounds.setEnabled(True)
                 self.commonWidget.Form.inputVBounds.setEnabled(True)
-                self.createWidget = self.creator.CreateCurveWidget() # TODO: CHANGE TO param surface WIDGET
+                self.createWidget = self.creator.CreateSurfaceWidget() # TODO: CHANGE TO param surface WIDGET
 
            # case FigureTypes.VE:
            #    self.createWidget = self.creator.CreateVectorWidget()
@@ -625,9 +638,9 @@ class UI(QMainWindow):
 
     def input_parametric_surface(self):
 
-        curve_input_x = self.findChild(QLineEdit, "curve_input_x").text() #TODO: Currently using curve input, shall create surface input
-        curve_input_y = self.findChild(QLineEdit, "curve_input_y").text()
-        curve_input_z = self.findChild(QLineEdit, "curve_input_z").text()
+        curve_input_x = self.findChild(QLineEdit, "surface_input_x").text()
+        curve_input_y = self.findChild(QLineEdit, "surface_input_y").text()
+        curve_input_z = self.findChild(QLineEdit, "surface_input_z").text()
 
         _curve_input_x_text = curve_input_x
         _curve_input_y_text = curve_input_y
@@ -776,9 +789,9 @@ class UI(QMainWindow):
             case FigureTypes.PARAMETRIC_SURFACE:
                 self.commonWidget.Form.inputTBounds.setEnabled(True)
                 self.commonWidget.Form.inputVBounds.setEnabled(True)
-                self.createWidget.Form.curve_input_x.setText(str(storage[uid]["surface_string"][0])) #TODO: CHANGE TO PROPER WIDGET (param surface)
-                self.createWidget.Form.curve_input_y.setText(str(storage[uid]["surface_string"][1]))
-                self.createWidget.Form.curve_input_z.setText(str(storage[uid]["surface_string"][2]))
+                self.createWidget.Form.surface_input_x.setText(str(storage[uid]["surface_string"][0]))
+                self.createWidget.Form.surface_input_y.setText(str(storage[uid]["surface_string"][1]))
+                self.createWidget.Form.surface_input_z.setText(str(storage[uid]["surface_string"][2]))
 
 
 

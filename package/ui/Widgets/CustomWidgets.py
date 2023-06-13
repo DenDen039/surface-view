@@ -21,6 +21,7 @@ import package.ui.Widgets.generated.CommonSettingsWidget_ as CommonSettingsWidge
 import package.ui.Widgets.generated.ObjectWidget_ as ObjectWidget_
 import package.ui.Widgets.generated.SettingsWidget_ as SettingsWidget_
 import package.ui.Widgets.generated.HelpWidget_ as HelpWidget_
+import package.ui.Widgets.generated.CreateSufaceWidget_ as CreateSurfaceWidget_
 
 class Creator:
 
@@ -93,6 +94,17 @@ class Creator:
         Form = CreateVectorWidget_.Ui_Form()
         Form.setupUi(Widget)
         Widget.Form = Form
+
+        return Widget
+
+    def CreateSurfaceWidget(self):
+
+        Widget = QtWidgets.QWidget()
+        Form = CreateSurfaceWidget_.Ui_Form()
+        Form.setupUi(Widget)
+        Widget.Form = Form
+
+        return Widget
 
     def CommonSettingsWidget(self):
         Widget = QtWidgets.QWidget()
