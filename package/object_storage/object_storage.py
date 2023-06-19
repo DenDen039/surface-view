@@ -75,7 +75,9 @@ class ObjectStorage:
         self.__line_width = value
         self.__draw_intersections()
 
+
     def __draw_intersections(self) -> None:
+
         self.PW.remove_intersections()
         print(f"CALLED DRAW, intersections will {self.enable_intersections}")
         if not self.enable_intersections:
@@ -91,6 +93,7 @@ class ObjectStorage:
         self.PW.add_intersections(intersections, colors, self.line_width)
 
     def wipe_everything(self) -> None:
+
         self.PW.clear_actors()
         self.PW.remove_intersections()
         self.objManager.wipe()
@@ -101,6 +104,7 @@ class ObjectStorage:
             self.SOW.delete(obj)
 
         self.storage.clear()
+
 
     def load(self, file_path: str) -> None:
 
@@ -201,6 +205,7 @@ class ObjectStorage:
             return 0
 
     def delete(self, uid: uuid.uuid4) -> None:
+
         self.storage.pop(uid)
         self.PW.remove_label(uid)
         self.label_counter -= 1

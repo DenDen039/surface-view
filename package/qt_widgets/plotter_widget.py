@@ -199,7 +199,9 @@ class PlotterWidget(QtWidgets.QWidget):
         self.intersections_list.clear()
         self.update_camera()
 
+
     def add_label(self, uid, point_size=14, line_width=8, font_size=12) -> None:
+
         if not self.labels_enabled:
             return
         point_size = self.__point_size

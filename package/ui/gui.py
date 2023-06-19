@@ -1,5 +1,7 @@
 # Actual version @09.06.2023 12:55
+
 import uuid
+
 
 import PyQt5
 import PyQt5.QtCore
@@ -426,7 +428,9 @@ class UI(QMainWindow):
         self.settingsWidget.Form.intersectionsSelectColorButton.clicked.connect(select_intersection_color)
         self.settingsWidget.Form.outlineColorButton.clicked.connect(select_outline_color)
 
+
     def wipe_scene(self) -> None:
+
         if self.handler.warning("Create new scene? Current scene will be cleared"):
             self.pyvista_widget.clear_actors()
             self.pyvista_widget.remove_intersections()
