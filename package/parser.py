@@ -28,8 +28,15 @@ class Parser:
                     None
         """
         check = re.match("^-?(0|[1-9]\d*)(\.\d*)? *, *-?(0|[1-9]\d*)(\.\d*)?", input_string)
-        if check:
+        if check is not None:
+            try:
+                parsed = [float(x) for x in input_string.split(",")]
+                print(f"pp{parsed}")
+            except ValueError:
+                return False
             return [float(x) for x in input_string.split(",")]
+
+
         return False
 
     def check_expression_string_two_params(self, input_string: str) -> bool:

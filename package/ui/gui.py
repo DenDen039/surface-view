@@ -1104,7 +1104,9 @@ class UI(QMainWindow):
         try:
             input["opacity"] = float(opacity)
         except:
-            self.handler.error("Incorrect input in ")
+            self.handler.error("Incorrect input in opacity. Float expected")
+            return
+
 
         if update_mode == 0:
             self.console.append(f"Created {input['FigureTypes']} object with name {input['name']}")
