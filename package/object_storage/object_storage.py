@@ -1,3 +1,5 @@
+import uuid
+
 from package.object_manager.manager import ObjectManager
 from package.figures.figure import FigureTypes
 from unittest.mock import MagicMock
@@ -11,6 +13,25 @@ from unittest.mock import MagicMock
 from numpy import *
 
 class ObjectStorage:
+    """Class for managing and manipulating objects.
+
+           This class provides functionality to create, update, delete objects and manage their properties like intersection,
+           colors, line width etc.
+
+           Attributes:
+               objManager (ObjectManager): An instance of ObjectManager class.
+               storage (dict): Dictionary for storing objects.
+               SOW: An instance of StorageIbjectWidget class.
+               PW : An instance of PlotterWidget class.
+               counter (int): General counter.
+               __enable_intersections (bool): Flag to indicate if intersections are enabled or not.
+               label_counter (int): Counter for labels.
+               parser (Parser): An instance of Parser class.
+               saves_counter (int): Counter for save operations.
+               __intersections_color: Color for intersections.
+               __line_width (float): Width for lines.
+    """
+
     def __init__(self, PW, SOW, intersections_color, line_width):
 
         self.objManager = ObjectManager()
@@ -54,7 +75,7 @@ class ObjectStorage:
         self.__line_width = value
         self.__draw_intersections()
 
-    def __draw_intersections(self):
+    def __draw_intersections(self) -> None:
         self.PW.remove_intersections()
         print(f"CALLED DRAW, intersections will {self.enable_intersections}")
         if not self.enable_intersections:
@@ -69,7 +90,7 @@ class ObjectStorage:
 
         self.PW.add_intersections(intersections, colors, self.line_width)
 
-    def wipe_everything(self):
+    def wipe_everything(self) -> None:
         self.PW.clear_actors()
         self.PW.remove_intersections()
         self.objManager.wipe()
@@ -81,7 +102,7 @@ class ObjectStorage:
 
         self.storage.clear()
 
-    def load(self, file_path):
+    def load(self, file_path: str) -> None:
 
      if file_path == "":
          return
@@ -138,7 +159,7 @@ class ObjectStorage:
 
         self.enable_intersections = temp
 
-    def save(self, file_path):
+    def save(self, file_path: str) -> None:
         save_items = self.storage.items()
         for item in save_items:
             if 'curve' in item[1]:
@@ -179,7 +200,7 @@ class ObjectStorage:
         else:
             return 0
 
-    def delete(self, uid):
+    def delete(self, uid: uuid.uuid4) -> None:
         self.storage.pop(uid)
         self.PW.remove_label(uid)
         self.label_counter -= 1
@@ -189,7 +210,7 @@ class ObjectStorage:
             self.__draw_intersections()
         self.SOW.delete(uid)
 
-    def update(self, uid, new_data: dict):
+    def update(self, uid: uuid.uuid4, new_data: dict) -> None:
         self.storage[uid] = new_data
         if new_data["FigureTypes"] == FigureTypes.CONE:
             new_data["curve_string"] = new_data["curve"]
@@ -263,7 +284,7 @@ class ObjectStorage:
 
         self.SOW.update(uid, new_data["name"], new_data["FigureTypes"], new_data["color"])
 
-    def create(self, to_create: dict):
+    def create(self, to_create: dict) -> None:
         if to_create["name"] == '':
             to_create["name"] = 'untitled_' + str(self.counter)
             self.counter += 1
