@@ -2,6 +2,7 @@ from pyvistaqt import BackgroundPlotter
 from package.figures.figure import FigureTypes
 from PyQt5 import QtWidgets
 
+
 class PlotterWidget(QtWidgets.QWidget):
     '''A widget used for creating and displaying scenes.
 
@@ -268,9 +269,15 @@ class PlotterWidget(QtWidgets.QWidget):
     def take_screenshot(self, extension: str, file_path='') -> None:
         if file_path == '':
             file_name = 'untitled_' + str(self.photo_counter) + extension
-            self.photo_counter += 1
+            try:
+                self.photo_counter += 1
 
-            self.plotter.screenshot(f"photos/{file_name}")
+                self.plotter.screenshot(f"photos/{file_name}")
+            except PermissionError as e:
+                raise e
+            except Exception as e:
+                raise e
+
         else:
             if file_path.split('.')[-1] not in ['png', 'jpeg', 'jpg', 'bmp', 'tif', 'tiff']:
                 raise Exception("Unfortunately, this graphic format is not supported")
@@ -292,12 +299,3 @@ class PlotterWidget(QtWidgets.QWidget):
             return max(numbers) + 1
         else:
             return 0
-
-        # files = os.listdir("package/photos/")
-        #     numbers = list(filter(lambda str: str.startswith("untitled_"), files))
-        #     numbers = [int(numbers[i].split('untitled_')[-1].split('.png')[0]) for i in range(len(numbers))]
-        #     if numbers:
-        #         print(numbers)
-        #         return max(numbers) + 1
-        #     else:
-        #         return 0

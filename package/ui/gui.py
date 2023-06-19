@@ -266,7 +266,7 @@ class UI(QMainWindow):
         self.save_as.triggered.connect(self.save_file_as)
         self.open.triggered.connect(self.load_file)
 
-        self.save_image.triggered.connect(lambda: self.pyvista_widget.take_screenshot(self.screenshot_extension, ''))
+        self.save_image.triggered.connect(self.take_screenshot)
         self.objects_list = {}
 
 
@@ -274,6 +274,14 @@ class UI(QMainWindow):
 
     def open_help_window(self) -> None:
         self.help_window.show()
+
+    def take_screenshot(self) -> None:
+        try:
+            self.pyvista_widget.take_screenshot(self.screenshot_extension, '')
+        except PermissionError:
+            self.handler.error("Permission error. Please run program as an administrator or reinstall it to the other folder")
+        except Exception as e:
+            self.handler.error(f"Unknown error while saving {e}")
 
     def open_settings_widget(self) -> None:
 
